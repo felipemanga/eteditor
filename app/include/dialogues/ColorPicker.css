@@ -1,0 +1,31 @@
+#palette {
+    width: 100%;
+}
+
+body, html {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+#fields{
+    text-align: center;
+}
+
+#fields input {
+    width: 40px;
+}
+
+#fieldHex {
+    width: 60px !important;
+}
+
+#lumSlider {
+    display: block;
+    width: 100% !important;
+}
+
+html {width: calc( 100% - 2px ) !important;}

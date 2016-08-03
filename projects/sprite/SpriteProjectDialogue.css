@@ -1,0 +1,300 @@
+
+#tools div, #filters div, #layerList div{
+    height: 50px;
+    margin: 2px;
+    box-sizing: border-box;
+    background-color: #678;
+    cursor: pointer;
+    position: relative;
+}
+
+html{
+    background-color: rgba(0,0,0,0.05);
+}
+
+#options {
+    -webkit-user-select: none;
+    width: 100%;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100%;
+    color: white;
+    font-family: sans-serif;
+    font-weight: bold;
+    position: relative;
+}
+
+
+html {
+    background-color: #567;
+}
+
+
+#tools, #filters {
+    width: 100px;
+    float: left;
+    text-align: center;
+    height: 100%;
+    overflow: auto;
+}
+
+#layerList {
+    width: calc( 100% - 100px );
+    height: 100%;
+    box-sizing: border-box;
+    overflow: auto;
+    text-align: center;
+    position: relative;
+}
+
+.active {
+    background-color: #579 !important;
+}
+
+#layerList .layerCtrl {
+    float: left;
+    cursor: pointer;
+    font-size: 20px;
+    color: white;
+}
+
+#layerList .layerCtrl.remove {
+    float: right;
+    color: black;
+}
+
+#tools div, #filters div, #layerList div.btn {
+    padding-top: 15px;
+}
+
+#layerList .layerLabel {
+    position: absolute;
+    top: 0;
+    left: 120px;
+    width: calc( 100% - 160px );
+    padding-top: 15px;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+#layerList button, #canvasSize button {
+    height: 100%;
+    width: 39px;
+    border-style: none;
+    background: #789;
+    margin: 0 1px;
+}
+
+#canvasSize {
+    height: initial !important;
+}
+
+#canvasSize div {
+    box-sizing: border-box;
+    text-align: center;
+    padding: 5px;
+    height: initial;
+}
+
+#canvasSize div span {
+    display: inline-block;
+    position: relative;
+    width: 150px;
+    margin-right: 10px;
+}
+
+#canvasSize button {
+    width: 120px;
+    height: 40px;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+#tools .label {
+    display: inline-block;
+    border-bottom-style: solid;
+    width: 100%;
+    padding-top: 30px;
+    height: 50px;
+    box-sizing: border-box;
+}
+
+#filtersBody #tabs{
+    position: absolute;
+    top: 80px;
+    left: 110px;
+    height: calc(100% - 100px);
+    width: calc(100% - 120px);
+}
+
+#filtersBody textarea {
+    width: 100%;
+    height: 100%;
+    border-width: 0;
+    margin: 0;
+    resize: none;
+}
+
+#filtersBody #path {
+    height: 25px;
+    padding: 7px 5px 0px 115px;
+}
+
+#filtersBody #bar {
+    height: 50px;
+    margin-left: 115px;
+}
+
+#filtersBody #bar div {
+    float: left;
+    background-color: #678;
+    padding: 10px;
+    text-align: center;
+    box-sizing: border-box;
+    width: 80px;
+    height: 40px;
+    margin: 0 5px;
+}
+
+#filtersBody #btnSave, #filtersBody #btnRun {
+    float: right !important;
+}
+
+
+#filterOpts .optionContainer {
+    padding: 10px;
+}
+
+#filterOpts select, #filterOpts input {
+    width: 100%;
+}
+
+#filterOpts select {
+    font-size: 24px;
+}
+
+#filterOpts .rangeLabel {
+    float: right;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+    background: #ddd;
+    border: none;
+    border-radius: 3px;
+}
+
+
+#layerList #inpLayerAlphaLabel {
+    display: inline-block;
+    width: 40px;
+    position: relative;
+    padding: 0 10px;
+    top: -4px;
+}
+
+input#inpLayerAlpha {
+    width: calc( 100% - 100px );
+    padding-top: 10px;
+    margin: 0;
+    outline: none;
+}
+
+.layerSetting input, select#layerBlending {
+    width: calc( 100% - 30px );
+    margin: 15px;
+    box-sizing: border-box;
+}
+
+#layerList #layerOps button {
+    width: 74px;
+    color: white;
+    font-weight: bold;
+    height: 42px;
+    margin: 1px 1px;
+}
+
+div#layerOps {
+    height: initial;
+}
+
+#canvasSize input {
+    width: calc( 100% - 220px );
+    min-width: 50px;
+    margin: 2px;
+}
+
+button#btnMergeLayer {
+    position: relative;
+    top: -7px;
+}
+
+body#filtersBody {
+    height: 100%;
+    position: absolute;
+}
+
+#framesBody #frameCtrls, #framesBody #preview {
+    position: fixed;
+    width: 200px;
+    height: 230px;
+    background-color: #567;
+}
+
+#framesBody .frameLayerElement, #framesBody .frameIndicator, #framesBody .onionSkinIndicator {
+    height: 40px;
+    border-style: solid;
+    border-width: 1px;
+    box-sizing: border-box;
+    padding-top: 10px;
+    -webkit-user-select: none;
+    cursor: pointer;
+}
+
+#framesBody .frameElement {
+    display: inline-block;
+    width: 40px;
+    text-align: center;
+}
+
+#framesBody {
+    height: 100%;
+    min-height: 230px;
+    overflow-x: auto;
+    overflow-y: auto;
+    position: absolute;
+}
+
+div#frames {
+    white-space: nowrap;
+    margin-left: 210px;
+}
+
+
+#frameCtrls button, #frameCtrls span {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 1px;
+    height: 40px;
+    padding: 5px;
+}
+
+#framesBody #cnvPreview {
+	position: absolute;
+	right: 0px;
+	bottom: 0px;
+	border-width: 1px;
+	border-style: solid;
+	max-height: calc( 100% - 150px );
+	box-sizing: border-box;
+	z-index: -1;
+}
+
+#frameCtrls span {
+    font-size: 10px;
+}

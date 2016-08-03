@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html><head>
+    <meta charset="utf-8">
+    <link href="SpriteProjectDialogue.css" rel="stylesheet"></link>
+</head>
+<body id="propertiesBody">
+    <div id="options">
+        <div id="tools"></div>
+        <div id="layerList">
+			<div id="layerOps">
+				<button id="btnAddLayer" class="btn">New</button><button id="btnDuplicateLayer" class="btn">Duplicate</button><button id="btnMergeLayer" class="btn">Merge Down</button><button id="btnFlatten" class="btn">Flatten</button>
+			</div>
+			<div class="layerSetting">
+				<input id="inpLayerName" />
+			</div>
+            <div class="layerSetting">
+                <span id="inpLayerAlphaLabel">0</span>
+                <input id="inpLayerAlpha" type="range" />
+            </div>
+            <div class="layerSetting">
+                <select id="layerBlending">
+					<option>normal</option>
+					<option>multiply</option>
+					<option>screen</option>
+					<option>overlay</option>
+					<option>darken</option>
+					<option>lighten</option>
+					<option>color-dodge</option>
+					<option>color-burn</option>
+					<option>hard-light</option>
+					<option>soft-light</option>
+					<option>difference</option>
+					<option>exclusion</option>
+					<option>hue</option>
+					<option>saturation</option>
+					<option>color</option>
+					<option>luminosity</option>                    
+                </select>
+            </div>
+			<div id="canvasSize" class="layerSetting">
+				<div><span>Canvas Width:</span><input id="canvasWidth"></div>
+				<div><span>Canvas Height:</span><input id="canvasHeight"></div>
+				<div><button id="btnResample">Resample</button> <button id="btnCrop">Crop</button></div>
+			</div>            
+        </div>
+    </div>
+	<div id="clear"></div>
+</body>
+</html>

@@ -1,0 +1,38 @@
+CLAZZ("concrete.C", {
+    CONSTRUCTOR:function(){
+        console.log("C");
+    }
+});
+
+CLAZZ("concrete.B", {
+    PROVIDES:{
+        "abstract.Food":"singleton"
+    },
+    INJECT:{
+        "c":"concrete.C",
+        "d":"abstract.amount"
+    },
+    CONSTRUCTOR:function(){
+        console.log("B", this.c);
+    }
+});
+
+CLAZZ("concrete.A", {
+    INJECT:{
+        "food":"Food"
+    },
+    CONSTRUCTOR:function(){
+        console.log("A", this.food);
+    }
+});
+
+CLAZZ("Main", {
+    CONSTRUCTOR:function(){
+        CLAZZ.implements("abstract.Plate", A);
+        CLAZZ.value("abstract.amount", "lots");
+		
+        CLAZZ.get("abstract.Plate");
+        CLAZZ.get("abstract.Plate");
+        CLAZZ.get("abstract.Plate");
+    }
+});

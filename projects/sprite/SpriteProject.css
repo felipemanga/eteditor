@@ -1,0 +1,39 @@
+#stack {
+    position: absolute;
+    margin: 0;
+    outline-style: dotted;
+    background-image: url(bg.png);
+}
+
+#stack canvas {
+    image-rendering: pixelated;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform-origin: top left;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100%;
+    color: white;
+    font-family: sans-serif;
+    font-weight: bold;
+    position: relative;
+}
+
+html {
+    background-color: #444;
+}
+
+div#activeTool {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    color: black;
+    font-size: 36px;
+    text-transform: uppercase;
+}
+
