@@ -18,6 +18,7 @@ singleton
     ("popups.openfile.IOpenFileDialogue", "popups.openfile.OpenFileDialogue")
 
     ("io.FileReader", "io.HTMLFileReader")
+    ("io.FileSaver", "io.WebFileSaver")
 
     ("app", "DOC.Pool")
     ("ROOT", "mainmenu.MainMenu")

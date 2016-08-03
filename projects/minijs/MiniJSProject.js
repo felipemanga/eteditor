@@ -1,4 +1,7 @@
-need("dialogues.IDialogue", function(){
+need([
+    "dialogues.IDialogue",
+    {FQCN:"CanvasTool.PngEncoder", URL:"js/CanvasTool.js"}
+], function(){
 
 var FileEntry = CLAZZ({
     file:null,
@@ -38,6 +41,7 @@ CLAZZ("projects.minijs.MiniJSProject", {
         }),
 
         fileReader:"io.FileReader",
+        fileSaver:"io.FileSaver",
 
         app:"app"
     },
@@ -54,10 +58,6 @@ CLAZZ("projects.minijs.MiniJSProject", {
 	onLoad:function(){
 		this.files = [];
 	},
-
-    add:function(path, data){
-        this.files.push(  );
-    },
 
     $BODY:{
         dragover:function( evt ){
@@ -76,6 +76,7 @@ CLAZZ("projects.minijs.MiniJSProject", {
                 if( isDirectory )
                     return;
                 var fe = new FileEntry( path, this.dialogue.DOM );
+                this.files.push( fe );
                 this.fileReader.readAsArrayBuffer( file, fe.setData.bind(fe) );
             });
         }
@@ -95,10 +96,17 @@ CLAZZ("projects.minijs.MiniJSProject", {
 		return acc;
     },
 
+    $MENU:{
+        save:function(){
+            this.onSave()
+        }
+    },
+
 	fileData:null,
-	onSave:function( cb ){
+	onSave:function(){
+        this.path = this.path || "mini.bin"
         var ext = this.path.match(/\.([a-z]+)$/i);
-        if( !ext || ext[1].toLowerCase() != "png" ) this.path += ".png";
+        if( !ext || ext[1].toLowerCase() != "bin" ) this.path += ".bin";
 
 		var dim = Math.ceil( Math.sqrt( this.getTotalSize() ) );
 		var dest = new Uint8Array( dim*dim*4 );
@@ -129,12 +137,14 @@ CLAZZ("projects.minijs.MiniJSProject", {
 			colourType: CanvasTool.PngEncoder.ColourType.GRAYSCALE
 		});
 
+        var codecSrc = "(" + this.codec.toString().replace("__DECODE__", this.path.replace(/.*[\/\\]/g, '') ) + ")();";
 
-		fs.writeFileSync( this.path + ".js", "(" + this.codec.toString().replace("__DECODE__", this.path.replace(/.*[\/\\]/g, '') ) + ")();" );
+		this.fileSaver.saveFile( [
+            {file:this.path, data:enc.convert()},
+            {file:this.path + ".js", data:codecSrc }
+        ] );
 
-		cb( enc.convert() );
-		this.dialogue.DOM.stats.textContent = Math.ceil(this.dataSize/1024) + "Kb => "
-								+ Math.ceil(fs.lstatSync( this.path ).size/1024) + "Kb";
+		this.dialogue.DOM.stats.textContent = DOC.TEXT("Total uncompressed size: ") + Math.ceil(this.dataSize/1024) + "Kb";
 	},
 
 	codec: function(){function c(){return k[g+=4]}function l(){var b=c()<<24,b=b+(c()<<16),b=b+(c()<<8);return b+=c()}function m(){for(var b="",d=l(),n=0;n<d;++n)b+=String.fromCharCode(c());return b}var g=-4,k,h=document,f=h.createElement("img");f.onload=function(){try{var b=h.createElement("canvas"),d=b.height=b.width=f.width,c=b.getContext("2d");c.drawImage(f,0,0);k=c.getImageData(0,0,d,d).data;var g=l(),b="",e;window.a=window.a||{};for(d=0;d<g;++d){var p=m();e=window.a[p]=m();/\.js$/i.test(p)&&(b+=e)}b.length&&(e=h.createElement("script"),e.textContent=b,document.head.appendChild(e))}catch(q){console.error(q)}};f.src="__DECODE__"},

@@ -82,7 +82,7 @@ CLAZZ("mainmenu.MainMenu", {
 				this.menuElements.push( DOC.create("div", DOM.quickMenu, {
 					className:"btn",
 					text: DOC.TEXT(label),
-					onclick: obj.raise("MENU", label)
+                    onclick: obj.raise.bind(obj, "MENU", label)
 				}) );
 			});
 		}
