@@ -12,6 +12,7 @@ json("settings", "settings")
 implements
     ("projects.IProject", "projects.minijs.MiniJSProject")
     ("io.compressors.FileCompressor", "io.compressors.PNCCompressor")
+    ("io.compressors.FileCompressor", "io.compressors.ZIPCompressor")
 
 
 singleton
