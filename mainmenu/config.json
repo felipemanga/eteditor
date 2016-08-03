@@ -1,0 +1,19 @@
+{
+	"title": "SweetSuite",
+	"toolbar": false,
+	"width": 126,
+	"height":60,
+	"show_in_taskbar": true,
+	"frame": false,
+	"fullscreen": false,
+	"show": true,
+	"as_desktop": false,
+	"transparent": false,
+	"visible": true,
+	"--icon": "ptop_icon.png",
+	"always_on_top": true,
+	"resizable": false,
+	"kiosk_emulation": false,
+	"--exe_icon": "ptop_icon.png",
+	"kiosk": false
+}

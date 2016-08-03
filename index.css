@@ -1,0 +1,103 @@
+html, body {
+    position: relative;
+    padding: 0; margin: 0;
+    background-color: #234;
+    font-family: sans-serif;
+    font-weight: bold;
+    color: white;
+    min-width: 100%;
+    min-height: 100%;
+}
+
+#HTML, #BODY{
+    position: relative;
+    padding: 0; margin: 0;
+}
+
+html, #HTML {
+    overflow: hidden;
+	height: 100%;
+}
+
+#BODY {
+    box-sizing: border-box;
+    padding: 8px;
+}
+
+div {
+    user-select: none;
+    -webkit-user-select: none;
+    position: relative;
+    box-sizing: border-box;
+}
+
+#windowframeheader_btnCloseWindow {
+    float: right;
+    background-color: #633;
+    width: 20px;
+    text-align: center;
+    outline-style: solid;
+    outline-color: #324;
+    cursor: pointer;
+}
+
+.windowframe_hresize {
+    position: absolute;
+    width: 4px;
+    height: 100%;
+    right: -2px;
+    top: 0;
+    cursor:ew-resize;
+}
+
+.windowframe_vhresize {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    right: -2px;
+    bottom: -2px;
+    cursor:nwse-resize;
+}
+
+.windowframe_vresize {
+    position: absolute;
+    width: 100%;
+    height: 4px;
+    bottom: -2px;
+    left: 0;
+    cursor:ns-resize;
+}
+
+.btn {
+    box-sizing: border-box;
+    height: 60px;
+    text-align: center;
+    padding: 20px 0px 0px 20px;
+    border-radius: 0px 30px 30px 0px;
+    cursor: pointer;
+    -webkit-user-select: none;
+    padding-left: 40px;
+}
+
+.btn:hover {
+	background-color: #7080A0;
+}
+
+.windowframe {
+    background-color: #456;
+    position: absolute;
+}
+
+.windowframeheader {
+    background-color: #568;
+    padding: 5px;
+    cursor: -webkit-grab;
+}
+
+.windowframecontents {
+    overflow: auto;
+    min-width: 100%;
+    width: 100%;
+    height: calc(100% - 30px);
+    min-height: 100%;
+}

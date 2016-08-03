@@ -1,0 +1,49 @@
+#projectTypeList {
+    position: absolute;
+    border-style: solid;
+    border-color: #445577;
+    background-color: #6677AA;
+    width: calc( 100% - 15px );
+    height: calc( 100% - 50px );
+    box-sizing: border-box;
+    overflow: auto;
+    padding: 10px;
+}
+
+#savePath {
+    position: absolute;
+    width: calc( 100% - 100px );
+    bottom: 10px;
+    background-color: #235;
+}
+
+#btnStart {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    width: 80px;
+}
+
+body {
+    background-color: #334466;
+    color: #ABF;
+    font-family: sans-serif;
+    font-weight: bold;
+    height: 100%;
+}
+
+.project {
+    float: left;
+    box-sizing: border-box;
+    padding: 5px;
+    color: #235;
+    cursor: pointer;
+}
+
+.project:hover {
+   background-color: #BCE;
+}
+
+.project.selected {
+    background-color: #ABE;
+}

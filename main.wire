@@ -1,0 +1,25 @@
+/* */
+implements("dialogues.IDialogue", "dialogues.HTMLDialogue")
+
+json("mainmenuCfg", "mainmenu.config");
+
+/*/
+implements("dialogues.IDialogue", "dialogues.NWDialogue")
+/* */
+
+json("settings", "settings")
+
+implements
+    ("projects.IProject", "projects.minijs.MiniJSProject")
+    ("io.compressors.FileCompressor", "io.compressors.PNCCompressor")
+
+
+singleton
+    ("popups.openfile.IOpenFileDialogue", "popups.openfile.OpenFileDialogue")
+
+    ("io.FileReader", "io.HTMLFileReader")
+
+    ("app", "DOC.Pool")
+    ("ROOT", "mainmenu.MainMenu")
+
+get("ROOT")
