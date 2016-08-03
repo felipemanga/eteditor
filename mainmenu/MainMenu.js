@@ -1,3 +1,5 @@
+need("mainmenu.ShortcutHandler", function(){
+
 CLAZZ("mainmenu.MainMenu", {
     PROVIDES:{
         "QuickMenu":"singleton"
@@ -9,6 +11,7 @@ CLAZZ("mainmenu.MainMenu", {
             cfg:INJECT("mainmenuCfg")
         }),
 
+        shortcutHandler:"mainmenu.ShortcutHandler",
         openFile:"popups.openfile.IOpenFileDialogue",
 
         app:"app"
@@ -19,6 +22,7 @@ CLAZZ("mainmenu.MainMenu", {
     		this.onResize();
     	}
     },
+
 
     __screenAnchorY:false,
     onResize:function(){
@@ -137,4 +141,6 @@ CLAZZ("mainmenu.MainMenu", {
     		this.toggleVisibility();
 		}
 	}
+});
+
 });

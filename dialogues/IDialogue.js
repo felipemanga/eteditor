@@ -27,7 +27,6 @@ CLAZZ("dialogues.IDialogue", {
 
 		this.parent = this.cfg.parent;
 
-		console.log(this.controller.constructor.NAME, this.app);
 		this.app.add(this);
 		this.app.add(this.controller);
 

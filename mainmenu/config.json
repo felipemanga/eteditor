@@ -1,5 +1,7 @@
 {
 	"title": "ETEditor",
+	"forceOpenOSWindow":true,
+
 	"toolbar": false,
 	"width": 126,
 	"height":60,

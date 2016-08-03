@@ -219,6 +219,9 @@ CLAZZ("dialogues.HTMLDialogue", {
             }
             this.bringToTop();
 
+            if( opt.forceOpenOSWindow )
+                this.app.call("onOpenOSWindow", window);
+
             this.__onDOMReady( el );
 			DOC.attach( document.body, this[DOC.attachPrefix+"BODY"], this );
             DOC.attach( this.DOM.__ROOT__, this.controller[DOC.attachPrefix+"WINDOW"], this.controller );
