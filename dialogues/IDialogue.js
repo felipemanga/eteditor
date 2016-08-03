@@ -1,13 +1,11 @@
 CLAZZ("dialogues.IDialogue", {
-	ABSTRACT:true,
-
 	INJECT:{
-		quickMenu:"QuickMenu",
+		app:"app",
 		controller:"controller",
 		cfg:"cfg"
 	},
 
-	quickMenu:null,
+	cfg:{},
 
 	STATIC:{
 		dialoguePaths:"",
@@ -15,8 +13,6 @@ CLAZZ("dialogues.IDialogue", {
 		focusRoot:null,
 		instances:[]
 	},
-
-	cfg:{},
 
 	DOM:null,
     isVisible:false,
@@ -30,6 +26,10 @@ CLAZZ("dialogues.IDialogue", {
 		this.children = [];
 
 		this.parent = this.cfg.parent;
+
+		console.log(this.controller.constructor.NAME, this.app);
+		this.app.add(this);
+		this.app.add(this.controller);
 
 		dialogues.IDialogue.instances.push(this);
 
@@ -118,11 +118,11 @@ CLAZZ("dialogues.IDialogue", {
 		while( menuTarget && !(menuTarget.cfg && menuTarget.cfg.menu) )
 			menuTarget = menuTarget.parent;
 
-		if( this.quickMenu ){
+		if( this.app ){
 			if( menuTarget && menuTarget.cfg.menu )
-				this.quickMenu.render( menuTarget.cfg.menu, this );
+				this.app.call("render", menuTarget.cfg.menu, this );
 			else
-				this.quickMenu.render( null, this );
+				this.app.call( "render", null, this );
 		}
 
 		this.raise( "DIALOGUE", "focus" );
@@ -154,6 +154,9 @@ CLAZZ("dialogues.IDialogue", {
 	},
 
 	close:function(){
+		if( this.raise("DIALOGUE", "close") === false )
+			return;
+
 		if( this.parent ){
 			i = this.parent.children.indexOf(this);
 			if( i ==  this.parent.children.length-1 ) this.parent.children.pop();
@@ -168,9 +171,8 @@ CLAZZ("dialogues.IDialogue", {
 		while( this.children.length )
 			this.children[ this.children.length-1 ].close();
 
+		this.app.remove(this.controller);
+		this.app.remove(this);
 		this.__close();
-
-		if( main.quickMenuTarget == this )
-			main.showQuickMenu();
 	}
 });

@@ -293,7 +293,7 @@
 
     CLAZZ.singleton = function( name, clazz ){
     	if( typeof clazz == "string" ) clazz = resolve(clazz);
-    	dibindings[dibindings.length-1][ name ] = () => clazz.instance ? clazz.instance : new clazz();
+    	dibindings[dibindings.length-1][ name ] = () => clazz.instance ? clazz.instance : clazz.instance = new clazz();
     	return CLAZZ.singleton;
     };
 

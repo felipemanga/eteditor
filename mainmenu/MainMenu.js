@@ -14,10 +14,6 @@ CLAZZ("mainmenu.MainMenu", {
         app:"app"
     },
 
-    CONSTRUCTOR:function(){
-        this.app.add(this);
-    },
-
     $DIALOGUE:{
     	load:function(){
     		this.onResize();
