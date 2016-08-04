@@ -1,11 +1,15 @@
 CLAZZ("projects.sprite.Core", {
-	app:null,
-	
-    tools:null,	
+	INJECT:{
+		app:"app",
+		pool:"Pool",
+		"color":"PrimaryColor"
+	}
+
+    tools:null,
     activeLayer:null,
     activeTool:null,
     color:null,
-	
+
 	selection:null,
     layers:null,
 	frames:null,
@@ -14,42 +18,39 @@ CLAZZ("projects.sprite.Core", {
     height:0,
     historyId:-1,
     history:null,
-	
+
 	composite:null,
-	
+
 	DOM:null,
-	
+
 	pool:null,
-	
+
 	opMap:{
 		"normal" : "source-over"
 	},
 
-	CONSTRUCTOR:function( app ){
-		this.app = app;
-		this.pool = (app && app.pool) || new MAR.Pool();
+	CONSTRUCTOR:function( ){
 		this.pool.silence("onUpdateLayers");
 		this.pool.silence("onUpdateFrames");
-		this.DOM = (app && app.DOM);
 		this.pool.add(this);
-        this.color = new Color(0,0,0,0xFF);
+        if( !this.color ) this.color = new Color(0,0,0,0xFF);
         this.tools   = {};
 		this.frames  = [];
         this.history = [];
         this.layers  = [];
 	},
-	
+
 	mask:function( x, y ){
-		if( !this.activeLayer 
-			|| x < 0 
-			|| y < 0 
+		if( !this.activeLayer
+			|| x < 0
+			|| y < 0
 			|| x >= this.width
 			|| y >= this.height
 			) return 0;
 		if( !this.selection || !this.selection.enabled ) return 1;
 		return this.selection.data.data[(y*this.width+x)*4+3]/255;
 	},
-	
+
 	loadTools:function( toolset ){
         this.tools = {};
 		Object.keys(toolset).forEach(k => {
@@ -58,38 +59,38 @@ CLAZZ("projects.sprite.Core", {
 			tool.app = this;
 			this.tools[ k ] = tool;
 		});
-		
+
 		this.pool.call("onLoadTools", this.tools);
 	},
-	
+
 	createLayer:function( hidden ){
 		return new projects.sprite.Layer( this, hidden );
 	},
-	
+
     setLayer:function(layer, noUndo){
         this.activeLayer = layer;
 
-        if( noUndo !== true ) 
+        if( noUndo !== true )
             this.push();
-		
+
 		this.pool.call("onUpdateLayers", this.layers, layer);
     },
-	
+
 	setFrame:function(frame, noUndo){
 		var pos = 0;
 		if( this.activeLayer ){
 			pos = this.layers.indexOf( this.activeLayer );
 			if( pos == -1 ) pos = 0;
 		}
-		
+
 		if( this.layers )
 			this.renderComposite(this.layers.composite, this.layers );
-		
+
 		this.layers = frame;
 		this.setLayer( frame[pos] );
 		this.pool.call("onUpdateFrames", this.frames, this.layers );
 	},
-	
+
 	setLayerBlending:function(mode){
 		if( !this.activeLayer ) return;
 		this.activeLayer.canvas.style.mixBlendMode = mode;
@@ -102,36 +103,36 @@ CLAZZ("projects.sprite.Core", {
 		this.activeLayer.alpha = a;
         this.activeLayer.canvas.style.opacity = a;
     },
-	
+
 	setLayerIndex:function(layer, index){
 		if( !this.frames.length || !layer ) return;
 		var pos = this.layers.indexOf(layer);
 		if( index == pos || pos == -1 ) return;
 		// if( index > pos ) index--;
-		
+
 		this.frames.forEach(function(frame){
 			frame.splice( pos, 1 );
 			frame.splice( index, 0, layer );
 		});
-		
+
         this.push();
 		this.pool.call("onUpdateLayers", this.layers, layer, layer );
 		this.pool.call("onUpdateFrames", this.frames, this.layers );
 	},
-	
+
 	removeLayer:function(layer){
 		if( !this.frames.length || !layer ) return;
 		var pos = this.layers.indexOf(layer);
 		if( pos == -1 ) return;
-		
+
 		this.frames.forEach( frame => frame.splice( pos, 1 ) );
-		
+
 		if( this.layers.length == 0 ) this.addLayer( false, true );
-		
+
         this.setLayer( this.layers[pos-1] || this.layers[0] );
 		this.pool.call("onUpdateFrames", this.frames, this.layers );
 	},
-	
+
 	addLayer:function(duplicate, noUndo){
 		var layer = null;
 		var dup = this.layers.indexOf(this.activeLayer);
@@ -151,20 +152,20 @@ CLAZZ("projects.sprite.Core", {
 			if( this.frames[i] == this.layers )
 				layer = this.frames[i][ this.frames[i].length-1 ];
 		}
-		
+
 		this.setLayer(layer, noUndo);
-		
+
 		this.pool.call("onUpdateFrames", this.frames, this.layers );
 	},
-	
+
 	removeFrame:function(frame){
 		var i = this.frames.indexOf(frame);
 		if( i == -1 ) return;
 		this.frames.splice(i, 1);
-		
+
 		if( this.frames.length == 0 ) this.addFrame(0, false, true);
 		if( i >= this.frames.length ) i = this.frames.length-1;
-		
+
 		if( this.layers == frame ){
 			this.setFrame( this.frames[i] );
 		}else{
@@ -172,10 +173,10 @@ CLAZZ("projects.sprite.Core", {
 			this.pool.call("onUpdateFrames", this.frames, this.layers );
 		}
 	},
-	
+
 	addFrame:function(pos, duplicate, noUndo){
 		var layers, active;
-		
+
 		if( this.layers ){
 			layers = this.layers.concat();
 			for( var i=0; i<layers.length; ++i ){
@@ -185,18 +186,18 @@ CLAZZ("projects.sprite.Core", {
 				layer.alpha = src.alpha;
 				layer.blend = src.blend;
 				layer.enabled = src.enabled;
-				
-				if( this.layers[i] == this.activeLayer ) 
+
+				if( this.layers[i] == this.activeLayer )
 					active = layers[i];
 				if( !duplicate ) continue;
-				
+
 				layer.context.drawImage( src.canvas, 0, 0 );
 				layer.read();
 			}
 		}else{
 			layers = [ active = this.createLayer() ];
 		}
-		
+
 		layers.composite = this.createLayer(true);
 		layers.composite.canvas.style.display = "none";
 		layers.composite.canvas.style.mixBlendMode = "multiply";
@@ -207,13 +208,13 @@ CLAZZ("projects.sprite.Core", {
 		this.setLayer( active, noUndo );
 		this.pool.call("onUpdateFrames", this.frames, this.layers );
 	},
-	
+
 	getComposite:function(){
 		if( !this.composite )
 			this.composite = this.createLayer(true);
 		return this.composite;
 	},
-	
+
     renderComposite:function( composite, layers ){
 		composite = composite || this.getComposite();
 		layers = layers || this.layers;
@@ -230,31 +231,31 @@ CLAZZ("projects.sprite.Core", {
                 composite.context.drawImage( layer.canvas, 0, 0 );
             }
         });
-		
+
 		return composite;
     },
-	
+
 	setTool:function( tool ){
 		var oldTool = this.activeTool;
 		if( tool == oldTool ) return;
-		
+
         if( oldTool && oldTool.deactivate ) oldTool.deactivate();
 		this.activeTool = tool;
 		if( tool.activate ) this.activeTool.activate();
 		this.pool.call("onSetTool", tool);
 	},
-	
+
     setCanvasSize:function(width, height, stretch){
 		if(this.selection) this.selection.enabled = false;
-		
+
         var composite = this.getComposite();
         composite.canvas.width = this.width;
         composite.canvas.height = this.height;
         this.width = width;
         this.height = height;
-		
+
 		this.frames.forEach( frame => {
-		
+
 			frame.forEach( layer => {
 				layer.canvas.width = width;
 				layer.canvas.height = height;
@@ -269,17 +270,17 @@ CLAZZ("projects.sprite.Core", {
 					layer.read();
 				}
 			});
-			
+
 		});
-		
+
 		this.history = [];
 		this.historyId = -1;
-		
+
 		this.push();
 
 		this.pool.call("onUpdateLayers", this.layers, this.activeLayer);
     },
-	
+
     loadImage:function( path ){
         MAR.create("img", {
             src:path,
@@ -292,7 +293,7 @@ CLAZZ("projects.sprite.Core", {
 			}
         });
     },
-	
+
     runFilter:function(filter){
         if( !this.activeLayer ) return;
 
@@ -316,11 +317,11 @@ CLAZZ("projects.sprite.Core", {
                 d[i++] = color.a;
             }
         }
-        
+
         this.activeLayer.redraw();
         this.push();
     },
-	
+
 
     mergeLayer:function( noUndo ){
 		var top = this.activeLayer;
@@ -375,7 +376,7 @@ CLAZZ("projects.sprite.Core", {
         var snapshot = this.history[ id ], THIS=this;
         if( !snapshot ) return;
 		var data = snapshot.data;
-		
+
 		snapshot = this.makeSnapshot(snapshot);
         this.frames = snapshot.frames;
         this.layers = snapshot.layers;
@@ -384,7 +385,7 @@ CLAZZ("projects.sprite.Core", {
             this.activeLayer.data.data.set( data );
             this.activeLayer.redraw();
         }
-        
+
         this.pool.call("onUpdateLayers", this.layers, this.activeLayer );
         this.pool.call("onUpdateFrames", this.frames, this.layers );
     },
@@ -396,16 +397,16 @@ CLAZZ("projects.sprite.Core", {
     historyCommit:true,
 
 	makeSnapshot:function( src ){
-        var frames = src.frames.map( f =>{ 
-			var copy = f.concat(); 
+        var frames = src.frames.map( f =>{
+			var copy = f.concat();
 			copy.composite = f.composite;
 			return copy;
 		});
-		
+
 		var framePos = src.frames.indexOf( src.layers )
         var layerPos = src.frames[ framePos ].indexOf( src.activeLayer );
         var activeLayer = frames[framePos][layerPos];
-		
+
 		// console.log("SNAP");
 		return {
 			frames: frames,
@@ -461,5 +462,5 @@ CLAZZ("projects.sprite.Core", {
 
     redo:function(){
         this.applySnapshot( this.historyId+1 );
-    }	
+    }
 });

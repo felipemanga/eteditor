@@ -25,29 +25,38 @@ CLAZZ("projects.sprite.SpriteProject", {
     toolStack:null,
     zoom:1,
 
-    onLoad:function(){
-        this.toolStack = [];
-
-        this.core = CLAZZ.get("projects.sprite.Core", { pool:this.pool });
+    CONSTRUCTOR:function(){
+        this.core = CLAZZ.get("projects.sprite.Core", { Pool:this.pool });
 
         this.colorview = CLAZZ.get();
-        this.properties = CLAZZ.get("projects.sprite.SpriteProperties", { pool: this.pool, core:this.core });
-        this.framesview = CLAZZ.get("projects.sprite.Frames", { pool: this.pool, core:this.core });
-        this.filtersview = CLAZZ.get("projects.sprite.Filters", { pool: this.pool, core:this.core });
+        var ctx = {
+            Pool: this.pool,
+            parent: this,
+            core:this.core
+        };
 
-        this.core.color = this.colorview.color;
-        this.core.width = this.settings.width || 64;
-        this.core.height = this.settings.height || 64;
-		this.core.loadTools( projects.sprite.tools );
-		this.core.addFrame(0, false, true);
-		this.core.addLayer(false, true);
-        if( fs.existsSync( this.path ) )
-            this.core.loadImage( this.path );
-		else this.core.push();
+        this.properties = CLAZZ.get("projects.sprite.SpriteProperties", ctx);
+        this.framesview = CLAZZ.get("projects.sprite.Frames", ctx);
+        this.filtersview = CLAZZ.get("projects.sprite.Filters", ctx);
+    },
 
-        this.DOM.attach( this.win.window, this.WINDOW, this );
-        this.DOM.stack.style.top = Math.round(this.win.appWindow.innerBounds.height*0.5 - this.core.height*0.5)+"px";
-        this.DOM.stack.style.left = Math.round(this.win.appWindow.innerBounds.width*0.5 - this.core.width*0.5)+"px";
+    $DIALOG:{
+        load:function(){
+            this.toolStack = [];
+            this.core.DOM = this.dialogue.DOM;
+            this.core.width = this.settings.width || 64;
+            this.core.height = this.settings.height || 64;
+    		this.core.loadTools( projects.sprite.tools );
+    		this.core.addFrame(0, false, true);
+    		this.core.addLayer(false, true);
+            
+            if( this.path ) this.core.loadImage( this.path );
+    		else this.core.push();
+
+            this.DOM.attach( this.win.window, this.WINDOW, this );
+            this.DOM.stack.style.top = Math.round(this.win.appWindow.innerBounds.height*0.5 - this.core.height*0.5)+"px";
+            this.DOM.stack.style.left = Math.round(this.win.appWindow.innerBounds.width*0.5 - this.core.width*0.5)+"px";
+        }
     },
 
 	onLoadTools:function( tools ){
