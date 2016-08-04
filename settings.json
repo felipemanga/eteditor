@@ -1,3 +1,31 @@
 {
+
+    "global":{
+		"shortcuts":{
+			"new":["N"],
+			"open":[17, "O"],
+			"toggleVisibility":[9]
+		}
+	},
+
+    "projects":{
+
+        "minijs":{
+            "MiniJSProject":{
+                "dialogue":{
+                    "position":"center",
+                    "menu":{
+                        "save":{
+                            "shortcut":[17, "S"],
+                            "priority":5
+                        }
+                    }
+                }
+            }
+        }
+
+
+    }
+
     
 }

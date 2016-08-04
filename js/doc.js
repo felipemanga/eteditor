@@ -1365,7 +1365,7 @@ var DOC = {
 					src += "var singleton = CLAZZ.singleton,\n";
 					src += "\timplements = CLAZZ.implements,\n";
 					src += "\tfactory = CLAZZ.factory,\n";
-					src += "\tjson = function(a, b){ CLAZZ.set(a, DOC.resolve(b)); return json; },\n";
+					src += "\tjson = function(a, b){ CLAZZ.set(a, self[a] = DOC.resolve(b)); return json; },\n";
 					src += "\tset = CLAZZ.set,\n";
 					src += "\tget = CLAZZ.get;\n";
 					src += wire;

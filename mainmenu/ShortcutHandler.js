@@ -1,7 +1,14 @@
 CLAZZ("mainmenu.ShortcutHandler", {
     INJECT:{
-        app:"app"
+        app:"app",
+        main:"main",
+        settings:RESOLVE("settings.global.shortcuts")
     },
+
+    settings:null,
+    main:null,
+    menu:null,
+    menuTarget:null,
 
     CONSTRUCTOR:function(){
         this.app.add(this);
@@ -12,10 +19,21 @@ CLAZZ("mainmenu.ShortcutHandler", {
         window.onkeyup = this.__onKey.bind(this);
     },
 
+    renderMenu:function( menu, obj ){
+		this.menu = {};
+		this.menuTarget = obj;
+		for( var k in menu ){
+			if( menu[k] && menu[k].shortcut )
+				this.menu[k] = menu[k].shortcut;
+		}
+    },
+
     keys:null,
 	keyCount:0,
     clearKeysHandle:0,
 	__onKey:function(evt){
+		if( !this.keys ) this.keys = [];
+		
 		var down = evt.type == "keydown";
 		var keyCode = evt.keyCode || evt.which;
 
@@ -47,14 +65,9 @@ CLAZZ("mainmenu.ShortcutHandler", {
 		var keys = this.keys, keyCount = this.keys.reduce( (a, b) => a+b )|0;
 		var prevent = false;
 
-		function checkShortcuts(target){
-			if( target && target.parent )
-				checkShortcuts(target.parent);
-
-			if( !target || !target.settings || !target.settings.shortcuts )
+		function checkShortcuts(target, cuts){
+			if( !target || !cuts )
 				return;
-
-			var cuts = target.settings.shortcuts; // see what I did there?
 
 			for( var k in cuts ){
 				var ks = cuts[k];
@@ -76,15 +89,14 @@ CLAZZ("mainmenu.ShortcutHandler", {
 				}
 
 				if( i == ks.length && i >= keyCount ){
-					if( typeof target[k] == "function" ) target[k]();
-					else if( target.pool ) target.pool.call(k);
+					target.raise("MENU", k);
 					prevent = true;
 				}
 			}
 		}
 
-		checkShortcuts(this);
-		checkShortcuts(this.quickMenuTarget);
+		checkShortcuts(this.main.dialogue, this.settings);
+		checkShortcuts(this.menuTarget, this.menu);
 		if( prevent ) evt.preventDefault();
 	},
 

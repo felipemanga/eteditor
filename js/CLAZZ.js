@@ -1,10 +1,11 @@
 (function(){
 
-    function resolve( strpath, write ){
-        var ctx = self;
+    function resolve( strpath, write, ctx ){
         var path = strpath.split(".");
         var i = 0;
+        if( !ctx || path[0] != "this" ) ctx = self;
         if( path[0] == "this" ) i++;
+
         if( write === undefined ){
             for( ; i<path.length; ++i )
     			ctx=ctx[path[i]];
@@ -250,16 +251,18 @@
     	return ret;
     }
 
-    function Injection(name, context){
+    function Injection(resolve, name, context){
+        this.resolve = resolve || name == "this";
     	this.name = name;
     	this.context = context;
     }
 
-    CLAZZ.makeInjection = function( name, context ){
-    	return new Injection(name, context);
+    CLAZZ.makeInjection = function( resolve, name, context ){
+    	return new Injection(resolve, name, context);
     };
 
-    self.INJECT = CLAZZ.makeInjection;
+    self.INJECT = CLAZZ.makeInjection.bind(null, false);
+    self.RESOLVE = CLAZZ.makeInjection.bind(null, true);
 
     CLAZZ.withContext = function( context, cb, THIS ){
     	var ret;
@@ -269,7 +272,8 @@
     		for( var k in context ){
     			var v = context[k];
     			if( v && v instanceof Injection ){
-    				if( v.name == "this" ) CLAZZ.set(k, THIS);
+    			    if( v.debugger ) debugger;
+    				if( v.resolve ) CLAZZ.set(k, resolve(v.name, undefined, THIS));
     				else CLAZZ.set( k, CLAZZ.get(v) );
     			}else CLAZZ.set(k, v);
     		}
@@ -314,6 +318,15 @@
     	else if( m instanceof Injection ){
     		name = m.name;
     		context = m.context;
+    		if( context && context.debugger ) debugger;
+    		if( m.resolve ){
+    		    var value = resolve(name, undefined, THIS);
+    		    if( value === undefined ){
+    		        if( def === undefined ) throw("Resolve not found: " + name);
+    		        return def;
+    		    }
+    		    return value;
+    		}
     	}
 
     	var bind, ctxId = dibindings.length-1;

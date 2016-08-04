@@ -7,11 +7,14 @@ CLAZZ("mainmenu.MainMenu", {
 
     INJECT:{
         dialogue:INJECT("dialogues.IDialogue", {
-            controller:INJECT("this"),
+            controller:RESOLVE("this"),
             cfg:INJECT("mainmenuCfg")
         }),
 
-        shortcutHandler:"mainmenu.ShortcutHandler",
+        shortcutHandler:INJECT("mainmenu.ShortcutHandler", {
+        	"main":RESOLVE("this")
+        }),
+
         openFile:"popups.openfile.IOpenFileDialogue",
 
         app:"app"
@@ -64,7 +67,7 @@ CLAZZ("mainmenu.MainMenu", {
 
 	quickMenuTarget:null,
     menuElements:null,
-	render:function( menu, obj ){
+	renderMenu:function( menu, obj ){
         if( obj == this.dialogue )
             return;
 
@@ -94,51 +97,30 @@ CLAZZ("mainmenu.MainMenu", {
 		click:function(){
 			this.toggleVisibility();
 		}
-	},
+ 	},
 
-	"new":function(){
-		this.openFile.show("New");
+	$MENU:{
+		"new":function(){
+            this.openFile.show("New");
+			this.toggleVisibility(false);
+		},
+		open:function(){
+	        this.openFile.show("Open");
+			this.toggleVisibility(false);
+		}
 	},
 
 	$btnNew:{
 		click:function(){
             this.openFile.show("New");
-			this.toggleVisibility();
-		}
-	},
-
-	open:function(){
-        this.openFile.show("Open");
-	},
-
-	save:function(){
-		if( this.quickMenuTarget )
-			this.quickMenuTarget.save();
-	},
-
-	saveAs:function(){
-		if( this.quickMenuTarget )
-			this.quickMenuTarget.save( true );
-	},
-
-	$btnSave:{
-		click:function(){
-			this.save();
-			this.toggleVisibility();
-		}
-	},
-
-	$btnSaveAs:{
-		click:function(){
-			this.saveAs();
-			this.toggleVisibility();
+			this.toggleVisibility(false);
 		}
 	},
 
 	$btnOpen:{
 		click:function(){
-            this.open();
-    		this.toggleVisibility();
+	        this.openFile.show("Open");
+			this.toggleVisibility(false);
 		}
 	}
 });

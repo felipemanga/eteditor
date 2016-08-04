@@ -30,14 +30,7 @@ CLAZZ("projects.minijs.MiniJSProject", {
 	INJECT:{
         dialogue:INJECT("dialogues.IDialogue", {
             controller:INJECT("this"),
-            cfg:{
-            	position:"center",
-                menu:{
-                    save:{
-                        priority:5
-                    }
-                }
-            }
+            cfg:RESOLVE("settings.projects.minijs.MiniJSProject.dialogue")
         }),
 
         fileReader:"io.FileReader",

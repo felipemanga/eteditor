@@ -119,9 +119,9 @@ CLAZZ("dialogues.IDialogue", {
 
 		if( this.app ){
 			if( menuTarget && menuTarget.cfg.menu )
-				this.app.call("render", menuTarget.cfg.menu, this );
+				this.app.call("renderMenu", menuTarget.cfg.menu, this );
 			else
-				this.app.call( "render", null, this );
+				this.app.call( "renderMenu", null, this );
 		}
 
 		this.raise( "DIALOGUE", "focus" );
