@@ -1,76 +1,40 @@
+need([
+    "projects.sprite.Core",
+    "projects.sprite.Properties",
+    "projects.sprite.Frames",
+    "projects.sprite.Filters"
+], function(){
+
 CLAZZ("projects.sprite.SpriteProject", {
-    EXTENDS:"Dialogue",
-    DYNAMIC:true,
-
-	"@properties":{dialogue:"projects.sprite.SpriteProperties"},
-    properties:null,
-	
-	"@colorview":{dialogue:"dialogues.ColorPicker"},
-	colorview:null,
-
-	"@framesview":{dialogue:"projects.sprite.Frames"},
-	framesview:null,
-	
-	"@filtersview":{dialogue:"projects.sprite.Filters"},
-	filtersview:null,
-	
-    STATIC:{
-        title:"Sprite",
-        settings:{
-            shortcuts:{
-                "undo":[17, "Z"],
-                "redo":[17, 16, "Z"],
-                "onClose":[17, "W"],
-                "startHand":[32],
-                "endHand":[-32],
-                "startPencil":["B"],
-                "startEraser":["E"],
-                "startDropper":[18],
-                "endDropper":[-18],
-                "startFill":["G"],
-				"selectAll":[17, "A"],
-				"selectNone":[17, "D"],
-                "addLayer":[16, "N"],
-				"dupFrame":[18, "N"],
-                "removeLayer":[16, 46],
-				"layerAbove":[38],
-				"layerBelow":[40],
-				"nextFrame":[39],
-				"prevFrame":[37],
-                "moveActiveLayerUp":[16, 38],
-                "moveActiveLayerDown":[16, 40],
-				"X":["X"]
-            }
-        }
+    INJECT:{
+        dialogue:INJECT("dialogues.IDialogue", {
+            controller:INJECT("this"),
+            cfg:RESOLVE("settings.projects.sprite.SpriteProject.dialogue")
+        }),
+        colorpicker:"popups.colorpicker.IColorPicker",
+        app:"app",
+        pool:"Pool",
+        settings:RESOLVE("settings.projects.sprite.SpriteProject")
     },
 
-    menu:[
-		"X",
-        "undo",
-        "redo"
-    ],
+    core:null,
+    properties:null,
+    framesview:null,
+    filtersview:null,
 
-    // injected
-    path:null,
-    settings:null,
-	
-	core:null,
     toolStack:null,
     zoom:1,
 
-    CONSTRUCTOR:function(){
-    	try{
-        	SUPER();
-    	}catch(ex){
-    		alert(ex);
-    		return;
-    	}
-
-        this.toolStack = [];
-    },
-
     onLoad:function(){
-		this.core = new projects.sprite.Core( this );
+        this.toolStack = [];
+
+        this.core = CLAZZ.get("projects.sprite.Core", { pool:this.pool });
+
+        this.colorview = CLAZZ.get();
+        this.properties = CLAZZ.get("projects.sprite.SpriteProperties", { pool: this.pool, core:this.core });
+        this.framesview = CLAZZ.get("projects.sprite.Frames", { pool: this.pool, core:this.core });
+        this.filtersview = CLAZZ.get("projects.sprite.Filters", { pool: this.pool, core:this.core });
+
         this.core.color = this.colorview.color;
         this.core.width = this.settings.width || 64;
         this.core.height = this.settings.height || 64;
@@ -84,16 +48,16 @@ CLAZZ("projects.sprite.SpriteProject", {
         this.DOM.attach( this.win.window, this.WINDOW, this );
         this.DOM.stack.style.top = Math.round(this.win.appWindow.innerBounds.height*0.5 - this.core.height*0.5)+"px";
         this.DOM.stack.style.left = Math.round(this.win.appWindow.innerBounds.width*0.5 - this.core.width*0.5)+"px";
-    }, 
-	
+    },
+
 	onLoadTools:function( tools ){
 		Object.keys(tools).forEach( k => {
 			this.inject( tools[k] );
 		} );
 	},
-	
+
 	layers:null,
-	
+
 	onUpdateLayers:function( layers, active ){
 		this.layers = layers;
 		MAR.removeChildren( this.DOM.stack );
@@ -103,10 +67,10 @@ CLAZZ("projects.sprite.SpriteProject", {
 			l.canvas.style.opacity = l.alpha;
 			l.canvas.style.mixBlendMode = l.blend;
 		});
-		
+
 		this.updateOnionSkins( this.core.frames );
 	},
-	
+
 	updateOnionSkins:function( frames ){
 		frames.forEach(frame => {
 			if( !frame.composite ){
@@ -117,17 +81,17 @@ CLAZZ("projects.sprite.SpriteProject", {
 			if( frame != this.layers && frame.composite.canvas.style.display != "none" )
 				this.DOM.stack.appendChild( frame.composite.canvas );
 		});
-		
+
 		this.applyZoom();
 	},
-	
+
 	onUpdateFrames:function( frames, layers ){
 		if( this.layers != layers )
 			this.onUpdateLayers( layers, this.core.activeLayer );
 		else
 			this.updateOnionSkins( frames );
 	},
-	
+
 	onResize:function(){
 		this.DOM.stack.style.top = Math.round(this.win.appWindow.innerBounds.height*0.5 - this.height*0.5)+"px";
 		this.DOM.stack.style.left = Math.round(this.win.appWindow.innerBounds.width*0.5 - this.width*0.5)+"px";
@@ -136,7 +100,7 @@ CLAZZ("projects.sprite.SpriteProject", {
     onSave:function( cb ){
         if( !this.core.layers.length )
             return false;
-        
+
         var ext = this.path.match(/\.([a-z]+)$/i);
         if( !ext ){
 			if( this.core.frames.length > 1 ){
@@ -151,7 +115,7 @@ CLAZZ("projects.sprite.SpriteProject", {
         if( ext == "jpg" ) ext = "jpeg";
 
         if( ext == "png" || ext == "jpeg" ){
-			
+
 			if( this.core.frames.length == 1 ){
 				cb( this.core.renderComposite().canvas.toDataURL("image/" + ext) );
 				return true;
@@ -162,12 +126,12 @@ CLAZZ("projects.sprite.SpriteProject", {
 			var rows = Math.ceil(this.core.frames.length / cols);
 			var outh = rows * this.core.height;
 			outw = cols * this.core.width;
-			
+
 			var comp = this.DOM.create("canvas", {width:outw, height:outh});
 			MAR.remove(comp);
 			var ctx = comp.getContext("2d");
 			var arr = {};
-			
+
 			this.core.frames.forEach( (frame, i) => {
 				var x = (i%cols)*width, y = Math.floor(i/cols)*height;
 				this.core.renderComposite( frame.composite, frame );
@@ -193,37 +157,37 @@ CLAZZ("projects.sprite.SpriteProject", {
 					}
 				};
 			} );
-			
+
 			fs.writeFileSync( this.path + ".json", JSON.stringify({frames:arr}) );
 			cb( comp.toDataURL("image/" + ext) );
         }
-		
+
 		if( ext == "gif" ){
 			var gif = new GIF({
 				workerScript:"js/gif.worker.js",
 				width: this.core.width,
 				height: this.core.height
 			});
-			
+
 			var delay = 1000 / (this.core.fps || 1);
-			
+
 			this.core.frames.forEach(frame => {
 				this.core.renderComposite( frame.composite, frame );
 				gif.addFrame(frame.composite.canvas, {delay:delay});
 			});
-			
+
 			gif.on('finished', function(blob, data){
 				var acc = "";
 				for( var i=0; i<data.length; ++i )
 					acc += String.fromCharCode( data[i] );
 				cb(acc);
 			});
-			
+
 			gif.render();
 			return true;
 		}
     },
-	
+
 	X:function(){
 		if( this.toolStack.length >= 2 ){
 			var current = this.toolStack.pop();
@@ -232,7 +196,7 @@ CLAZZ("projects.sprite.SpriteProject", {
 			this.core.setTool( next );
 		}
 	},
-	
+
 	undo:function(){
 		this.core.undo();
 	},
@@ -240,15 +204,15 @@ CLAZZ("projects.sprite.SpriteProject", {
 	redo:function(){
 		this.core.redo();
 	},
-	
+
 	clearToolHnd:0,
     onSetTool:function(tool){
 		if( !tool ) return;
-		
+
 		this.toolStack.push( tool );
-		
+
         if( this.toolStack.length > 3 ) this.toolStack.shift();
-		
+
 		this.DOM.activeTool.textContent = MAR.TEXT( tool.constructor.NAME || tool.constructor.name );
 		this.DOM.activeTool.style.display = "initial";
 
@@ -260,7 +224,7 @@ CLAZZ("projects.sprite.SpriteProject", {
 		this.DOM.stack.style.backgroundImage = "url(" + (path||"bg.png").replace(/\\/g, "\\\\") + ")";
 		this.DOM.stack.style.backgroundSize = path ? "contain" : "initial";
 	},
-	
+
 	layerAbove:function(){
         var pos = this.core.layers.indexOf( this.core.activeLayer );
 		pos = (pos+1) % this.core.layers.length;
@@ -355,12 +319,12 @@ CLAZZ("projects.sprite.SpriteProject", {
         Array.prototype.slice.call(this.DOM.stack.children).forEach( layer =>
             layer.style.transform = transform
         );
-		
+
 		this.core.selection.canvas.style.transform = transform;
-		
+
         this.DOM.stack.style.width = this.core.width * zoom + "px";
         this.DOM.stack.style.height = this.core.height * zoom + "px";
-		
+
 		if( parseInt( this.DOM.stack.style.left ) + this.core.width * zoom < 0 )
 			this.DOM.stack.style.left = "0px";
 
@@ -386,7 +350,7 @@ CLAZZ("projects.sprite.SpriteProject", {
         y = Math.round( (pageY - parseInt(this.DOM.stack.style.top) ) / this.zoom - 0.1 );
 
         return {
-            x:x, 
+            x:x,
             y:y,
             pageX:pageX,
             pageY:pageY
@@ -399,11 +363,11 @@ CLAZZ("projects.sprite.SpriteProject", {
 
         var x = Math.floor( (evt.pageX - (parseInt(this.DOM.stack.style.left)||0)) / this.zoom );
         var y = Math.floor( (evt.pageY - (parseInt(this.DOM.stack.style.top)||0)) / this.zoom );
-        
+
         if( this.core.activeTool[type]( this.core.activeLayer.data, x, y, 1 ) )
             this.core.activeLayer.redraw();
     },
-	
+
 	disableTool:false,
 
     WINDOW:{
@@ -419,7 +383,7 @@ CLAZZ("projects.sprite.SpriteProject", {
 			this.dragOffsetY = evt.pageY;
         },
         mousemove:function(evt){
-            if( evt.buttons != 0 ) 
+            if( evt.buttons != 0 )
                 this.runTool(evt, "move");
             this.drag(evt);
         },
@@ -475,4 +439,6 @@ CLAZZ("projects.sprite.SpriteProject", {
             evt.preventDefault();
         }
     }
+});
+
 });

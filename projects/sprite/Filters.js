@@ -1,20 +1,18 @@
 CLAZZ("projects.sprite.Filters", {
-	EXTENDS:"Dialogue",
-	CONSTRUCTOR:function( parent ){
-		SUPER({
-			width:800,
-			show:false,
-			always_on_top: true,
-			title:"Filters"
-		}, parent);
+	INJECT:{
+        dialogue:INJECT("dialogues.IDialogue", {
+            controller:INJECT("this"),
+            cfg:RESOLVE("settings.projects.sprite.Filters.dialogue")
+        }),
+		pool:"Pool"
 	},
-	
+
 	onClose:function(){
 		SUPER();
 		this.enabled = false;
 	},
 
-	id:0,	
+	id:0,
 	onLoad:function(){
 		this.win.moveTo(0,0);
 		var THIS=this;
@@ -24,7 +22,7 @@ CLAZZ("projects.sprite.Filters", {
 			if( /.+\.js/i.test(file) ){
 				var clazz = THIS.compile( fs.readFileSync(path + file, "utf-8") );
 				if( !clazz ) return true;
-				
+
 				THIS.id++;
 				DOM.create("div", DOM.filters, {
 					onclick:THIS.openFilter.bind(THIS, path + file, THIS.id),
@@ -37,7 +35,7 @@ CLAZZ("projects.sprite.Filters", {
 		});
 		this.setTab( DOM.tabHeader[0] );
 	},
-	
+
 	openFilter:function(path, id){
 		this.DOM.path.textContent = path;
 		this.DOM.TEXTAREA.value = fs.readFileSync(path, "utf-8");
@@ -59,7 +57,7 @@ CLAZZ("projects.sprite.Filters", {
 		try{
 			if( code == undefined )
 				code=this.DOM.TEXTAREA.value;
-			
+
 			syntax = esprima.parse(code, {
                 tolerant: true,
                 loc: true
@@ -86,13 +84,13 @@ CLAZZ("projects.sprite.Filters", {
 			header.className = header.className.replace(/ active|$/, header == current ? " active" : "");
 		}
 	},
-	
+
 	tabHeader:{
 		click:function(evt){
 			this.setTab(evt.target);
 		}
 	},
-	
+
 	meta:null,
 	buildMenu:function( filter ){
 		MAR.removeChildren( this.DOM.filterOpts );
@@ -100,12 +98,12 @@ CLAZZ("projects.sprite.Filters", {
 		if( !filter || !filter.meta ) return;
 		var meta = filter.meta;
 		var DOM=this.DOM, filterOpts=this.DOM.filterOpts, THIS=this;
-		
+
 		function updateMeta(k, m, evt){
 			THIS.meta[k] = evt.target.value;
 			if( m.int ) THIS.meta[k] = parseInt(THIS.meta[k]);
 		}
-		
+
 		function createMeta(k){
 			var m=meta[k];
 			var value = (THIS.meta[k] != undefined ? THIS.meta[k] : filter[k]);
@@ -128,24 +126,24 @@ CLAZZ("projects.sprite.Filters", {
 			}
 			return ["div", {text:JSON.stringify(m)}];
 		}
-		
+
 		Object.sort( meta ).forEach( (k) => {
 				DOM.create("div", {className:"optionContainer"}, filterOpts, [
 					["div", {className:"optionLabel", text:MAR.TEXT(k)}],
 					createMeta( k )
 				]);
 			});
-			
+
 	},
-	
+
 	onSave:function(){
 		var path = "app/include/projects/sprite/filters/";
 		try{
 			var clazz = this.compile();
 			if( !clazz ) return;
-			
+
 			var instance = new clazz();
-			
+
 			this.buildMenu( instance );
 
 			var file = (clazz.NAME || clazz.name);
@@ -167,13 +165,13 @@ CLAZZ("projects.sprite.Filters", {
 		fs.writeFileSync( path, this.DOM.TEXTAREA.value );
 		this.DOM.path.textContent = path;
 	},
-	
+
 	btnSave:{
 		click:function(){
 			this.onSave();
 		}
 	},
-	
+
 	btnRun:{
 		click:function(){
 			var clazz = this.compile();

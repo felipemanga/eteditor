@@ -82,7 +82,7 @@ CLAZZ("mainmenu.MainMenu", {
 		if( menu ){
             Object.sort(menu).forEach((label) => {
                 var item = menu[label];
-				this.menuElements.push( DOC.create("div", DOM.quickMenu, {
+                if( !item.hidden ) this.menuElements.push( DOC.create("div", DOM.quickMenu, {
 					className:"btn",
 					text: DOC.TEXT(label),
                     onclick: obj.raise.bind(obj, "MENU", label)
@@ -107,7 +107,10 @@ CLAZZ("mainmenu.MainMenu", {
 		open:function(){
 	        this.openFile.show("Open");
 			this.toggleVisibility(false);
-		}
+		},
+        toggleVisibility:function(){
+            this.toggleVisibility();
+        }
 	},
 
 	$btnNew:{

@@ -1,22 +1,29 @@
-CLAZZ("projects.sprite.SpriteProperties", {
-    EXTENDS:"Dialogue",
+CLAZZ("projects.sprite.Properties", {
+    INJECT:{
+        dialogue:INJECT("dialogues.IDialogue", {
+            controller:INJECT("this"),
+            cfg:RESOLVE("settings.projects.minijs.MiniJSProject.dialogue")
+        }),
+        pool:"Pool"
+    },
+
 	layerEls:null,
-	
+
     CONSTRUCTOR:function(parent){
         this.menu = parent.menu;
         var THIS=this;
         this.menu.forEach(function(str){
             THIS[str] = parent[str].bind(parent);
         });
-		
+
 		this.layerEls = [];
 
         SUPER({
             height: 580,
-            show: false, 
+            show: false,
             always_on_top:true
         }, parent);
-        
+
         this.enabled = true;
     },
 
@@ -29,16 +36,16 @@ CLAZZ("projects.sprite.SpriteProperties", {
             this.win.moveTo( main.win.appWindow.outerBounds.width+dialogues.ColorPicker.WIDTH, main.screenHeight-this.win.appWindow.outerBounds.height );
         }
     },
-	
+
 	call:function(name){
 		var args = Array.prototype.slice.call(arguments);
 		args.unshift( this.pool );
 		return this.pool.call.bind.apply( this.pool.call, args );
 	},
-	
+
 	onLoadTools:function(tools){
 		MAR.removeChildren( this.DOM.tools );
-		
+
         this.DOM.create("div", {
             text:MAR.TEXT("Filters"),
             onclick:this.toggleView.bind(this, "filtersview")
@@ -48,27 +55,27 @@ CLAZZ("projects.sprite.SpriteProperties", {
             text:MAR.TEXT("Frames"),
             onclick:this.toggleView.bind(this, "framesview")
         }, this.DOM.tools);
-				
+
 		this.DOM.create("div", {
 			text:MAR.TEXT("Reference"),
 			onclick:this.toggleReference.bind(this)
 		}, this.DOM.tools);
 
         this.DOM.create("span", this.DOM.tools, {text:MAR.TEXT("Brushes:"), className:"label"});
-		
+
 		var toolA = null, toolB = null, THAT=this;
 		Object.sort(tools).forEach( (k) => {
             var tool = tools[k];
-			
+
 			if( !toolA ) toolA = tool;
 			else if( !toolB ) toolB = tool;
-			
+
             this.DOM.create("div", {
-                text:MAR.TEXT(k), 
+                text:MAR.TEXT(k),
 				id: "tool_" + k,
                 onclick:this.call("setTool", tool)
             }, this.DOM.tools);
-            
+
 			var listener = {
 					destroyToolListeners:function(){
 						THAT.pool.remove(this);
@@ -77,11 +84,11 @@ CLAZZ("projects.sprite.SpriteProperties", {
 			listener["start" + k] = this.call("setTool", tool);
             this.pool.add(listener);
 		});
-		
+
 		this.parent.toolStack = [toolB];
 		this.pool.call("setTool", toolA);
 	},
-	
+
 	onUpdateLayers:function( layers, active ){
 		this.layerEls.forEach( l => MAR.remove(l) );
 		if( !layers ){
@@ -92,7 +99,7 @@ CLAZZ("projects.sprite.SpriteProperties", {
 			this.DOM.canvasWidth.value = this.parent.core.width;
 			this.DOM.canvasHeight.value = this.parent.core.height;
 		}
-		layers.forEach( l =>{ 
+		layers.forEach( l =>{
 			var el = this.createLayerElement(l);
 			if( l == active ) this.onSetLayer( l, el );
 		});
@@ -126,10 +133,10 @@ CLAZZ("projects.sprite.SpriteProperties", {
 		}
 	},
 
-	
+
     btnResample:{
         click:function(){
-            this.pool.call("setCanvasSize", 
+            this.pool.call("setCanvasSize",
                 this.DOM.canvasWidth.value = parseInt(this.DOM.canvasWidth.value) || this.parent.width,
                 this.DOM.canvasHeight.value = parseInt(this.DOM.canvasHeight.value) || this.parent.height,
 				true
@@ -139,13 +146,13 @@ CLAZZ("projects.sprite.SpriteProperties", {
 
     btnCrop:{
         click:function(){
-            this.pool.call("setCanvasSize", 
+            this.pool.call("setCanvasSize",
                 this.DOM.canvasWidth.value = parseInt(this.DOM.canvasWidth.value) || this.parent.width,
                 this.DOM.canvasHeight.value = parseInt(this.DOM.canvasHeight.value) || this.parent.height
             );
         }
     },
-	
+
     canvasWidth:{
         change:function(){
 			this.DOM.canvasWidth.value = parseInt(this.DOM.canvasWidth.value) || this.parent.width;
@@ -172,11 +179,11 @@ CLAZZ("projects.sprite.SpriteProperties", {
             }],
             ["button", { text:"†", className:"layerCtrl remove", onclick:this.call("removeLayer", layer) }]
         ]);
-		
+
 		this.layerEls.push(el);
 		return el;
     },
-	
+
 	onSetTool:function(tool){
 		var id = "#tool_"+(tool && tool.constructor.NAME);
 		tool = this.DOM.tools.querySelector(id);
@@ -188,21 +195,21 @@ CLAZZ("projects.sprite.SpriteProperties", {
     onSetLayer:function(layer, el){
 		el.className = "active";
 		this.DOM.inpLayerName.value = layer.name;
-		
+
 		var blending = layer.canvas.style.mixBlendMode || "normal";
 		this.DOM.layerBlending.value = blending;
-		
+
 		var alpha = parseFloat(layer.canvas.style.opacity);
 		if( isNaN(alpha) ) alpha = 1;
 		this.DOM.inpLayerAlpha.value = alpha*100;
 		this.DOM.inpLayerAlphaLabel.textContent = this.DOM.inpLayerAlpha.value;
     },
-	
+
 	onResize:function(w,h){
         this.properties.DOM.canvasWidth.value = this.width;
         this.properties.DOM.canvasHeight.value = this.height;
 	},
-	
+
 	inpLayerName:{
 		change:function( evt ){
 			var layer = this.parent.core.activeLayer;
@@ -217,9 +224,9 @@ CLAZZ("projects.sprite.SpriteProperties", {
         change:function(){
             this.call("setLayerAlpha", parseInt(this.DOM.inpLayerAlpha.value)/100 )();
             this.DOM.inpLayerAlphaLabel.textContent = this.DOM.inpLayerAlpha.value;
-        }    
+        }
     },
-	
+
 	layerBlending:{
 		change:function(){
 			this.call( "setLayerBlending", this.DOM.layerBlending.value )();

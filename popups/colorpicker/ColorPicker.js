@@ -1,40 +1,30 @@
-CLAZZ("dialogues.ColorPicker", {
-    EXTENDS:"Dialogue",
-
+CLAZZ("popups.colorpicker.ColorPicker", {
     color:null,
     tmpColor:null,
     ctx:null,
     data:null,
 
-    menu:[
-        "load"
-    ],
-
-    STATIC:{
-        HEIGHT:500,
-        WIDTH: 400
+    PROVIDES:{
+        "popups.colorpicker.IColorPicker":"singleton"
     },
 
-    CONSTRUCTOR:function( parent ){
-        SUPER({
-            height:dialogues.ColorPicker.HEIGHT, 
-            width:dialogues.ColorPicker.WIDTH, 
-            resizable:false, 
-            show:false, 
-            always_on_top:true 
-        }, parent);
-
-        if( !dialogues.ColorPicker.color ){
-            dialogues.ColorPicker.color = new Color();
-            dialogues.ColorPicker.color.a = 0xFF;
-        }
-        this.color = dialogues.ColorPicker.color;
-        this.tmpColor = new Color();
-    },
-
-    close:function(){
-        SUPER();
-        dialogues.ColorPicker.instance = null;
+    INJECT:{
+        dialogue:INJECT("dialogues.IDialogue", {
+            controller:INJECT("this"),
+            color:"PrimaryColor",
+            tmpColor:"Color",
+            cfg:{
+                menu:{
+                    "load":{}
+                },
+                width:400,
+                height:500,
+                resizable:false,
+                show:false,
+                always_on_top:true,
+                hide_only:true
+            }
+        })
     },
 
     // not a child, but toggle anyway
@@ -128,8 +118,8 @@ CLAZZ("dialogues.ColorPicker", {
 
         pal = pal.slice( 3, length+3 ).map( s => s.split(" ").map( n => parseInt(n) ) );
 
-        this.loadColorArray(pal);    
-    }, 
+        this.loadColorArray(pal);
+    },
 
     loadImagePal:function( evt ){
         var img = evt.target;
@@ -145,9 +135,9 @@ CLAZZ("dialogues.ColorPicker", {
             var ry = h*0.5-y;
             for( x=0; x<w; ++x ){
                 var rx = w*0.5-x;
-                color.fromHSV( 
-                    Math.atan2(rx, ry)/(Math.PI*2)+0.5, 
-                    Math.max(0, Math.min(1, Math.sqrt( rx*rx + ry*ry )/(w*0.5) )), 
+                color.fromHSV(
+                    Math.atan2(rx, ry)/(Math.PI*2)+0.5,
+                    Math.max(0, Math.min(1, Math.sqrt( rx*rx + ry*ry )/(w*0.5) )),
                     (this.DOM.lumSlider.value/100.0)||0
                 );
                 m[(y*w+x)*4  ] = color.r;

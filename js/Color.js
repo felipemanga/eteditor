@@ -1,4 +1,4 @@
-CLAZZ("Color", {
+CLAZZ("js.Color", {
     r:0,
     g:0,
     b:0,
@@ -45,9 +45,9 @@ CLAZZ("Color", {
             case 5: r = v, g = p, b = q; break;
         }
 
-        this.r = Math.round(r*255);     
-        this.g = Math.round(g*255);     
-        this.b = Math.round(b*255);     
+        this.r = Math.round(r*255);
+        this.g = Math.round(g*255);
+        this.b = Math.round(b*255);
     },
 
     fromData:function( d, x, y ){

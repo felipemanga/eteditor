@@ -22,10 +22,129 @@
                     }
                 }
             }
+        },
+
+        "sprite":{
+            "SpriteProject":{
+                "dialogue":{
+                    "title":"Sprite",
+                    "menu":{
+                        "undo":{
+                            "shortcut":[17, "Z"]
+                        },
+                        "redo":{
+                            "shortcut":[17, 16, "Z"]
+                        },
+                        "close":{
+                            "hidden":true,
+                            "shortcut":[17, "W"]
+                        },
+                        "startHand":{
+                            "hidden":true,
+                            "shortcut":[32]
+                        },
+                        "endHand":{
+                            "hidden":true,
+                            "shortcut":[-32]
+                        },
+                        "startPencil":{
+                            "hidden":true,
+                            "shortcut":["B"]
+                        },
+                        "startEraser":{
+                            "hidden":true,
+                            "shortcut":["E"]
+                        },
+                        "startDropper":{
+                            "hidden":true,
+                            "shortcut":[18]
+                        },
+                        "endDropper":{
+                            "hidden":true,
+                            "shortcut":[-18]
+                        },
+                        "startFill":{
+                            "hidden":true,
+                            "shortcut":["G"]
+                        },
+        				"selectAll":{
+                            "hidden":true,
+                            "shortcut":[17, "A"]
+                        },
+        				"selectNone":{
+                            "hidden":true,
+                            "shortcut":[17, "D"]
+                        },
+                        "addLayer":{
+                            "hidden":true,
+                            "shortcut":[16, "N"]
+                        },
+        				"dupFrame":{
+                            "hidden":true,
+                            "shortcut":[18, "N"]
+                        },
+                        "removeLayer":{
+                            "hidden":true,
+                            "shortcut":[16, 46]
+                        },
+        				"layerAbove":{
+                            "hidden":true,
+                            "shortcut":[38]
+                        },
+        				"layerBelow":{
+                            "hidden":true,
+                            "shortcut":[40]
+                        },
+        				"nextFrame":{
+                            "hidden":true,
+                            "shortcut":[39]
+                        },
+        				"prevFrame":{
+                            "hidden":true,
+                            "shortcut":[37]
+                        },
+                        "moveActiveLayerUp":{
+                            "hidden":true,
+                            "shortcut":[16, 38]
+                        },
+                        "moveActiveLayerDown":{
+                            "hidden":true,
+                            "shortcut":[16, 40]
+                        },
+        				"X":{
+                            "shortcut":["X"]
+                        }
+                    }
+                }
+            },
+            "Properties":{
+                "dialogue":{
+                    "height": 580,
+                    "show": false,
+                    "always_on_top":true
+                }
+            },
+            "Frames":{
+                "dialogue":{
+        			"show":false,
+        			"width":600,
+        			"height":235,
+        			"always_on_top": true,
+        			"title":"Frames"
+        		}
+            },
+            "Filters":{
+                "dialogue":{
+        			"width":800,
+        			"show":false,
+        			"always_on_top": true,
+        			"title":"Filters"
+        		}
+            }
         }
 
 
     }
 
-    
+
 }

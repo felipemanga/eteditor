@@ -44,14 +44,6 @@ CLAZZ("projects.minijs.MiniJSProject", {
         this.files = [];
     },
 
-	STATIC:{
-		title:"MiniJS"
-	},
-
-	onLoad:function(){
-		this.files = [];
-	},
-
     $BODY:{
         dragover:function( evt ){
             if( evt.stopPropagation ) evt.stopPropagation();
