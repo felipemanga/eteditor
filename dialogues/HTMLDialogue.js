@@ -287,7 +287,7 @@ CLAZZ("dialogues.HTMLDialogue", {
         function processStyle( prefix, text ){
             var rules = text.split("}");
             for(var i=0, l=rules.length-1; i<l; ++i ){
-                var match = rules[i].match(/^\s*([^{]*)(\{[\s\S]*)/);
+                var match = rules[i].match(/^\s*([^{]*)\{([\s\S]*)/);
                 if( !match ){
                     console.warn("CSS Parse Error:", rules[i]);
                     continue;
@@ -297,7 +297,9 @@ CLAZZ("dialogues.HTMLDialogue", {
                 for( var s=0, sl=selectors.length; s<sl; s++ )
                     selectors[s] = prefix + selectors[s].replace(/^\s*body/i, "#BODY").replace(/^\s*html/i, "#HTML");
 
-                rules[i] = selectors.join(",") + match[2];
+                var style = match[2];
+                style = style.replace(/url\(([^)]+)\)/g, "url(" + documentRoot + "$1)");
+                rules[i] = selectors.join(",") + "{" + style;
             }
 
             text = rules.join("}\n");
