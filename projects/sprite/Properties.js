@@ -2,39 +2,25 @@ CLAZZ("projects.sprite.Properties", {
     INJECT:{
         dialogue:INJECT("dialogues.IDialogue", {
             controller:INJECT("this"),
-            cfg:RESOLVE("settings.projects.minijs.MiniJSProject.dialogue")
+            cfg:RESOLVE("settings.projects.sprite.Properties.dialogue")
         }),
-        pool:"Pool"
+        core:"core",
+        pool:"Pool",
+        parent:"parent"
     },
 
 	layerEls:null,
 
-    CONSTRUCTOR:function(parent){
-        this.menu = parent.menu;
-        var THIS=this;
-        this.menu.forEach(function(str){
-            THIS[str] = parent[str].bind(parent);
-        });
-
+    CONSTRUCTOR:function(){
 		this.layerEls = [];
-
-        SUPER({
-            height: 580,
-            show: false,
-            always_on_top:true
-        }, parent);
-
-        this.enabled = true;
+        this.pool.add(this);
     },
 
     // onSave:null,
 
     onLoad:function(){
-        if( main.screenWidth > main.screenHeight ){
-            this.win.moveTo( main.screenWidth-this.win.appWindow.outerBounds.width, dialogues.ColorPicker.HEIGHT );
-        }else{
-            this.win.moveTo( main.win.appWindow.outerBounds.width+dialogues.ColorPicker.WIDTH, main.screenHeight-this.win.appWindow.outerBounds.height );
-        }
+        var area = this.dialogue.getAvailArea();
+        this.dialogue.moveTo( area.width-this.dialogue.width, area.height-this.dialogue.height );
     },
 
 	call:function(name){

@@ -3,7 +3,7 @@ CLAZZ("projects.sprite.Core", {
 		app:"app",
 		pool:"Pool",
 		"color":"PrimaryColor"
-	}
+	},
 
     tools:null,
     activeLayer:null,

@@ -21,6 +21,8 @@ CLAZZ("dialogues.IDialogue", {
     children:null,
     parent:null,
 	enabled:false,
+	width:0,
+	height:0,
 
 	CONSTRUCTOR:function(opt){
 		this.children = [];

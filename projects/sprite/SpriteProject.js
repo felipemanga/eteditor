@@ -28,14 +28,13 @@ CLAZZ("projects.sprite.SpriteProject", {
     CONSTRUCTOR:function(){
         this.core = CLAZZ.get("projects.sprite.Core", { Pool:this.pool });
 
-        this.colorview = CLAZZ.get();
         var ctx = {
             Pool: this.pool,
             parent: this,
             core:this.core
         };
 
-        this.properties = CLAZZ.get("projects.sprite.SpriteProperties", ctx);
+        this.properties = CLAZZ.get("projects.sprite.Properties", ctx);
         this.framesview = CLAZZ.get("projects.sprite.Frames", ctx);
         this.filtersview = CLAZZ.get("projects.sprite.Filters", ctx);
     },
@@ -49,7 +48,7 @@ CLAZZ("projects.sprite.SpriteProject", {
     		this.core.loadTools( projects.sprite.tools );
     		this.core.addFrame(0, false, true);
     		this.core.addLayer(false, true);
-            
+
             if( this.path ) this.core.loadImage( this.path );
     		else this.core.push();
 

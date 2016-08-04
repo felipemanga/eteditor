@@ -149,16 +149,20 @@ CLAZZ("dialogues.HTMLDialogue", {
     },
 
     setHeight:function(height){
-        this.DOM.windowframecontents[0].style.height = height + "px";
+        this.height = height || 0;
+        this.DOM.windowframecontents[0].style.height = this.height + "px";
     },
 
     setWidth:function(width){
-        this.DOM.windowframecontents[0].style.width = width + "px";
+        this.width = width || 0;
+        this.DOM.windowframecontents[0].style.width = this.width + "px";
     },
 
     setSize:function(width, height){
-        this.DOM.windowframecontents[0].style.height = height + "px";
-        this.DOM.windowframecontents[0].style.width = width + "px";
+        this.height = height || 0;
+        this.width = width || 0;
+        this.DOM.windowframecontents[0].style.height = this.height + "px";
+        this.DOM.windowframecontents[0].style.width = this.width + "px";
     },
 
     moveTo:function(x, y){
