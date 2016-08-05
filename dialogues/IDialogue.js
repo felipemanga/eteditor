@@ -2,7 +2,8 @@ CLAZZ("dialogues.IDialogue", {
 	INJECT:{
 		app:"app",
 		controller:"controller",
-		cfg:"cfg"
+		cfg:"cfg",
+		parent:"parent"
 	},
 
 	cfg:{},
@@ -20,19 +21,21 @@ CLAZZ("dialogues.IDialogue", {
     __loadedChildrenCount:0,
     children:null,
     parent:null,
-	enabled:false,
+	enabled:true,
 	width:0,
 	height:0,
 
-	CONSTRUCTOR:function(opt){
+	CONSTRUCTOR:function(){
 		this.children = [];
-
-		this.parent = this.cfg.parent;
-
 		this.app.add(this);
 		this.app.add(this.controller);
 
 		dialogues.IDialogue.instances.push(this);
+
+		if( this.parent ) this.parent.children.push(this);
+		if( !this.cfg ) debugger;
+
+		if( "enabled" in this.cfg ) this.enabled = this.cfg.enabled;
 
 		setTimeout(
 			this.loadLayout.bind(
@@ -142,7 +145,7 @@ CLAZZ("dialogues.IDialogue", {
 
 	onLoad:function(){
 		this.__onLoadQueued = false;
-		this.raise("DIALOGUE", "load", 1)
+		this.raise("DIALOGUE", "load")
 	},
 
 	canClose:function(){

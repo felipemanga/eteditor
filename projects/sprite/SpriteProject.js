@@ -17,6 +17,7 @@ CLAZZ("projects.sprite.SpriteProject", {
         settings:RESOLVE("settings.projects.sprite.SpriteProject")
     },
 
+    DOM:null,
     core:null,
     properties:null,
     framesview:null,
@@ -26,11 +27,13 @@ CLAZZ("projects.sprite.SpriteProject", {
     zoom:1,
 
     CONSTRUCTOR:function(){
-        this.core = CLAZZ.get("projects.sprite.Core", { Pool:this.pool });
+        this.pool.add(this);
+        this.core = CLAZZ.get("projects.sprite.Core", { Pool:this.pool, main:this });
 
         var ctx = {
             Pool: this.pool,
-            parent: this,
+            parent: this.dialogue,
+            main:this,
             core:this.core
         };
 
@@ -39,12 +42,14 @@ CLAZZ("projects.sprite.SpriteProject", {
         this.filtersview = CLAZZ.get("projects.sprite.Filters", ctx);
     },
 
-    $DIALOG:{
+    $DIALOGUE:{
         load:function(){
             this.toolStack = [];
+            this.DOM = this.dialogue.DOM;
             this.core.DOM = this.dialogue.DOM;
             this.core.width = this.settings.width || 64;
             this.core.height = this.settings.height || 64;
+
     		this.core.loadTools( projects.sprite.tools );
     		this.core.addFrame(0, false, true);
     		this.core.addLayer(false, true);
@@ -52,23 +57,17 @@ CLAZZ("projects.sprite.SpriteProject", {
             if( this.path ) this.core.loadImage( this.path );
     		else this.core.push();
 
-            this.DOM.attach( this.win.window, this.WINDOW, this );
-            this.DOM.stack.style.top = Math.round(this.win.appWindow.innerBounds.height*0.5 - this.core.height*0.5)+"px";
-            this.DOM.stack.style.left = Math.round(this.win.appWindow.innerBounds.width*0.5 - this.core.width*0.5)+"px";
+            var DOM = this.dialogue.DOM;
+            DOM.stack.style.top = Math.round(this.dialogue.height*0.5 - this.core.height*0.5)+"px";
+            DOM.stack.style.left = Math.round(this.dialogue.width*0.5 - this.core.width*0.5)+"px";
         }
     },
-
-	onLoadTools:function( tools ){
-		Object.keys(tools).forEach( k => {
-			this.inject( tools[k] );
-		} );
-	},
 
 	layers:null,
 
 	onUpdateLayers:function( layers, active ){
 		this.layers = layers;
-		MAR.removeChildren( this.DOM.stack );
+		DOC.removeChildren( this.DOM.stack );
 		layers.forEach(l => {
 			if( !l.enabled ) return;
 			this.DOM.stack.appendChild( l.canvas );
@@ -85,7 +84,7 @@ CLAZZ("projects.sprite.SpriteProject", {
 				console.warn("Missing frame composite!");
 				return;
 			}
-			MAR.remove( frame.composite );
+			DOC.remove( frame.composite );
 			if( frame != this.layers && frame.composite.canvas.style.display != "none" )
 				this.DOM.stack.appendChild( frame.composite.canvas );
 		});
@@ -136,7 +135,7 @@ CLAZZ("projects.sprite.SpriteProject", {
 			outw = cols * this.core.width;
 
 			var comp = this.DOM.create("canvas", {width:outw, height:outh});
-			MAR.remove(comp);
+			DOC.remove(comp);
 			var ctx = comp.getContext("2d");
 			var arr = {};
 
@@ -221,7 +220,7 @@ CLAZZ("projects.sprite.SpriteProject", {
 
         if( this.toolStack.length > 3 ) this.toolStack.shift();
 
-		this.DOM.activeTool.textContent = MAR.TEXT( tool.constructor.NAME || tool.constructor.name );
+		this.DOM.activeTool.textContent = DOC.TEXT( tool.constructor.NAME || tool.constructor.name );
 		this.DOM.activeTool.style.display = "initial";
 
 		if( this.clearToolHnd ) clearTimeout( this.clearToolHnd );
@@ -378,7 +377,7 @@ CLAZZ("projects.sprite.SpriteProject", {
 
 	disableTool:false,
 
-    WINDOW:{
+    $WINDOW:{
         mousewheel:function(evt){
             if( evt.wheelDelta > 0 ) this.zoom *= 2;
             else this.zoom *= 0.5;

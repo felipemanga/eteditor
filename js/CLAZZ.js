@@ -7,7 +7,7 @@
         if( path[0] == "this" ) i++;
 
         if( write === undefined ){
-            for( ; i<path.length; ++i )
+            for( ; ctx && i<path.length; ++i )
     			ctx=ctx[path[i]];
             return ctx;
         }else{
@@ -50,8 +50,14 @@
     			}});
     			Object.defineProperties(this, desc);
 
-    			for( var k in injects )
-    				this[k] = CLAZZ.get( injects[k], null, this, this[k] );
+    			try{
+                    for( var k in injects )
+                        this[k] = CLAZZ.get( injects[k], null, this, this[k] );
+    			}catch(ex){
+    			    if( ex instanceof BindingError )
+    			        throw new BindingError(ex.message + " instancing clazz " + name);
+    			    throw(ex);
+    			}
     		}
 
     		if( clazz.CONSTRUCTOR )
@@ -312,6 +318,13 @@
     	return CLAZZ.set;
     };
 
+    function BindingError(msg){
+        Error.call(this, msg);
+        this.message = msg;
+    }
+
+    BindingError.prototype = Object.create(Error.prototype);
+
     CLAZZ.get = function( m, context, THIS, def ){
     	var name;
     	if( typeof m == "string" ) name = m;
@@ -335,8 +348,8 @@
     	}while( !bind && --ctxId>-1 );
 
     	if( !bind ){
-    		if( def == undefined )
-    			throw ("Binding not found: " + name);
+    		if( def === undefined )
+    			throw new BindingError("Binding not found: " + name);
     		else return def;
     	}
 

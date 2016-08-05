@@ -13,9 +13,21 @@ implements
     ("Color", "js.Color")
     ("Pool", "DOC.Pool")
     ("projects.IProject", "projects.minijs.MiniJSProject")
-    ("projects.IProject", "projects.sprite.SpriteProject")
     ("io.compressors.FileCompressor", "io.compressors.PNCCompressor")
     ("io.compressors.FileCompressor", "io.compressors.ZIPCompressor")
+
+    ("projects.IProject", "projects.sprite.SpriteProject")
+    ("projects.sprite.ILayer", "projects.sprite.Layer")
+    ("popups.brushpicker.IBrushPicker", "popups.brushpicker.BrushPicker")
+    ("projects.sprite.ITool", "projects.sprite.tools.Dropper")
+    ("projects.sprite.ITool", "projects.sprite.tools.Eraser")
+    ("projects.sprite.ITool", "projects.sprite.tools.Fill")
+    ("projects.sprite.ITool", "projects.sprite.tools.Hand")
+    ("projects.sprite.ITool", "projects.sprite.tools.Move")
+    ("projects.sprite.ITool", "projects.sprite.tools.Pencil")
+    ("projects.sprite.ITool", "projects.sprite.tools.Select")
+
+
 
 
 singleton

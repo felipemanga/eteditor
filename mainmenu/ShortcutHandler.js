@@ -1,4 +1,7 @@
 CLAZZ("mainmenu.ShortcutHandler", {
+    PROVIDES:{
+        "shortcutHandler":"singleton"
+    },
     INJECT:{
         app:"app",
         main:"main",
@@ -33,7 +36,7 @@ CLAZZ("mainmenu.ShortcutHandler", {
     clearKeysHandle:0,
 	__onKey:function(evt){
 		if( !this.keys ) this.keys = [];
-		
+
 		var down = evt.type == "keydown";
 		var keyCode = evt.keyCode || evt.which;
 

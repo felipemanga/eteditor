@@ -1,8 +1,12 @@
 CLAZZ("projects.sprite.tools.Eraser", {
-    app:null,
-	
-	"@win":{dialogue:"dialogues.BrushPicker"},
-	win:null,
+    INJECT:{
+        core:"core",
+        pool:"Pool",
+        main:"main",
+        win:INJECT("popups.brushpicker.BrushPicker", {
+            tool:INJECT("this")
+        })
+    },
 
 	priority:-1,
 
@@ -10,17 +14,17 @@ CLAZZ("projects.sprite.tools.Eraser", {
 
     lastPixelX:-1,
     lastPixelY:-1,
-	
+
     activate:function(){
     	this.win.enable();
-        this.app.app.DOM.stack.style.cursor = "crosshair";
+        this.main.DOM.stack.style.cursor = "crosshair";
     },
 
     deactivate:function(){
     	this.win.disable();
-        this.app.app.DOM.stack.style.cursor = "initial";
+        this.main.DOM.stack.style.cursor = "initial";
     },
-	
+
     pixel:function( layer, x, y, z ){
 		var redraw;
     	if( !this.brush ){
@@ -47,7 +51,7 @@ CLAZZ("projects.sprite.tools.Eraser", {
     		if( z == 0 ) return;
 			var wy = y*lw, wby = by*bw, wty = ty*lw;
 			redraw = wy<wty && x<tx;
-			
+
     		for( ; wy<wty; wy += lw, wby += bw ){
     			for( var ix=x, ibx=bx; ix<tx; ++ix, ++ibx ){
     				var bi = (wby+ibx)*4;
@@ -56,7 +60,7 @@ CLAZZ("projects.sprite.tools.Eraser", {
 					if( fa==1 ){
 						ld[i] = ld[i+1] = ld[i+2] = 0;
 					}
-   					// this.app.color.write( layer, ix, y, L );
+   					// this.core.color.write( layer, ix, y, L );
     			}
     		}
     	}
@@ -72,13 +76,13 @@ CLAZZ("projects.sprite.tools.Eraser", {
 		var iy = (dy > 0) - (dy < 0);
 		dx = Math.abs(dx) << 1;
 		dy = Math.abs(dy) << 1;
-	 
+
 		redraw = pixel(x1, y1, z) || redraw;
-	 
+
 		if( dx >= dy )
 		{
 			var error = dy - (dx >> 1);
-	 
+
 			while( x1 != x2 )
 			{
 				if ((error >= 0) && (error || (ix > 0)))
@@ -86,17 +90,17 @@ CLAZZ("projects.sprite.tools.Eraser", {
 					error -= dx;
 					y1 += iy;
 				}
-	 
+
 				error += dy;
 				x1 += ix;
-	 
+
 				redraw = pixel(x1, y1, z) || redraw;
 			}
 		}
 		else
 		{
 			var error = dx - (dy >> 1);
-	 
+
 			while (y1 != y2)
 			{
 				if ((error >= 0) && (error || (iy > 0)))
@@ -104,10 +108,10 @@ CLAZZ("projects.sprite.tools.Eraser", {
 					error -= dy;
 					x1 += ix;
 				}
-	 
+
 				error += dx;
 				y1 += iy;
-	 
+
 				redraw = pixel(x1, y1, z) || redraw;
 			}
 		}
@@ -116,7 +120,7 @@ CLAZZ("projects.sprite.tools.Eraser", {
 
     goTo:function( layer, x, y, z ){
 		var redraw;
-        if( this.app.color ){
+        if( this.core.color ){
 
             if( this.lastPixelX != -1 ) redraw = this.line( layer, this.lastPixelX, this.lastPixelY, x, y, z );
             else redraw = this.pixel( layer, x, y, z );
@@ -137,7 +141,7 @@ CLAZZ("projects.sprite.tools.Eraser", {
     },
 
     up:function(layer, x, y, z){
-        this.app.push();
+        this.core.push();
         this.lastPixelX = -1;
         this.lastPixelY = -1;
         return true;

@@ -6,9 +6,10 @@ CLAZZ("projects.sprite.Properties", {
         }),
         core:"core",
         pool:"Pool",
-        parent:"parent"
+        main:"parent"
     },
 
+    DOM:null,
 	layerEls:null,
 
     CONSTRUCTOR:function(){
@@ -17,11 +18,13 @@ CLAZZ("projects.sprite.Properties", {
     },
 
     // onSave:null,
-
-    onLoad:function(){
-        var area = this.dialogue.getAvailArea();
-        this.dialogue.moveTo( area.width-this.dialogue.width, area.height-this.dialogue.height );
-    },
+	$DIALOGUE:{
+		load:function(){
+            this.DOM = this.dialogue.DOM;
+			var area = this.dialogue.getAvailArea();
+			this.dialogue.moveTo( area.width-this.dialogue.width, area.height-this.dialogue.height );
+		}
+	},
 
 	call:function(name){
 		var args = Array.prototype.slice.call(arguments);
@@ -30,24 +33,24 @@ CLAZZ("projects.sprite.Properties", {
 	},
 
 	onLoadTools:function(tools){
-		MAR.removeChildren( this.DOM.tools );
+		DOC.removeChildren( this.DOM.tools );
 
         this.DOM.create("div", {
-            text:MAR.TEXT("Filters"),
+            text:DOC.TEXT("Filters"),
             onclick:this.toggleView.bind(this, "filtersview")
         }, this.DOM.tools);
 
         this.DOM.create("div", {
-            text:MAR.TEXT("Frames"),
+            text:DOC.TEXT("Frames"),
             onclick:this.toggleView.bind(this, "framesview")
         }, this.DOM.tools);
 
 		this.DOM.create("div", {
-			text:MAR.TEXT("Reference"),
+			text:DOC.TEXT("Reference"),
 			onclick:this.toggleReference.bind(this)
 		}, this.DOM.tools);
 
-        this.DOM.create("span", this.DOM.tools, {text:MAR.TEXT("Brushes:"), className:"label"});
+        this.DOM.create("span", this.DOM.tools, {text:DOC.TEXT("Brushes:"), className:"label"});
 
 		var toolA = null, toolB = null, THAT=this;
 		Object.sort(tools).forEach( (k) => {
@@ -57,7 +60,7 @@ CLAZZ("projects.sprite.Properties", {
 			else if( !toolB ) toolB = tool;
 
             this.DOM.create("div", {
-                text:MAR.TEXT(k),
+                text:DOC.TEXT(k),
 				id: "tool_" + k,
                 onclick:this.call("setTool", tool)
             }, this.DOM.tools);
@@ -71,19 +74,19 @@ CLAZZ("projects.sprite.Properties", {
             this.pool.add(listener);
 		});
 
-		this.parent.toolStack = [toolB];
+		this.main.toolStack = [toolB];
 		this.pool.call("setTool", toolA);
 	},
 
 	onUpdateLayers:function( layers, active ){
-		this.layerEls.forEach( l => MAR.remove(l) );
+		this.layerEls.forEach( l => DOC.remove(l) );
 		if( !layers ){
 			alert( (new Error()).stack );
 			return;
 		}
 		if( active ){
-			this.DOM.canvasWidth.value = this.parent.core.width;
-			this.DOM.canvasHeight.value = this.parent.core.height;
+			this.DOM.canvasWidth.value = this.core.width;
+			this.DOM.canvasHeight.value = this.core.height;
 		}
 		layers.forEach( l =>{
 			var el = this.createLayerElement(l);
@@ -96,8 +99,8 @@ CLAZZ("projects.sprite.Properties", {
     },
 
     toggleView:function(view){
-		if( this.parent[view] )
-			this.parent[view].toggleEnabled();
+		if( this.main[view] )
+			this.main[view].toggleEnabled();
 		else
 			alert("view " + view + " not found.");
     },
@@ -107,7 +110,7 @@ CLAZZ("projects.sprite.Properties", {
 		this.hasRef = !this.hasRef;
 		var THIS=this;
 		if( this.hasRef ){
-			MAR.create("input", {
+			DOC.create("input", {
 				type:"file",
 				onchange:function(e){
 					if( !e.target.files.length ) return;
@@ -120,46 +123,46 @@ CLAZZ("projects.sprite.Properties", {
 	},
 
 
-    btnResample:{
+    $btnResample:{
         click:function(){
             this.pool.call("setCanvasSize",
-                this.DOM.canvasWidth.value = parseInt(this.DOM.canvasWidth.value) || this.parent.width,
-                this.DOM.canvasHeight.value = parseInt(this.DOM.canvasHeight.value) || this.parent.height,
+                this.DOM.canvasWidth.value = parseInt(this.DOM.canvasWidth.value) || this.core.width,
+                this.DOM.canvasHeight.value = parseInt(this.DOM.canvasHeight.value) || this.core.height,
 				true
             );
         }
     },
 
-    btnCrop:{
+    $btnCrop:{
         click:function(){
             this.pool.call("setCanvasSize",
-                this.DOM.canvasWidth.value = parseInt(this.DOM.canvasWidth.value) || this.parent.width,
-                this.DOM.canvasHeight.value = parseInt(this.DOM.canvasHeight.value) || this.parent.height
+                this.DOM.canvasWidth.value = parseInt(this.DOM.canvasWidth.value) || this.core.width,
+                this.DOM.canvasHeight.value = parseInt(this.DOM.canvasHeight.value) || this.core.height
             );
         }
     },
 
-    canvasWidth:{
+    $canvasWidth:{
         change:function(){
-			this.DOM.canvasWidth.value = parseInt(this.DOM.canvasWidth.value) || this.parent.width;
-			this.DOM.canvasHeight.value = parseInt(this.DOM.canvasHeight.value) || this.parent.height;
+			this.DOM.canvasWidth.value = parseInt(this.DOM.canvasWidth.value) || this.core.width;
+			this.DOM.canvasHeight.value = parseInt(this.DOM.canvasHeight.value) || this.core.height;
         }
     },
 
-    canvasHeight:{
+    $canvasHeight:{
         change:function(){
-			this.DOM.canvasWidth.value = parseInt(this.DOM.canvasWidth.value) || this.parent.width;
-			this.DOM.canvasHeight.value = parseInt(this.DOM.canvasHeight.value) || this.parent.height;
+			this.DOM.canvasWidth.value = parseInt(this.DOM.canvasWidth.value) || this.core.width;
+			this.DOM.canvasHeight.value = parseInt(this.DOM.canvasHeight.value) || this.core.height;
         }
     },
 
     createLayerElement:function( layer ){
-        var el = MAR.create("div", { id: layer.__uid, before:this.DOM.layerList.firstChild }, [
+        var el = DOC.create("div", { id: layer.__uid, before:this.DOM.layerList.firstChild }, [
             ["button", { text:"▲", className:"layerCtrl up", onclick:this.call("moveLayer", layer, 1) }],
             ["button", { text:"▼", className:"layerCtrl down", onclick:this.call("moveLayer", layer, -1)}],
             ["button", { text:layer.enabled ? "●" : "◌", className:"layerCtrl enabled", onclick:this.call("toggleLayer", layer)}],
             ["span", {
-                text:MAR.TEXT(layer.name),
+                text:DOC.TEXT(layer.name),
                 className:"layerLabel",
                 onclick:this.call("setLayer", layer)
             }],
@@ -196,48 +199,48 @@ CLAZZ("projects.sprite.Properties", {
         this.properties.DOM.canvasHeight.value = this.height;
 	},
 
-	inpLayerName:{
+	$inpLayerName:{
 		change:function( evt ){
-			var layer = this.parent.core.activeLayer;
+			var layer = this.core.activeLayer;
 			if( layer ){
 				layer.name = evt.target.value.trim() || "Layer";
-				this.onUpdateLayers( this.parent.core.layers, layer );
+				this.onUpdateLayers( this.core.layers, layer );
 			}
 		}
 	},
 
-    inpLayerAlpha:{
+    $inpLayerAlpha:{
         change:function(){
             this.call("setLayerAlpha", parseInt(this.DOM.inpLayerAlpha.value)/100 )();
             this.DOM.inpLayerAlphaLabel.textContent = this.DOM.inpLayerAlpha.value;
         }
     },
 
-	layerBlending:{
+	$layerBlending:{
 		change:function(){
 			this.call( "setLayerBlending", this.DOM.layerBlending.value )();
 		}
 	},
 
-    btnAddLayer:{
+    $btnAddLayer:{
         click:function(){
-            this.parent.addLayer();
+            this.main.addLayer();
         }
     },
 
-    btnDuplicateLayer:{
+    $btnDuplicateLayer:{
 		click:function(){
-			this.parent.addLayer(true);
+			this.main.addLayer(true);
 		}
     },
 
-    btnMergeLayer:{
+    $btnMergeLayer:{
 		click:function(){
 			this.call("mergeLayer")();
 		}
     },
 
-    btnFlatten:{
+    $btnFlatten:{
 		click:function(){
 			this.call("flattenLayers")();
 		}

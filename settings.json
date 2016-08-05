@@ -127,6 +127,7 @@
             "Frames":{
                 "dialogue":{
         			"show":false,
+                    "enabled":false,
         			"width":600,
         			"height":235,
         			"always_on_top": true,
@@ -137,14 +138,54 @@
                 "dialogue":{
         			"width":800,
         			"show":false,
+                    "enabled":false,
         			"always_on_top": true,
         			"title":"Filters"
         		}
             }
         }
 
+    },
 
+    "popups":{
+        "brushpicker":{
+            "brushes":[
+                "popups/brushpicker/brushes/box-32px.png",
+                "popups/brushpicker/brushes/box-3px.png",
+                "popups/brushpicker/brushes/box-4px.png",
+                "popups/brushpicker/brushes/box-6px.png",
+                "popups/brushpicker/brushes/circle-32px.png",
+                "popups/brushpicker/brushes/circle-3px.png",
+                "popups/brushpicker/brushes/circle-4px.png",
+                "popups/brushpicker/brushes/circle-5px.png",
+                "popups/brushpicker/brushes/circle-64px.png",
+                "popups/brushpicker/brushes/circle-6px.png",
+                "popups/brushpicker/brushes/circle-7px.png",
+                "popups/brushpicker/brushes/circle-8px.png",
+                "popups/brushpicker/brushes/circle-9px.png",
+                "popups/brushpicker/brushes/dither 1.png.json",
+                "popups/brushpicker/brushes/dither 2.png.json",
+                "popups/brushpicker/brushes/dither 3.png.json",
+                "popups/brushpicker/brushes/dither 4.png.json",
+                "popups/brushpicker/brushes/hollow 1.png",
+                "popups/brushpicker/brushes/hollow 2.png",
+                "popups/brushpicker/brushes/man 8px.png",
+                "popups/brushpicker/brushes/man big.png",
+                "popups/brushpicker/brushes/noise-128px-2.png",
+                "popups/brushpicker/brushes/noise-32px-2.png",
+                "popups/brushpicker/brushes/noise-32px.png",
+                "popups/brushpicker/brushes/noise-512px.png",
+                "popups/brushpicker/brushes/noise-64px-2.png",
+                "popups/brushpicker/brushes/noise-64px.png",
+                "popups/brushpicker/brushes/soft-16px.png",
+                "popups/brushpicker/brushes/soft-32px.png",
+                "popups/brushpicker/brushes/soft-4px.png",
+                "popups/brushpicker/brushes/soft-64px.png",
+                "popups/brushpicker/brushes/soft-8px.png",
+                "popups/brushpicker/brushes/wacky-1.png",
+                "popups/brushpicker/brushes/wacky-2.png"
+            ]
+        }
     }
-
 
 }

@@ -183,6 +183,8 @@ CLAZZ("dialogues.HTMLDialogue", {
 			var always_on_top = opt.always_on_top == undefined ? false : opt.always_on_top;
 			var show = this.isVisible = (opt.show == undefined ? true : opt.show);
 			var width = opt.width || 400, height = opt.height || 300;
+            this.width = width;
+            this.height = height;
 
             var el = DOC.create("div", document.body, {
 				className:"windowframe",

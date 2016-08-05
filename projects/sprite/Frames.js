@@ -73,9 +73,11 @@ CLAZZ("projects.sprite.Frames", {
 	hnd:-1,
 	context:null,
 
-	onLoad:function(){
-		this.win.moveTo(210, 50);
-		this.context = this.DOM.cnvPreview.getContext('2d');
+	$DIALOGUE:{
+		load:function(){
+			this.dialogue.moveTo(210, 50);
+			this.context = this.dialogue.DOM.cnvPreview.getContext('2d');
+		}
 	},
 
 	onUpdateFrames:function( frames, current ){
@@ -142,14 +144,14 @@ CLAZZ("projects.sprite.Frames", {
 		this.context.drawImage( this.frames[pos].composite.canvas, 0, 0 );
 	},
 
-	btnTogglePlay:{
+	$btnTogglePlay:{
 		click:function(){
 			if( this.hnd != -1 ) this.stop();
 			else this.play();
 		}
 	},
 
-	inpFrameRate:{
+	$inpFrameRate:{
 		change:function(){
 			var fps = parseInt(this.DOM.inpFrameRate.value)||1;
 			this.DOM.inpFrameRate.value = fps;
@@ -158,7 +160,7 @@ CLAZZ("projects.sprite.Frames", {
 		}
 	},
 
-	btnAddFrame:{
+	$btnAddFrame:{
 		click:function(){
 			this.pool.call("addFrame", this.frames.indexOf(this.current)+1, false );
 		}
@@ -168,13 +170,13 @@ CLAZZ("projects.sprite.Frames", {
 		this.pool.call("addFrame", this.frames.indexOf(this.current)+1, true );
 	},
 
-	btnDupFrame:{
+	$btnDupFrame:{
 		click:function(){
 			this.dupFrame();
 		}
 	},
 
-	btnDelFrame:{
+	$btnDelFrame:{
 		click:function(){
 			this.pool.call("removeFrame", this.current);
 		}

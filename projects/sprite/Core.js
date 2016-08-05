@@ -1,8 +1,9 @@
 CLAZZ("projects.sprite.Core", {
 	INJECT:{
 		app:"app",
+		main:"main",
 		pool:"Pool",
-		"color":"PrimaryColor"
+		color:"PrimaryColor"
 	},
 
     tools:null,
@@ -23,8 +24,6 @@ CLAZZ("projects.sprite.Core", {
 
 	DOM:null,
 
-	pool:null,
-
 	opMap:{
 		"normal" : "source-over"
 	},
@@ -33,7 +32,7 @@ CLAZZ("projects.sprite.Core", {
 		this.pool.silence("onUpdateLayers");
 		this.pool.silence("onUpdateFrames");
 		this.pool.add(this);
-        if( !this.color ) this.color = new Color(0,0,0,0xFF);
+        if( !this.color ) this.color = new js.Color(0,0,0,0xFF);
         this.tools   = {};
 		this.frames  = [];
         this.history = [];
@@ -54,10 +53,11 @@ CLAZZ("projects.sprite.Core", {
 	loadTools:function( toolset ){
         this.tools = {};
 		Object.keys(toolset).forEach(k => {
-			var Tool = toolset[k];
-			var tool = new Tool( this );
-			tool.app = this;
-			this.tools[ k ] = tool;
+			this.tools[ k ] = CLAZZ.get(toolset[k].fullName, {
+				pool:this.pool,
+				core:this,
+				main:this.main
+			});
 		});
 
 		this.pool.call("onLoadTools", this.tools);
