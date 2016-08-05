@@ -1,5 +1,6 @@
 CLAZZ("dialogues.IDialogue", {
 	INJECT:{
+		mainmenu:"mainmenu",
 		app:"app",
 		controller:"controller",
 		cfg:"cfg",
@@ -24,6 +25,7 @@ CLAZZ("dialogues.IDialogue", {
 	enabled:true,
 	width:0,
 	height:0,
+	window:null,
 
 	CONSTRUCTOR:function(){
 		this.children = [];
@@ -54,6 +56,7 @@ CLAZZ("dialogues.IDialogue", {
 			else this.__onLoadQueued = true;
 		}catch(ex){
 			alert(ex + "\n" + ex.stack);
+			throw(ex);
 		}
 		try{
 			var parent = this.parent;
@@ -67,25 +70,27 @@ CLAZZ("dialogues.IDialogue", {
 			}else this.__onFocus();
 		}catch(ex){
 			alert(ex + "\n" + ex.stack);
+			throw(ex);
 		}
 	},
 
     enable:function(){
     	this.enabled = true;
-    	this.onToggleMenu( main.toggle );
+    	this.onToggleMenu( this.mainmenu.toggle );
 	},
 
 	disable:function(){
     	this.enabled = false;
-    	this.onToggleMenu( main.toggle );
+    	this.onToggleMenu( this.mainmenu.toggle );
 	},
 
 	toggleEnabled:function(){
 		this.enabled = !this.enabled;
-		this.onToggleMenu(main.toggle);
+		this.onToggleMenu(this.mainmenu.toggle);
 	},
 
     onToggleMenu:function(visible){
+		this.raise("DIALOGUE", "toggleMenu", visible);
         if( !this.parent ) return;
         if( visible && this.enabled ) this.__show();
         else this.__hide();
@@ -134,13 +139,21 @@ CLAZZ("dialogues.IDialogue", {
 
 	raise:function(scope, event){
 		scope = DOC.attachPrefix + scope;
-		return this.controller &&
+		var func = this.controller &&
 		this.controller[scope] &&
 		this.controller[scope][event] &&
-		this.controller[scope][event].apply(
+		this.controller[scope][event];
+
+		if( func ) return func.apply(
 			this.controller,
 			Array.prototype.splice.call(arguments, 2, arguments.length-2)
 		);
+
+		if( this.controller.pool )
+			return this.controller.pool.call.apply(
+				this.controller.pool,
+				[event].concat( Array.prototype.splice.call(arguments, 2, arguments.length-2) )
+			);
 	},
 
 	onLoad:function(){

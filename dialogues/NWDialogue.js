@@ -77,13 +77,14 @@ CLAZZ("dialogues.NWDialogue", {
 			win.on( 'loaded', function(){
 				// alert("loaded " + THIS.constructor.NAME );
 				var w = win.window;
+                THIS.window = w;
 				w.addEventListener( 'focus', THIS.__onFocus.bind(THIS) );
 				w.addEventListener( 'blur', THIS.__onBlur.bind(THIS) );
 				w.addEventListener( 'keydown', main.__onKey.bind(main) );
 				w.addEventListener( 'keyup', main.__onKey.bind(main) );
-				w.onerror = main.win.window.onerror;
+				w.onerror = self.onerror;
 
-                THIS.__onDOMReady( win.window.document.body );
+                THIS.__onDOMReady( w.document.body );
 			});
 
 			win.on( 'close', THIS.onClose.bind(THIS) );

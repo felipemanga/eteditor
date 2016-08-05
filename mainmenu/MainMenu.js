@@ -11,7 +11,7 @@ CLAZZ("mainmenu.MainMenu", {
             cfg:INJECT("mainmenuCfg")
         }),
 
-        shortcutHandler:INJECT("mainmenu.ShortcutHandler", {
+        shortcutHandler:INJECT("shortcutHandler", {
         	"main":RESOLVE("this")
         }),
 

@@ -13,6 +13,7 @@ CLAZZ("dialogues.HTMLDialogue", {
     CONSTRUCTOR:function(opt){
         SUPER(opt);
         dialogues.HTMLDialogue.focusZ++;
+        this.window = window;
     },
 
     $windowframeheader_btnCloseWindow:{
@@ -96,10 +97,10 @@ CLAZZ("dialogues.HTMLDialogue", {
 
         if( this.isResizing ){
             if( this.isResizing.indexOf("V") != -1 )
-                this.setHeight( this.DOM.windowframecontents[0].clientHeight + dy );
+                this.setHeight( this.DOM.windowframecontents[0].offsetHeight + dy );
 
             if( this.isResizing.indexOf("H") != -1 )
-                this.setWidth( this.DOM.windowframecontents[0].clientWidth + dx );
+                this.setWidth( this.DOM.windowframecontents[0].offsetWidth + dx );
         }
 
         this.moveRefY = point.screenY;
@@ -208,11 +209,11 @@ CLAZZ("dialogues.HTMLDialogue", {
     					resize: resizable?"both":"none"
                     }
                 }, [
-                	["div", {id:"BODY"}, html.children]
+                	["embed-body", {id:"BODY"}, html.children]
                 ]],
-                (!frame||!resizable)?null:["div", {className:"windowframe_vresize"}],
-                (!frame||!resizable)?null:["div", {className:"windowframe_hresize"}],
-                (!frame||!resizable)?null:["div", {className:"windowframe_vhresize"}]
+                (!frame||!resizable)?undefined:["div", {className:"windowframe_vresize"}],
+                (!frame||!resizable)?undefined:["div", {className:"windowframe_hresize"}],
+                (!frame||!resizable)?undefined:["div", {className:"windowframe_vhresize"}]
             ]);
 
             this.DOM = DOC.index( el, null, this.controller );

@@ -28,6 +28,7 @@
             "SpriteProject":{
                 "dialogue":{
                     "title":"Sprite",
+                    "position":"center",
                     "menu":{
                         "undo":{
                             "shortcut":[17, "Z"]
@@ -121,6 +122,7 @@
                 "dialogue":{
                     "height": 580,
                     "show": false,
+                    "hide_only": true,
                     "always_on_top":true
                 }
             },
@@ -148,6 +150,9 @@
     },
 
     "popups":{
+        "colorpicker":{
+            "palette":""
+        },
         "brushpicker":{
             "brushes":[
                 "popups/brushpicker/brushes/box-32px.png",

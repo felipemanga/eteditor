@@ -17,7 +17,7 @@
         }
     }
 
-    var dibindings = [{}], nextUID=1;
+    var dibindings = [{}], nextUID=1, nextInstanceName, nextInstanceClazz;
 
     var CLAZZ = self.CLAZZ = function CLAZZ( name, clazz ){
     	"use strict";
@@ -38,7 +38,12 @@
             if( this == self )
                 return new (ret.bind.apply(ret, [null].concat( Array.prototype.slice.call(arguments) )));
 
-            ret.instance = this;
+            if( nextInstanceName && nextInstanceClazz === ret ){ 
+                ret.singletons[nextInstanceName] = this;
+                nextInstanceName = null;
+                nextInstanceClazz = null;
+            }
+
     		var isLast = !this.hasOwnProperty('__uid');
     		if( isLast )
     		{
@@ -303,7 +308,16 @@
 
     CLAZZ.singleton = function( name, clazz ){
     	if( typeof clazz == "string" ) clazz = resolve(clazz);
-    	dibindings[dibindings.length-1][ name ] = () => clazz.instance ? clazz.instance : clazz.instance = new clazz();
+        if( !clazz.singletons ) clazz.singletons = {};
+
+        dibindings[dibindings.length-1][ name ] = () => {
+            var inst = clazz.singletons[name];
+            if( inst ) return inst;
+            nextInstanceName = name;
+            nextInstanceClazz = clazz;
+            return clazz.singletons[name] = new clazz();
+        };
+
     	return CLAZZ.singleton;
     };
 

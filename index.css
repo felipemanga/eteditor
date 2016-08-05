@@ -9,22 +9,20 @@ html, body {
     min-height: 100%;
 }
 
-#HTML, #BODY{
+embed-body {
     position: relative;
-    padding: 0; margin: 0;
-}
-
-html, #HTML {
-    overflow: hidden;
-	height: 100%;
-}
-
-#BODY {
+    margin: 0;
+    display: block;
     box-sizing: border-box;
     padding: 8px;
 }
 
-div {
+html {
+    overflow: hidden;
+	height: 100%;
+}
+
+div, embed-body {
     -webkit-user-select: none;
     -ms-user-select: none;
     -moz-user-select: none;

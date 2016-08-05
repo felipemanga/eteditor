@@ -40,6 +40,6 @@ singleton
     ("io.FileSaver", "io.WebFileSaver")
 
     ("app", "DOC.Pool")
-    ("ROOT", "mainmenu.MainMenu")
+    ("mainmenu", "mainmenu.MainMenu")
 
-get("ROOT")
+get("mainmenu")

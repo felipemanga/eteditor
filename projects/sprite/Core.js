@@ -6,12 +6,12 @@ CLAZZ("projects.sprite.Core", {
 		color:"PrimaryColor"
 	},
 
+	selection:null,
     tools:null,
     activeLayer:null,
     activeTool:null,
     color:null,
 
-	selection:null,
     layers:null,
 	frames:null,
 	fps:30,
@@ -54,17 +54,21 @@ CLAZZ("projects.sprite.Core", {
         this.tools = {};
 		Object.keys(toolset).forEach(k => {
 			this.tools[ k ] = CLAZZ.get(toolset[k].fullName, {
-				pool:this.pool,
+				Pool:this.pool,
 				core:this,
-				main:this.main
+				main:this.main,
+				parent:this.main.dialogue
 			});
 		});
-
-		this.pool.call("onLoadTools", this.tools);
 	},
 
 	createLayer:function( hidden ){
-		return new projects.sprite.Layer( this, hidden );
+		var layer = CLAZZ.get("projects.sprite.Layer", {
+			core:this
+		});
+		if( hidden ) layer.hide();
+
+		return layer;
 	},
 
     setLayer:function(layer, noUndo){

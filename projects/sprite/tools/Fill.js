@@ -1,8 +1,11 @@
 CLAZZ("projects.sprite.tools.Fill", {
-    app:null,
+    INJECT:{
+        color:"PrimaryColor",
+        core:"core"
+    },
 
     pixel:function( layer, x, y, z ){
-        this.app.color.write( layer, x, y, z );
+        this.color.write( layer, x, y, z );
     },
 
     read:function( layer, x, y ){
@@ -26,13 +29,13 @@ CLAZZ("projects.sprite.tools.Fill", {
     up:function(layer, x, y, z){
         if( x<0 || x>=layer.width || y<0 || y>=layer.height ) return;
 
-        var color = this.app.color;
+        var color = this.color;
         var w = layer.width, h = layer.height, i, i4, out, w4 = w*4;
         var m = layer.data, m4 = new Int32Array( layer.data.buffer );
-		
+
 		var mask;
-		if( this.app.selection && this.app.selection.enabled ){
-			mask = this.app.selection.data.data;
+		if( this.core.selection && this.core.selection.enabled ){
+			mask = this.core.selection.data.data;
 		}
 
         target = m4[ y*w+x ];
@@ -53,7 +56,7 @@ CLAZZ("projects.sprite.tools.Fill", {
             var cy = queue[ --length ];
             var cx = queue[ --length ];
             var ci = (cy*w+cx)|0;
-			
+
 			if( mask && !mask[ci*4+3] ) continue;
             /* * /
             color.write( layer, x, y, z );
@@ -101,8 +104,8 @@ CLAZZ("projects.sprite.tools.Fill", {
                 }
             }
         }
-        
-        this.app.push();
+
+        this.core.push();
         return true;
     }
 });

@@ -15,6 +15,7 @@ CLAZZ("mainmenu.ShortcutHandler", {
 
     CONSTRUCTOR:function(){
         this.app.add(this);
+        this.keys = [];
     },
 
     onOpenOSWindow:function(window){
@@ -35,8 +36,6 @@ CLAZZ("mainmenu.ShortcutHandler", {
 	keyCount:0,
     clearKeysHandle:0,
 	__onKey:function(evt){
-		if( !this.keys ) this.keys = [];
-
 		var down = evt.type == "keydown";
 		var keyCode = evt.keyCode || evt.which;
 

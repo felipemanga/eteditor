@@ -6,7 +6,7 @@ CLAZZ("projects.sprite.Properties", {
         }),
         core:"core",
         pool:"Pool",
-        main:"parent"
+        main:"main"
     },
 
     DOM:null,
@@ -37,12 +37,12 @@ CLAZZ("projects.sprite.Properties", {
 
         this.DOM.create("div", {
             text:DOC.TEXT("Filters"),
-            onclick:this.toggleView.bind(this, "filtersview")
+            onclick:this.toggleView("filtersview")
         }, this.DOM.tools);
 
         this.DOM.create("div", {
             text:DOC.TEXT("Frames"),
-            onclick:this.toggleView.bind(this, "framesview")
+            onclick:this.toggleView("framesview")
         }, this.DOM.tools);
 
 		this.DOM.create("div", {
@@ -94,15 +94,13 @@ CLAZZ("projects.sprite.Properties", {
 		});
 	},
 
-    onClose:function(){
-        this.win.hide();
-    },
-
     toggleView:function(view){
-		if( this.main[view] )
-			this.main[view].toggleEnabled();
-		else
-			alert("view " + view + " not found.");
+        return ()=>{
+            if( this.main[view] )
+                this.main[view].dialogue.toggleEnabled();
+            else
+                alert("view " + view + " not found.");
+        };
     },
 
 	hasRef:false,

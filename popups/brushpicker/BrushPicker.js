@@ -3,6 +3,7 @@ CLAZZ("popups.brushpicker.BrushPicker", {
         dialogue:INJECT("dialogues.IDialogue", {
             controller:INJECT("this"),
             cfg:{
+				enabled:false,
 				show:false,
 				width: 200,
 				always_on_top: true,
@@ -17,6 +18,7 @@ CLAZZ("popups.brushpicker.BrushPicker", {
 	context:null,
 	defaults:null,
 	DOM:null,
+	active:null,
 
 	CONSTRUCTOR:function(){
 		this.defaults = {};
@@ -32,7 +34,7 @@ CLAZZ("popups.brushpicker.BrushPicker", {
 
 	$DIALOGUE:{
 		load:function(){
-			this.dialogue.moveTo(0,50);
+			this.dialogue.moveTo(128,0);
 			this.DOM = this.dialogue.DOM;
 
 			var THIS=this;
@@ -43,8 +45,7 @@ CLAZZ("popups.brushpicker.BrushPicker", {
 			DOC.remove(this.canvas);
 			this.context = this.canvas.getContext("2d");
 
-			DOM.create("div", {
-				onclick:THIS.setBrush.bind(THIS, 0, null),
+			var el = DOM.create("div", {
 				before:DOM.clear,
 				className:"active",
 				id:"b0"
@@ -52,31 +53,32 @@ CLAZZ("popups.brushpicker.BrushPicker", {
 				["span", { text:DOC.TEXT( "1 Pixel" ) }]
 			]);
 
+			this.active = el;
+			THIS.setBrush.bind(THIS, 0, null, el);
+
 			this.brushes.forEach(( file ) => {
 				var ext = file.match( /.+\.([a-z]+)$/i )[1].toLowerCase();
 				if( ext == "png" ){
 					++id;
 
-					DOM.create("div", {
-						onclick:THIS.setBrush.bind(THIS, id, file),
+					var el = DOM.create("div", {
 						before:DOM.clear,
 						id: "b" + id
 					},[
 						["img", { src:file, id:"brush" + id }],
-						["span", { text:DOC.TEXT( file.replace(/\.[a-z]+$/i, '') ) }]
+						["span", { text:DOC.TEXT( file.replace(/.*?\/|\.[a-z]+$/ig, '') ) }]
 					]);
+					el.onclick = THIS.setBrush.bind(THIS, id, file, el)
 				}
 			});
 		}
 	},
 
-	setBrush:function(id, src){
-		var active = this.DOM.qs(".active");
-		if( active ) active.className = "";
+	setBrush:function(id, src, el){
+		if( this.active ) this.active.className = "";
 
-		active = this.DOM.qs("#b" + id);
-		if(active) active.className = "active";
-		else alert("b" + id);
+		this.active = el;
+		this.active.className = "active";
 
 		if( !id ){
 			this.tool.brush = null;
@@ -84,7 +86,7 @@ CLAZZ("popups.brushpicker.BrushPicker", {
 			return;
 		}
 
-		var img = this.DOM.byId("brush" + id);
+		var img = this.active.querySelector("#brush" + id);
 		if( !img ){
 			console.warn(id, " not found.");
 			return;

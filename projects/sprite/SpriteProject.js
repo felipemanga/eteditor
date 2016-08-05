@@ -28,7 +28,11 @@ CLAZZ("projects.sprite.SpriteProject", {
 
     CONSTRUCTOR:function(){
         this.pool.add(this);
-        this.core = CLAZZ.get("projects.sprite.Core", { Pool:this.pool, main:this });
+        this.core = CLAZZ.get("projects.sprite.Core", {
+            Pool:this.pool,
+            main:this,
+            parent:this.dialogue
+        });
 
         var ctx = {
             Pool: this.pool,
@@ -40,6 +44,8 @@ CLAZZ("projects.sprite.SpriteProject", {
         this.properties = CLAZZ.get("projects.sprite.Properties", ctx);
         this.framesview = CLAZZ.get("projects.sprite.Frames", ctx);
         this.filtersview = CLAZZ.get("projects.sprite.Filters", ctx);
+
+        this.core.loadTools( projects.sprite.tools );
     },
 
     $DIALOGUE:{
@@ -50,7 +56,10 @@ CLAZZ("projects.sprite.SpriteProject", {
             this.core.width = this.settings.width || 64;
             this.core.height = this.settings.height || 64;
 
-    		this.core.loadTools( projects.sprite.tools );
+            console.log(this.pool);
+
+            this.pool.call("onLoadTools", this.core.tools);
+
     		this.core.addFrame(0, false, true);
     		this.core.addLayer(false, true);
 
@@ -195,22 +204,78 @@ CLAZZ("projects.sprite.SpriteProject", {
 		}
     },
 
-	X:function(){
-		if( this.toolStack.length >= 2 ){
-			var current = this.toolStack.pop();
-			var next = this.toolStack.pop();
-			this.toolStack.push( current );
-			this.core.setTool( next );
-		}
-	},
+    $MENU:{
+    	X:function(){
+    		if( this.toolStack.length >= 2 ){
+    			var current = this.toolStack.pop();
+    			var next = this.toolStack.pop();
+    			this.toolStack.push( current );
+    			this.core.setTool( next );
+    		}
+    	},
 
-	undo:function(){
-		this.core.undo();
-	},
+        layerAbove:function(){
+            var pos = this.core.layers.indexOf( this.core.activeLayer );
+            pos = (pos+1) % this.core.layers.length;
+            this.core.setLayer( this.core.layers[pos] );
+        },
 
-	redo:function(){
-		this.core.redo();
-	},
+        layerBelow:function(){
+            var pos = this.core.layers.indexOf( this.core.activeLayer );
+            pos = pos-1;
+            if( pos < 0 ) pos = this.core.layers.length - 1 + pos%this.core.layers.length;
+            this.core.setLayer( this.core.layers[pos] );
+        },
+
+        nextFrame:function(){
+            var pos = this.core.frames.indexOf( this.core.layers );
+            pos = (pos+1) % this.core.frames.length;
+            this.core.setFrame( this.core.frames[pos] );
+        },
+
+        prevFrame:function(){
+            var pos = this.core.frames.indexOf( this.core.layers );
+            pos = pos-1;
+            if( pos < 0 ) pos = this.core.frames.length - 1 + pos%this.core.frames.length;
+            this.core.setFrame( this.core.frames[pos] );
+        },
+
+        moveActiveLayerUp:function(){
+            this.moveLayer( this.core.activeLayer, 1 );
+        },
+
+        moveActiveLayerDown:function(){
+            this.moveLayer( this.core.activeLayer, -1 );
+        },
+
+    	undo:function(){
+    		this.core.undo();
+    	},
+
+    	redo:function(){
+    		this.core.redo();
+    	},
+
+        endHand:function(){
+            if( this.core.activeTool != this.core.tools.Hand )
+            return;
+            if(this.core.activeTool.deactivate) this.core.activeTool.deactivate();
+            this.toolStack.pop();
+            this.core.activeTool = null;
+            this.core.setTool( this.toolStack.pop() );
+            this.dragging = null;
+        },
+
+        endDropper:function(){
+            if( this.core.activeTool != this.core.tools.Dropper )
+            return;
+            if(this.core.activeTool.deactivate) this.core.activeTool.deactivate();
+            this.toolStack.pop();
+            this.core.activeTool = null;
+            this.core.setTool( this.toolStack.pop() );
+            this.dragging = null;
+        }
+    },
 
 	clearToolHnd:0,
     onSetTool:function(tool){
@@ -232,37 +297,6 @@ CLAZZ("projects.sprite.SpriteProject", {
 		this.DOM.stack.style.backgroundSize = path ? "contain" : "initial";
 	},
 
-	layerAbove:function(){
-        var pos = this.core.layers.indexOf( this.core.activeLayer );
-		pos = (pos+1) % this.core.layers.length;
-		this.core.setLayer( this.core.layers[pos] );
-	},
-	layerBelow:function(){
-        var pos = this.core.layers.indexOf( this.core.activeLayer );
-		pos = pos-1;
-		if( pos < 0 ) pos = this.core.layers.length - 1 + pos%this.core.layers.length;
-		this.core.setLayer( this.core.layers[pos] );
-	},
-	nextFrame:function(){
-        var pos = this.core.frames.indexOf( this.core.layers );
-		pos = (pos+1) % this.core.frames.length;
-		this.core.setFrame( this.core.frames[pos] );
-	},
-	prevFrame:function(){
-        var pos = this.core.frames.indexOf( this.core.layers );
-		pos = pos-1;
-		if( pos < 0 ) pos = this.core.frames.length - 1 + pos%this.core.frames.length;
-		this.core.setFrame( this.core.frames[pos] );
-	},
-
-    moveActiveLayerUp:function(){
-        this.moveLayer( this.core.activeLayer, 1 );
-    },
-
-    moveActiveLayerDown:function(){
-        this.moveLayer( this.core.activeLayer, -1 );
-    },
-
     moveLayer:function( layer, direction ){
         var pos = this.core.layers.indexOf(layer);
         var tpos = pos + direction;
@@ -283,25 +317,6 @@ CLAZZ("projects.sprite.SpriteProject", {
     dragOffsetY:0,
     dragDistance:0,
 
-    endHand:function(){
-    	if( this.core.activeTool != this.core.tools.Hand )
-    		return;
-    	if(this.core.activeTool.deactivate) this.core.activeTool.deactivate();
-    	this.toolStack.pop();
-        this.core.activeTool = null;
-        this.core.setTool( this.toolStack.pop() );
-        this.dragging = null;
-    },
-
-    endDropper:function(){
-    	if( this.core.activeTool != this.core.tools.Dropper )
-    		return;
-    	if(this.core.activeTool.deactivate) this.core.activeTool.deactivate();
-    	this.toolStack.pop();
-        this.core.activeTool = null;
-        this.core.setTool( this.toolStack.pop() );
-        this.dragging = null;
-    },
 
     startDrag:function(evt){
         this.dragging = evt.target;
@@ -327,7 +342,7 @@ CLAZZ("projects.sprite.SpriteProject", {
             layer.style.transform = transform
         );
 
-		this.core.selection.canvas.style.transform = transform;
+        this.core.selection.canvas.style.transform = transform;
 
         this.DOM.stack.style.width = this.core.width * zoom + "px";
         this.DOM.stack.style.height = this.core.height * zoom + "px";
@@ -367,9 +382,12 @@ CLAZZ("projects.sprite.SpriteProject", {
     runTool:function(evt, type){
         if( this.dragging || !this.core.activeTool || !this.core.activeLayer || !this.core.activeTool[type] )
             return;
+		var ref = this.DOM.stack.getBoundingClientRect();
+		ref.left += this.dialogue.window.scrollX;
+		ref.top += this.dialogue.window.scrollY;
 
-        var x = Math.floor( (evt.pageX - (parseInt(this.DOM.stack.style.left)||0)) / this.zoom );
-        var y = Math.floor( (evt.pageY - (parseInt(this.DOM.stack.style.top)||0)) / this.zoom );
+        var x = Math.floor( (evt.pageX - (ref.left||0)) / this.zoom );
+        var y = Math.floor( (evt.pageY - (ref.top||0)) / this.zoom );
 
         if( this.core.activeTool[type]( this.core.activeLayer.data, x, y, 1 ) )
             this.core.activeLayer.redraw();

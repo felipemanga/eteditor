@@ -1,8 +1,10 @@
 CLAZZ("projects.sprite.tools.Dropper", {
-    app:null,
+    INJECT:{
+        color:"PrimaryColor"
+    },
 
     down:function(layer, x, y, z){
-        this.app.color.fromData( layer, x, y );
+        this.color.fromData( layer, x, y );
     },
 
     move:function(layer, x, y, z){

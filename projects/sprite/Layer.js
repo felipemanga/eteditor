@@ -1,5 +1,10 @@
 CLAZZ("projects.sprite.Layer", {
-	app:null,
+	PROVIDES:{
+		"projects.sprite.selectionLayer":"singleton",
+	},
+	INJECT:{
+		core:"core"
+	},
 
     canvas:null,
     context:null,
@@ -11,25 +16,25 @@ CLAZZ("projects.sprite.Layer", {
     id:0,
     name:"",
 
-    CONSTRUCTOR:function(sp, hidden){
-		this.app = sp;
-
-        this.canvas = DOC.create("canvas", sp.DOM.stack, {
+    CONSTRUCTOR:function(){
+        this.canvas = DOC.create("canvas", this.core.DOM.stack, {
             position: "absolute",
             left: 0,
             top: 0,
-            width: sp.width,
-            height: sp.height
+            width: this.core.width,
+            height: this.core.height
         });
 
-		if( hidden ) DOC.remove(this.canvas);
-
-        this.id = sp.layers.length+1;
+        this.id = this.core.layers.length+1;
         this.name = "Layer " + this.id;
         this.context = this.canvas.getContext("2d");
         this.context.imageSmoothingEnabled = false;
         this.invalidate();
     },
+
+	hide:function(){
+		DOC.remove(this.canvas)
+	},
 
     read:function(){
         this.data.data.set( this.context.getImageData(0, 0, this.canvas.width, this.canvas.height).data );
@@ -44,7 +49,7 @@ CLAZZ("projects.sprite.Layer", {
     },
 
 	clone:function(){
-		var clone = new projects.sprite.Layer(this.app);
+		var clone = CLAZZ.get("projects.sprite.Layer", {core:this.core});
 		clone.name = this.name;
 		clone.enabled = this.enabled;
 		clone.canvas.style.mixBlendMode = this.canvas.style.mixBlendMode;

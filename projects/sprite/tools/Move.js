@@ -1,15 +1,19 @@
 CLAZZ("projects.sprite.tools.Move", {
-    app:null,
+    INJECT:{
+        core:"core",
+        main:"main"
+    },
+
 	refX:0,
 	refY:0,
-	
+
     down:function(layer, x, y, z){
-		if( this.app.selection && this.app.selection.enabled ){
-			this.app.addLayer(true, true);
-			this.app.selection.enabled = false;
-			var mask = this.app.selection.data.data;
-			var out = this.app.activeLayer.data.data;
-			var l = this.app.width*this.app.height*4;
+		if( this.core.selection && this.core.selection.enabled ){
+			this.core.addLayer(true, true);
+			this.core.selection.enabled = false;
+			var mask = this.core.selection.data.data;
+			var out = this.core.activeLayer.data.data;
+			var l = this.core.width*this.core.height*4;
 			for( var i=0; i<l; i+=4 ){
 				var v = mask[i+3], iv;
 				if( !v ){
@@ -22,27 +26,27 @@ CLAZZ("projects.sprite.tools.Move", {
 					out[i+3] = out[i+3] * v;
 				}
 			}
-			this.app.activeLayer.redraw();
+			this.core.activeLayer.redraw();
 		}
 		this.refX = x;
 		this.refY = y;
     },
 
     move:function(layer, x, y, z){
-		layer = this.app.activeLayer;
-		layer.canvas.style.top = this.app.app.zoom * (y - this.refY) + "px";
-		layer.canvas.style.left = this.app.app.zoom * (x - this.refX) + "px";
+		layer = this.core.activeLayer;
+		layer.canvas.style.top = this.main.zoom * (y - this.refY) + "px";
+		layer.canvas.style.left = this.main.zoom * (x - this.refX) + "px";
     },
 
     up:function(layer, x, y, z){
-		layer = this.app.activeLayer;
+		layer = this.core.activeLayer;
 		layer.canvas.style.top = 0;
 		layer.canvas.style.left = 0;
 		var refX = this.refX - x;
 		var refY = this.refY - y;
-		layer.context.clearRect(0, 0, this.app.width, this.app.height );
+		layer.context.clearRect(0, 0, this.core.width, this.core.height );
 		layer.context.putImageData( layer.data, -refX, -refY );
 		layer.read();
-		this.app.push();
+		this.core.push();
     }
 });
