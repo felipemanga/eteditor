@@ -82,7 +82,7 @@ CLAZZ("mainmenu.MainMenu", {
 		if( menu ){
             Object.sort(menu).forEach((label) => {
                 var item = menu[label];
-                if( !item.hidden ) this.menuElements.push( DOC.create("div", DOM.quickMenu, {
+                if( !item.hidden ) this.menuElements.push( DOC.create("div", item.toggle ? DOM.menuOptions : DOM.quickMenu, {
 					className:"btn",
 					text: DOC.TEXT(label),
                     onclick: obj.raise.bind(obj, "MENU", label)

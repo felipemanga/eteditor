@@ -36,6 +36,14 @@
                     "title":"Sprite",
                     "position":"center",
                     "menu":{
+						"save":{
+							"shortcut":[17, "S"],
+							"toggle":true
+						},
+						"saveAs":{
+							"shortcut":[17, 16, "S"],
+							"toggle":true
+						},
                         "undo":{
                             "shortcut":[17, "Z"]
                         },

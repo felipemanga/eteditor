@@ -69,22 +69,18 @@ CLAZZ("projects.minijs.MiniJSProject", {
 
     $MENU:{
         save:function(){
-            this.onSave()
+			this.path = this.path || "mini.bin"
+			var ext = this.path.match(/\.([a-z]+)$/i);
+			if( !ext || ext[1].toLowerCase() != "bin" ) this.path += ".bin";
+
+			this.files.forEach((file) =>
+				this.compressor.addFile(file.name, file.data)
+			);
+			this.compressor.compress( this.path, this.fileSaver.saveFile.bind(this.fileSaver) );
+
+			this.dialogue.DOM.stats.textContent = DOC.TEXT("Total uncompressed size: ") + Math.ceil(this.compressor.dataSize/1024) + "Kb";
         }
-    },
-
-	onSave:function(){
-        this.path = this.path || "mini.bin"
-        var ext = this.path.match(/\.([a-z]+)$/i);
-        if( !ext || ext[1].toLowerCase() != "bin" ) this.path += ".bin";
-
-        this.files.forEach((file) =>
-            this.compressor.addFile(file.name, file.data)
-        );
-        this.compressor.compress( this.path, this.fileSaver.saveFile.bind(this.fileSaver) );
-
-		this.dialogue.DOM.stats.textContent = DOC.TEXT("Total uncompressed size: ") + Math.ceil(this.compressor.dataSize/1024) + "Kb";
-	}
+    }
 
 });
 

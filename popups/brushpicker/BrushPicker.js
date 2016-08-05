@@ -54,7 +54,7 @@ CLAZZ("popups.brushpicker.BrushPicker", {
 			]);
 
 			this.active = el;
-			THIS.setBrush.bind(THIS, 0, null, el);
+			el.onclick = THIS.setBrush.bind(THIS, 0, null, el);
 
 			this.brushes.forEach(( file ) => {
 				var ext = file.match( /.+\.([a-z]+)$/i )[1].toLowerCase();

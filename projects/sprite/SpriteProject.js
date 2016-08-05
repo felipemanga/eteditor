@@ -2,7 +2,8 @@ need([
     "projects.sprite.Core",
     "projects.sprite.Properties",
     "projects.sprite.Frames",
-    "projects.sprite.Filters"
+    "projects.sprite.Filters",
+	{FQCN:"GIF", URL:"js/gif.js"}
 ], function(){
 
 CLAZZ("projects.sprite.SpriteProject", {
@@ -11,10 +12,12 @@ CLAZZ("projects.sprite.SpriteProject", {
             controller:INJECT("this"),
             cfg:RESOLVE("settings.projects.sprite.SpriteProject.dialogue")
         }),
+        fileSaver:"io.FileSaver",
         colorpicker:"popups.colorpicker.IColorPicker",
         app:"app",
         pool:"Pool",
-        settings:RESOLVE("settings.projects.sprite.SpriteProject")
+        settings:RESOLVE("settings.projects.sprite.SpriteProject"),
+		path:"path"
     },
 
     DOM:null,
@@ -25,6 +28,7 @@ CLAZZ("projects.sprite.SpriteProject", {
 
     toolStack:null,
     zoom:1,
+	path:null,
 
     CONSTRUCTOR:function(){
         this.pool.add(this);
@@ -113,97 +117,6 @@ CLAZZ("projects.sprite.SpriteProject", {
 		this.DOM.stack.style.left = Math.round(this.win.appWindow.innerBounds.width*0.5 - this.width*0.5)+"px";
 	},
 
-    onSave:function( cb ){
-        if( !this.core.layers.length )
-            return false;
-
-        var ext = this.path.match(/\.([a-z]+)$/i);
-        if( !ext ){
-			if( this.core.frames.length > 1 ){
-				this.path += ".gif";
-				ext = "gif";
-			}else{
-				this.path += ".png";
-				ext = "png";
-			}
-        }
-        else ext = ext[1].toLowerCase();
-        if( ext == "jpg" ) ext = "jpeg";
-
-        if( ext == "png" || ext == "jpeg" ){
-
-			if( this.core.frames.length == 1 ){
-				cb( this.core.renderComposite().canvas.toDataURL("image/" + ext) );
-				return true;
-			}
-			var width = this.core.width, height = this.core.height;
-			var outw = Math.sqrt( width * height * this.core.frames.length );
-			var cols = Math.floor(outw / this.core.width);
-			var rows = Math.ceil(this.core.frames.length / cols);
-			var outh = rows * this.core.height;
-			outw = cols * this.core.width;
-
-			var comp = this.DOM.create("canvas", {width:outw, height:outh});
-			DOC.remove(comp);
-			var ctx = comp.getContext("2d");
-			var arr = {};
-
-			this.core.frames.forEach( (frame, i) => {
-				var x = (i%cols)*width, y = Math.floor(i/cols)*height;
-				this.core.renderComposite( frame.composite, frame );
-				ctx.drawImage( frame.composite.canvas, x, y );
-				arr[(frame.name || 'frame')+i] = {
-					frame:{
-						x:x,
-						y:y,
-						w:width,
-						h:height
-					},
-					rotated:false,
-					trimmed:false,
-					spriteSourceSize:{
-						x:0,
-						y:0,
-						w:width,
-						h:height
-					},
-					sourceSize:{
-						w:width,
-						h:height
-					}
-				};
-			} );
-
-			fs.writeFileSync( this.path + ".json", JSON.stringify({frames:arr}) );
-			cb( comp.toDataURL("image/" + ext) );
-        }
-
-		if( ext == "gif" ){
-			var gif = new GIF({
-				workerScript:"js/gif.worker.js",
-				width: this.core.width,
-				height: this.core.height
-			});
-
-			var delay = 1000 / (this.core.fps || 1);
-
-			this.core.frames.forEach(frame => {
-				this.core.renderComposite( frame.composite, frame );
-				gif.addFrame(frame.composite.canvas, {delay:delay});
-			});
-
-			gif.on('finished', function(blob, data){
-				var acc = "";
-				for( var i=0; i<data.length; ++i )
-					acc += String.fromCharCode( data[i] );
-				cb(acc);
-			});
-
-			gif.render();
-			return true;
-		}
-    },
-
     $MENU:{
     	X:function(){
     		if( this.toolStack.length >= 2 ){
@@ -274,8 +187,138 @@ CLAZZ("projects.sprite.SpriteProject", {
             this.core.activeTool = null;
             this.core.setTool( this.toolStack.pop() );
             this.dragging = null;
+        },
+
+        save:function(){
+        	this.save();
+        },
+
+        saveAs:function(){
+        	this.path = "";
+        	this.save();
         }
     },
+
+    save:function( path ){
+		if( !this.core.layers.length )
+            return false;
+
+    	if( path ){
+			if( path.ext ) this.path = "sprite." + path.ext;
+    		else this.path = path;
+		}
+
+		if( !this.path )
+			return this.fileSaver.requestFormat([
+				{ext:"png", name:""},
+				{ext:"gif", name:""},
+				{ext:"jpg", name:""}
+			], this.save.bind(this))
+
+		var ext = this.path.match(/\.([a-z]+)$/i);
+		if( !ext ){
+			if( this.core.frames.length > 1 ){
+				this.path += ".gif";
+				ext = "gif";
+			}else{
+				this.path += ".png";
+				ext = "png";
+			}
+        }
+        else ext = ext[1].toLowerCase();
+
+		if( ext == "png" || ext == "jpeg" )
+			this.saveJPNG(ext);
+		else if( ext == "gif" )
+			this.saveGIF();
+    },
+
+	saveGIF:function(){
+		var gif = new GIF({
+			workerScript:"js/gif.worker.js",
+			width: this.core.width,
+			height: this.core.height
+		});
+
+		var delay = 1000 / (this.core.fps || 1), THIS=this;
+
+		this.core.frames.forEach(frame => {
+			this.core.renderComposite( frame.composite, frame );
+			gif.addFrame(frame.composite.canvas, {delay:delay});
+		});
+
+		gif.on('finished', function(blob, data){
+			var acc = "";
+			for( var i=0; i<data.length; ++i )
+				acc += String.fromCharCode( data[i] );
+
+			THIS.fileSaver.saveFile({
+				name:THIS.path,
+				data:acc
+			});
+		});
+
+		gif.render();
+	},
+
+	saveJPNG:function(ext){
+		if( this.core.frames.length == 1 ){
+			this.fileSaver.saveFile({
+				name:this.path,
+				data:this.core.renderComposite().canvas.toDataURL("image/" + ext)
+			});
+			return;
+		}
+
+		var width = this.core.width, height = this.core.height;
+		var outw = Math.sqrt( width * height * this.core.frames.length );
+		var cols = Math.floor(outw / this.core.width);
+		var rows = Math.ceil(this.core.frames.length / cols);
+		var outh = rows * this.core.height;
+		outw = cols * this.core.width;
+
+		var comp = this.DOM.create("canvas", {width:outw, height:outh});
+		DOC.remove(comp);
+		var ctx = comp.getContext("2d");
+		var arr = {};
+
+		this.core.frames.forEach( (frame, i) => {
+			var x = (i%cols)*width, y = Math.floor(i/cols)*height;
+			this.core.renderComposite( frame.composite, frame );
+			ctx.drawImage( frame.composite.canvas, x, y );
+			arr[(frame.name || 'frame')+i] = {
+				frame:{
+					x:x,
+					y:y,
+					w:width,
+					h:height
+				},
+				rotated:false,
+				trimmed:false,
+				spriteSourceSize:{
+					x:0,
+					y:0,
+					w:width,
+					h:height
+				},
+				sourceSize:{
+					w:width,
+					h:height
+				}
+			};
+		} );
+
+		this.fileSaver.saveFile([
+			{
+				name:this.path + ".json",
+				data:JSON.stringify({frames:arr})
+			},
+			{
+				name:this.path,
+				data:comp.toDataURL("image/" + ext)
+			}
+		]);
+	},
 
 	clearToolHnd:0,
     onSetTool:function(tool){

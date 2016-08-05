@@ -1,7 +1,21 @@
+need([
+	{FQCN:"saveAs", URL:"js/FileSaver.js"}
+], function(){
 
 CLAZZ("io.WebFileSaver", {
     INJECT:{
-        zip:"io.compressors.IZIPCompressor"
+        zip:"io.compressors.IZIPCompressor",
+        dialogue:INJECT("dialogues.IDialogue", {
+            controller:INJECT("this"),
+            cfg:{
+				width: 350,
+				height: 350,
+				position:"center",
+                show:false,
+                hide_only: true,
+                title:"Format"
+            }
+        })
     },
 
     saveFile:function( file ){
@@ -14,15 +28,53 @@ CLAZZ("io.WebFileSaver", {
             return;
         }
 
+		if( file.data && !(file.data instanceof Blob) ){
+			if( typeof file.data == "string" ){
+				if( file.data.match(/^data:[a-zA-Z0-9\/]+;base64,/) )
+					file.data = base64toBlob( file.data.replace(/^data:[a-zA-Z0-9\/]+;base64,/, "") );
+				else file.data = new Blob( [strToBuffer(file.data).buffer] );
+			}
+		}
+
         DOC.create("div", {
             text:"Click To Download: " + file.name,
-            onclick:() => open('data:application/zip,' + escape(file.data) ),
+            onclick:(evt) => {
+				DOC.remove( evt.target )
+				saveAs( file.data, file.name );
+			},
             style:{
                 position:"absolute",
                 bottom:0,
                 left:0
             }
-        }, document.body)
+        }, document.body);
+    },
+
+    requestFormat:function( options, cb ){
+        this.callback = cb;
+		var DOM = this.dialogue.DOM;
+        var list = this.dialogue.DOM.extensionList;
+		DOC.removeChildren(list);
+		options.forEach((obj) => {
+			var ext, name;
+			if( typeof obj == "string" ){
+				ext = obj;
+				name = DOC.TEXT("filetype:"+obj);
+			}else{
+				ext = obj.ext;
+				name = DOC.TEXT(obj.name);
+			}
+
+			DOM.create("div", { onclick:() => {
+				this.dialogue.hide(); cb(obj);
+			} },[
+				["h1", {text:ext}],
+				["h2", {text:name}]
+			], list);
+		});
+
+        this.dialogue.show();
     }
+});
 
 });
