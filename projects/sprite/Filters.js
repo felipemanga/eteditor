@@ -1,45 +1,64 @@
+need([
+	{FQCN:"esprima", URL:"js/esprima.js"}
+], function(){
+
 CLAZZ("projects.sprite.Filters", {
 	INJECT:{
         dialogue:INJECT("dialogues.IDialogue", {
             controller:INJECT("this"),
             cfg:RESOLVE("settings.projects.sprite.Filters.dialogue")
         }),
-		pool:"Pool"
-	},
-
-	onClose:function(){
-		SUPER();
-		this.enabled = false;
+		core:"core",
+		pool:"Pool",
+		filterList:RESOLVE("settings.projects.sprite.filters")
 	},
 
 	id:0,
-	onLoad:function(){
-		this.win.moveTo(0,0);
-		var THIS=this;
-		var DOM=this.DOM;
-		var path = "app/include/projects/sprite/filters/";
-		dir(path, function( file ){
-			if( /.+\.js/i.test(file) ){
-				var clazz = THIS.compile( fs.readFileSync(path + file, "utf-8") );
-				if( !clazz ) return true;
+	DOM:null,
+	filters:null,
 
-				THIS.id++;
-				DOM.create("div", DOM.filters, {
-					onclick:THIS.openFilter.bind(THIS, path + file, THIS.id),
-					id:"filter" + THIS.id,
-					text:MAR.TEXT( file.replace(/\.[a-z]+$/i, '') )
+	$DIALOGUE:{
+		load:function(){
+			this.filters = {};
+			this.DOM = this.dialogue.DOM;
+			var THIS=this;
+			var DOM=this.DOM;
+			var pending = this.filterList.length;
+			this.filterList.forEach(( file ) => {
+				DOC.getURL(file, (src) => {
+					var clazz = this.compile( src );
+					if( !clazz ) return true;
+
+					var id = ++this.id;
+
+					var el = DOM.create("div", DOM.filters, {
+						onclick:THIS.openFilter.bind(THIS, id),
+						id:"filter" + THIS.id,
+						text:DOC.TEXT( file.replace(/.*?\/|\.[a-z]+$/ig, '') )
+					});
+
+					this.filters[id] = {
+						url:file,
+						id:id,
+						clazz:clazz,
+						src:src,
+						el:el
+					};
+
+					pending--;
+
+					if( !pending )
+						this.setTab( DOM.tabHeader[0] );
 				});
-				// THIS.parent.filters[clazz.NAME] = clazz;
-			}
-			return true;
-		});
-		this.setTab( DOM.tabHeader[0] );
+			});
+		}
 	},
 
-	openFilter:function(path, id){
-		this.DOM.path.textContent = path;
-		this.DOM.TEXTAREA.value = fs.readFileSync(path, "utf-8");
-		var clazz = this.compile();
+	openFilter:function(id){
+		var filter = this.filters[id];
+		this.DOM.path.textContent = filter.url;
+		this.DOM.TEXTAREA.value = filter.src;
+		var clazz = filter.clazz;
 		var inst = clazz ? new clazz() : null;
 		this.meta = null;
 		this.buildMenu( inst );
@@ -85,7 +104,7 @@ CLAZZ("projects.sprite.Filters", {
 		}
 	},
 
-	tabHeader:{
+	$tabHeader:{
 		click:function(evt){
 			this.setTab(evt.target);
 		}
@@ -93,7 +112,7 @@ CLAZZ("projects.sprite.Filters", {
 
 	meta:null,
 	buildMenu:function( filter ){
-		MAR.removeChildren( this.DOM.filterOpts );
+		DOC.removeChildren( this.DOM.filterOpts );
 		this.meta = this.meta || {};
 		if( !filter || !filter.meta ) return;
 		var meta = filter.meta;
@@ -129,7 +148,7 @@ CLAZZ("projects.sprite.Filters", {
 
 		Object.sort( meta ).forEach( (k) => {
 				DOM.create("div", {className:"optionContainer"}, filterOpts, [
-					["div", {className:"optionLabel", text:MAR.TEXT(k)}],
+					["div", {className:"optionLabel", text:DOC.TEXT(k)}],
 					createMeta( k )
 				]);
 			});
@@ -154,7 +173,7 @@ CLAZZ("projects.sprite.Filters", {
 				this.DOM.create("div", this.DOM.filters, {
 						onclick:this.openFilter.bind(this, path, id),
 						id:"filter" + id,
-						text:MAR.TEXT( file )
+						text:DOC.TEXT( file )
 					});
 			}
 		}catch(err){
@@ -166,13 +185,13 @@ CLAZZ("projects.sprite.Filters", {
 		this.DOM.path.textContent = path;
 	},
 
-	btnSave:{
+	$btnSave:{
 		click:function(){
 			this.onSave();
 		}
 	},
 
-	btnRun:{
+	$btnRun:{
 		click:function(){
 			var clazz = this.compile();
 			if( !clazz ) return;
@@ -187,7 +206,7 @@ CLAZZ("projects.sprite.Filters", {
 							f[k] = THIS.meta[k];
 						}
 					}
-					THIS.parent.core.runFilter(f);
+					THIS.core.runFilter(f);
 				}catch(err){
 					THIS.error(err);
 					return;
@@ -197,4 +216,6 @@ CLAZZ("projects.sprite.Filters", {
 			}, 10);
 		}
 	}
+});
+
 });

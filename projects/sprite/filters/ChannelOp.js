@@ -5,7 +5,7 @@ CLAZZ("projects.sprite.filters.ChannelOp", {
     channel: "rgb",
 
     meta:{
-        mode:{select:["clamp", "noise"]},
+        mode:{select:["clamp", "noise", "tween"]},
         min:{int:{min:0, max:255}},
         max:{int:{min:0, max:255}},
         channel:{select:["rgb", "rgba", "r", "g", "b", "a"]}
@@ -22,6 +22,12 @@ CLAZZ("projects.sprite.filters.ChannelOp", {
     clamp:function( color ){
         for( var i=0, arr=this.channelArray; i<arr.length; ++i ){
             color[ arr[i] ] = Math.max( this.min, Math.min( this.max, color[ arr[i] ] ) );
+        }
+    },
+
+    tween:function( color ){
+        for( var i=0, arr=this.channelArray; i<arr.length; ++i ){
+            color[ arr[i] ] = Math.round( color[ arr[i] ] / 255 * (this.max - this.min) + this.min );
         }
     },
 

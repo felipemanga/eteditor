@@ -142,7 +142,7 @@ html {
 
 #filtersBody #path {
     height: 25px;
-    padding: 7px 5px 0px 115px;
+    margin: 7px 5px 0 115px;
 }
 
 #filtersBody #bar {

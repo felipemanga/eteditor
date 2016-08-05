@@ -1080,7 +1080,9 @@ var DOC = {
 			if( !name ) return;
 			if( multi ){
 				var a = obj[name];
-				if( a && a.push && a.indexOf(c) == -1 ) a.push(c);
+				if( a && a.push ){
+					if( a.indexOf(c) == -1 ) a.push(c);
+				}
 				else obj[name] = [c];
 			}else obj[name] = c;
 		}

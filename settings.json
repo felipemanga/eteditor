@@ -25,6 +25,12 @@
         },
 
         "sprite":{
+            "filters":[
+                "projects/sprite/filters/Blur.js",
+                "projects/sprite/filters/Brushify.js",
+                "projects/sprite/filters/ChannelOp.js",
+                "projects/sprite/filters/Desaturate.js"
+            ],
             "SpriteProject":{
                 "dialogue":{
                     "title":"Sprite",
