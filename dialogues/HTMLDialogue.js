@@ -10,6 +10,8 @@ CLAZZ("dialogues.HTMLDialogue", {
         map:{}
     },
 
+    zIndex:0,
+
     CONSTRUCTOR:function(opt){
         SUPER(opt);
         dialogues.HTMLDialogue.focusZ++;
@@ -23,7 +25,19 @@ CLAZZ("dialogues.HTMLDialogue", {
     },
 
     bringToTop:function(){
-        this.DOM.__ROOT__.style.zIndex = dialogues.HTMLDialogue.focusZ++;
+        this.zIndex = dialogues.HTMLDialogue.focusZ++;
+        var instances = dialogues.IDialogue.instances;
+        instances.sort((a, b) =>{
+            if( !!a.cfg.always_on_top == !!b.cfg.always_on_top ){
+                return a.zIndex - b.zIndex;
+            }
+            if( a.cfg.always_on_top ) return 1;
+            return -1;
+        });
+        instances.forEach((dialogue, i) => {
+            if( dialogue.DOM && dialogue.DOM.__ROOT__ )
+            	dialogue.DOM.__ROOT__.style.zIndex = i
+        });
     },
 
     $windowframe:{
