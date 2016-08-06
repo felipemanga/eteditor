@@ -1,6 +1,6 @@
 need([
     "projects.sprite.Core",
-    "projects.sprite.Properties",
+    "projects.sprite.ToolBox",
     "projects.sprite.Frames",
     "projects.sprite.Filters",
 	{FQCN:"GIF", URL:"js/gif.js"}
@@ -24,7 +24,7 @@ CLAZZ("projects.sprite.SpriteProject", {
     data:null,
     DOM:null,
     core:null,
-    properties:null,
+    toolbox:null,
     framesview:null,
     filtersview:null,
 
@@ -47,7 +47,7 @@ CLAZZ("projects.sprite.SpriteProject", {
             core:this.core
         };
 
-        this.properties = CLAZZ.get("projects.sprite.Properties", ctx);
+        this.toolbox = CLAZZ.get("projects.sprite.ToolBox", ctx);
         this.framesview = CLAZZ.get("projects.sprite.Frames", ctx);
         this.filtersview = CLAZZ.get("projects.sprite.Filters", ctx);
 
