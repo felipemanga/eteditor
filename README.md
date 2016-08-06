@@ -1,12 +1,13 @@
-# eteditor
+# ETEditor
 Editor of EveryThing - v0.5
 
 ETEditor is intended to be an online suite of tools with no back-end.
-It can be used [right here!](http://felipemanga.github.io/eteditor). Check it out!
+It can be used [right here!](http://felipemanga.github.io/eteditor) Check it out!
+Do note, it's still under heavy development and bugs are expected. Please tell me about any bugs you find and be sure to save often!
 
-Right now it does sprite editing and javascript-as-PNG encoding.
+Right now ETEditor does [sprite editing](#spriteeditor) and [javascript-as-PNG encoding](#minijs).
 
-## Sprite Editor
+## <a id="spriteeditor"></a> Sprite Editor
 This editor's interface is especially designed to be usable on a small, high-rez
 screen, like those on the MS Surface Pro or Samsung Galaxy Note tablets.
 
@@ -59,7 +60,7 @@ To-Do:
  - text tool
  - left-hand mode
 
-## MiniJS Javascript-to-PNG Codec
+## <a id="minijs"></a> MiniJS Javascript-to-PNG Codec
 Drag and drop Javascript files into this utility. It will merge them all and
 output a nicely compressed PNG and a tiny decoder script. Just embed the decoder
 in your HTML and it will decompress and execute all your JS code.
