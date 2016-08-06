@@ -48,7 +48,12 @@ CLAZZ("popups.openfile.OpenFileDialogue", {
                 if( invalid ) continue;
             }
 
-            var el = DOM.create( "div", {text:desc.title || id, id:"projects." + id, className:"project"}, DOM.projectTypeList );
+            var el = DOM.create( "div", {
+                text:DOC.TEXT(desc.title || id),
+                id:"projects." + id,
+                className:"project"
+            }, DOM.projectTypeList );
+
             DOM.index( el, null, this );
 
             if( this.settings.lastProjectType == id ){

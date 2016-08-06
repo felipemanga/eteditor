@@ -1353,13 +1353,15 @@ var DOC = {
 					var src = "", wire = DOC.resolve(path);
 					src += "(function(){\n";
 					// src += "debugger;";
-					src += "var __queue=0;\n";
+					src += "var __queue=0, __onReadyCB = [];\n";
 					src += "var singleton = function(a, b){ __queue++; need(b, __cb); return singleton; },\n";
 					src += "\timplements = singleton,\n";
 					src += "\tfactory = singleton,\n";
 					src += "\tjson = function(a, b){ __queue++; need([{URL:b.replace(/\\./g, '/') + '.json'}], __cb ); return json; },\n";
 					src += "\tset = function(){},\n";
-					src += "\tget = function(){};\n";
+					src += "\tget = function(){},\n";
+					src += "\tonready = function( cb ){ __onReadyCB.push(cb); },\n";
+					src += "\toninit = function( cb ){ cb(); };\n";
 					src += wire;
 					src += "\n\nfunction __cb(){\n";
 					src += "__queue--;\n"
@@ -1369,9 +1371,12 @@ var DOC = {
 					src += "\tfactory = CLAZZ.factory,\n";
 					src += "\tjson = function(a, b){ CLAZZ.set(a, self[a] = DOC.resolve(b)); return json; },\n";
 					src += "\tset = CLAZZ.set,\n";
-					src += "\tget = CLAZZ.get;\n";
+					src += "\tget = CLAZZ.get,\n";
+					src += "\tonready = function(){},\n";
+					src += "\toninit = function(){};\n";
+					src += "__onReadyCB.forEach(cb => cb());\n";
 					src += wire;
-					src += "\n}\n\n"
+					src += "\n}\n\n";
 					src += "})();";
 					DOC.create("script", {text:src}, document.head);
 					(new DOC.Loader()).start(function(){});
