@@ -435,7 +435,13 @@ CLAZZ("projects.sprite.SpriteProject", {
         var x = Math.floor( (evt.pageX - (ref.left||0)) / this.zoom );
         var y = Math.floor( (evt.pageY - (ref.top||0)) / this.zoom );
 
-        if( this.core.activeTool[type]( this.core.activeLayer.data, x, y, 1 ) )
+		var w = 1;
+        if( evt.pointerType == "pen" ){
+        	w = evt.pressure;
+        	console.log(w);
+        }
+
+        if( this.core.activeTool[type]( this.core.activeLayer.data, x, y, w ) )
             this.core.activeLayer.redraw();
     },
 
@@ -449,16 +455,25 @@ CLAZZ("projects.sprite.SpriteProject", {
 			evt.preventDefault();
         },
         pointerdown:function(evt){
-            console.log(evt);
-            evt.preventDefault();
+        	if( evt.pointerType != "pen" ) return;
+            this.runTool(evt, "down");
+			this.dragOffsetX = evt.pageX;
+			this.dragOffsetY = evt.pageY;
+			evt.preventDefault();
         },
         pointermove:function(evt){
-            console.log(evt);
-            evt.preventDefault();
+        	if( evt.pointerType != "pen" ) return;
+            this.runTool(evt, "move");
+			this.dragOffsetX = evt.pageX;
+			this.dragOffsetY = evt.pageY;
+			evt.preventDefault();
         },
         pointerup:function(evt){
-            console.log(evt);
-            evt.preventDefault();
+        	if( evt.pointerType != "pen" ) return;
+            this.runTool(evt, "move");
+			this.dragOffsetX = evt.pageX;
+			this.dragOffsetY = evt.pageY;
+			evt.preventDefault();
         },
         mousedown:function(evt){
             this.runTool(evt, "down");

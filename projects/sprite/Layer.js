@@ -45,7 +45,11 @@ CLAZZ("projects.sprite.Layer", {
     },
 
     invalidate:function(){
-        this.data = new ImageData( new Uint8ClampedArray(this.canvas.width*this.canvas.height*4), this.canvas.width, this.canvas.height );
+		try{
+        	this.data = new ImageData( new Uint8ClampedArray(this.canvas.width*this.canvas.height*4), this.canvas.width, this.canvas.height );
+		}catch(e){
+			this.data = this.context.createImageData(this.canvas.width, this.canvas.height);
+		}
     },
 
 	clone:function(){
