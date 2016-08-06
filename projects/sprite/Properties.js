@@ -4,6 +4,7 @@ CLAZZ("projects.sprite.Properties", {
             controller:INJECT("this"),
             cfg:RESOLVE("settings.projects.sprite.Properties.dialogue")
         }),
+        fileReader:"io.FileReader",
         core:"core",
         pool:"Pool",
         main:"main"
@@ -103,6 +104,7 @@ CLAZZ("projects.sprite.Properties", {
         };
     },
 
+	prevBlobURL:null,
 	hasRef:false,
 	toggleReference:function(){
 		this.hasRef = !this.hasRef;
@@ -112,11 +114,15 @@ CLAZZ("projects.sprite.Properties", {
 				type:"file",
 				onchange:function(e){
 					if( !e.target.files.length ) return;
-					THIS.parent.setReference( e.target.files[0].path );
+                    THIS.fileReader.readAsArrayBuffer(e.target.files[0], (data) => {
+                    	if( THIS.prevBlobURL ) URL.revokeObjectURL( THIS.prevBlobURL );
+                    	THIS.prevBlobURL = URL.createObjectURL( new Blob([data], {}) );
+                        THIS.main.setReference( "url(" + THIS.prevBlobURL + ")" );
+                    });
 				}
 			}).click();
 		}else{
-			THIS.parent.setReference();
+			THIS.main.setReference();
 		}
 	},
 

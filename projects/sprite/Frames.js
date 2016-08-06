@@ -12,7 +12,7 @@ var FrameElement = CLAZZ({
 
 		ctrl.pool.add(this);
 
-		this.el = MAR.create(
+		this.el = DOC.create(
 			"div",
 			ctrl.DOM.frames,
 			{className:"frameElement" + (frame == ctrl.current?" active":"")},
@@ -31,16 +31,16 @@ var FrameElement = CLAZZ({
 			])
 		);
 
-		this.dom = MAR.index( this.el, null, this );
+		this.dom = DOC.index( this.el, null, this );
 	},
 
-	frameIndicator:{
+	$frameIndicator:{
 		click:function(){
 			this.ctrl.pool.call("setFrame", this.frame, true);
 		}
 	},
 
-	onionSkinIndicator:{
+	$onionSkinIndicator:{
 		click:function(){
 			if( this.frame.composite.canvas.style.display == "none" )
 				this.frame.composite.canvas.style.display = "block";
@@ -55,7 +55,7 @@ var FrameElement = CLAZZ({
 
 	purgeFrames:function(){
 		this.ctrl.pool.remove(this);
-		MAR.remove(this.el);
+		DOC.remove(this.el);
 	}
 });
 
@@ -65,6 +65,7 @@ CLAZZ("projects.sprite.Frames", {
             controller:INJECT("this"),
             cfg:RESOLVE("settings.projects.sprite.Frames.dialogue")
         }),
+		core:"core",
 		pool:"Pool"
 	},
 
@@ -72,23 +73,28 @@ CLAZZ("projects.sprite.Frames", {
 	current:null,
 	hnd:-1,
 	context:null,
+	DOM:null,
+
+	CONSTRUCTOR:function(){
+		this.pool.add(this);
+	},
 
 	$DIALOGUE:{
 		load:function(){
+			this.DOM = this.dialogue.DOM;
 			this.dialogue.moveTo(210, 50);
 			this.context = this.dialogue.DOM.cnvPreview.getContext('2d');
 		}
 	},
 
 	onUpdateFrames:function( frames, current ){
-		this.DOM.inpFrameRate.value = this.parent.core.fps;
-
+		this.DOM.inpFrameRate.value = this.core.fps;
 		this.pool.call("purgeFrames");
 		this.current = current;
 		this.frames = frames;
 		frames.forEach( frame => new FrameElement(this, frame) );
 
-		var core = this.parent.core;
+		var core = this.core;
 		this.DOM.cnvPreview.width = core.width;
 		this.DOM.cnvPreview.height = core.height;
 
@@ -110,11 +116,11 @@ CLAZZ("projects.sprite.Frames", {
 	play:function(){
 		if( this.hnd != -1 ) this.stop();
 
-		var core = this.parent.core;
+		var core = this.core;
 		this.frames.forEach( frame => core.renderComposite( frame.composite, frame ) );
 		this.DOM.cnvPreview.width = core.width;
 		this.DOM.cnvPreview.height = core.height;
-		this.hnd = setInterval(this.previewNextFrame.bind(this), 1000/(this.parent.core.fps||1) );
+		this.hnd = setInterval(this.previewNextFrame.bind(this), 1000/(this.core.fps||1) );
 		this.previewNextFrame();
 	},
 
@@ -122,7 +128,7 @@ CLAZZ("projects.sprite.Frames", {
 		if( this.hnd != -1 ) this.play();
 		else{
 			this.previewPos = this.frames.indexOf( this.current ) - 1;
-			this.parent.core.renderComposite( this.current.composite, this.current );
+			this.core.renderComposite( this.current.composite, this.current );
 			this.previewNextFrame();
 		}
 	},
@@ -139,7 +145,7 @@ CLAZZ("projects.sprite.Frames", {
 
 		this.previewPos = pos;
 
-		var core = this.parent.core;
+		var core = this.core;
 		this.context.clearRect(0, 0, core.width, core.height);
 		this.context.drawImage( this.frames[pos].composite.canvas, 0, 0 );
 	},
@@ -155,7 +161,7 @@ CLAZZ("projects.sprite.Frames", {
 		change:function(){
 			var fps = parseInt(this.DOM.inpFrameRate.value)||1;
 			this.DOM.inpFrameRate.value = fps;
-			this.parent.core.fps = fps;
+			this.core.fps = fps;
 			this.check();
 		}
 	},

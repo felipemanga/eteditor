@@ -209,10 +209,13 @@ CLAZZ("dialogues.HTMLDialogue", {
     					resize: resizable?"both":"none"
                     }
                 }, [
-                	["embed-body", {
-                        id:html.body.id,
-                        className:html.body.className
-                    }, html.children]
+                    ["embed-html", [
+                        ["embed-body", {
+                            id:html.body.id,
+                            className:html.body.className
+                            }, html.children
+                        ]
+                    ]]
                 ]],
                 (!frame||!resizable)?undefined:["div", {className:"windowframe_vresize"}],
                 (!frame||!resizable)?undefined:["div", {className:"windowframe_hresize"}],
@@ -304,7 +307,7 @@ CLAZZ("dialogues.HTMLDialogue", {
 
                 var selectors = match[1].split(",");
                 for( var s=0, sl=selectors.length; s<sl; s++ )
-                    selectors[s] = prefix + selectors[s].replace(/^\s*body/i, "embed-body").replace(/^\s*html/i, "#HTML");
+                    selectors[s] = prefix + selectors[s].replace(/^\s*body/i, "embed-body").replace(/^\s*html/i, "embed-html");
 
                 var style = match[2];
                 style = style.replace(/url\(([^)]+)\)/g, "url(" + documentRoot + "$1)");

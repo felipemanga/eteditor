@@ -22,7 +22,6 @@ CLAZZ("mainmenu.MainMenu", {
 
     $DIALOGUE:{
     	load:function(){
-    		this.onResize();
     	}
     },
 
@@ -42,7 +41,7 @@ CLAZZ("mainmenu.MainMenu", {
 		this.dialogue.setHeight( height );
     },
 
-	toggle:true,
+	toggle:false,
     toggleVisibility:function( toggle ){
         var DOM = this.dialogue.DOM;
 
@@ -85,7 +84,7 @@ CLAZZ("mainmenu.MainMenu", {
                 if( !item.hidden ) this.menuElements.push( DOC.create("div", item.toggle ? DOM.menuOptions : DOM.quickMenu, {
 					className:"btn",
 					text: DOC.TEXT(label),
-                    onclick: obj.raise.bind(obj, "MENU", label)
+                    onclick: () => obj.raise("MENU", label)
 				}) );
 			});
 		}

@@ -60,8 +60,6 @@ CLAZZ("projects.sprite.SpriteProject", {
             this.core.width = this.settings.width || 64;
             this.core.height = this.settings.height || 64;
 
-            console.log(this.pool);
-
             this.pool.call("onLoadTools", this.core.tools);
 
     		this.core.addFrame(0, false, true);
@@ -204,6 +202,7 @@ CLAZZ("projects.sprite.SpriteProject", {
             return false;
 
     	if( path ){
+            if( path.target ) debugger;
 			if( path.ext ) this.path = "sprite." + path.ext;
     		else this.path = path;
 		}
@@ -336,7 +335,8 @@ CLAZZ("projects.sprite.SpriteProject", {
     },
 
 	setReference:function(path){
-		this.DOM.stack.style.backgroundImage = "url(" + (path||"bg.png").replace(/\\/g, "\\\\") + ")";
+        if( path ) this.DOM.stack.style.backgroundImage = path;
+		else this.DOM.stack.style.backgroundImage = "";
 		this.DOM.stack.style.backgroundSize = path ? "contain" : "initial";
 	},
 

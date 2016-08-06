@@ -238,8 +238,11 @@ body#filtersBody {
     position: absolute;
 }
 
+#framesBody #frameCtrls{
+    float: left;
+}
+
 #framesBody #frameCtrls, #framesBody #preview {
-    position: fixed;
     width: 200px;
     height: 230px;
     background-color: #567;
@@ -264,8 +267,6 @@ body#filtersBody {
 #framesBody {
     height: 100%;
     min-height: 230px;
-    overflow-x: auto;
-    overflow-y: auto;
     position: absolute;
 }
 
@@ -292,7 +293,6 @@ div#frames {
 	border-style: solid;
 	max-height: calc( 100% - 150px );
 	box-sizing: border-box;
-	z-index: -1;
 }
 
 #frameCtrls span {

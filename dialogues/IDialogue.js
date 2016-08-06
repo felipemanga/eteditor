@@ -166,8 +166,10 @@ CLAZZ("dialogues.IDialogue", {
 	},
 
 	onClose:function(){
-		if( this.parent || this.cfg.hide_only ) this.hide();
-		else this.close();
+		if( this.parent || this.cfg.hide_only ){
+			this.enabled = false;
+			this.hide();
+		}else this.close();
 	},
 
 	close:function(){
