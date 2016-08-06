@@ -29,6 +29,7 @@ CLAZZ("popups.colorpicker.ColorPicker", {
 
     $DIALOGUE:{
         load:function(){
+            this.color.fromRGBA(0,0,0,255);
             this.DOM = this.dialogue.DOM;
             var area = this.dialogue.getAvailArea();
             if( area.width > area.height )

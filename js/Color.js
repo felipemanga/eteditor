@@ -26,6 +26,13 @@ CLAZZ("js.Color", {
         ];
     },
 
+    fromRGBA:function(r, g, b, a){
+        this.r = r|0;
+        this.g = g|0;
+        this.b = b|0;
+        this.a = a|0;
+    },
+
     fromHSV:function( h, s, v ){
         var r, g, b, i, f, p, q, t;
         if (arguments.length === 1) {
