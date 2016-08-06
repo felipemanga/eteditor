@@ -1,6 +1,8 @@
 {
     "sprite.SpriteProject":"Sprite",
     "window:OpenFileDialogue":"Open File:",
+    "window:ColorPicker":"Color Picker",
+    "window:ToolBox":"Toolbox",
     "save":"Save",
     "saveAs":"Save as..."
 }

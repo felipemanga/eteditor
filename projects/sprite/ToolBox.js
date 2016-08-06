@@ -1,4 +1,4 @@
-CLAZZ("projects.sprite.Properties", {
+CLAZZ("projects.sprite.ToolBox", {
     INJECT:{
         dialogue:INJECT("dialogues.IDialogue", {
             controller:INJECT("this"),
@@ -199,8 +199,8 @@ CLAZZ("projects.sprite.Properties", {
     },
 
 	onResize:function(w,h){
-        this.properties.DOM.canvasWidth.value = this.width;
-        this.properties.DOM.canvasHeight.value = this.height;
+        this.DOM.canvasWidth.value = this.width;
+        this.DOM.canvasHeight.value = this.height;
 	},
 
 	$inpLayerName:{
