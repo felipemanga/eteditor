@@ -42,10 +42,12 @@ Implemented features:
  - JPG+JSON / PNG+JSON texture atlas for animation
  - GIF (with animation support)
 
-To-Do:
+To-do, in no particular order:
+ - stylus pressure detection (browsers don't have an API for this yet)
  - Brush scaling
  - blur tool
- - stylus pressure detection (browsers don't have an API for this yet)
+ - clone stamp
+ - better color palette window
  - tool preview overlay. Necessary for Pencil, Eraser and Select.
  - animation: import spritesheet support
  - animation: layer references
@@ -59,6 +61,8 @@ To-Do:
  - app icon and logo
  - text tool
  - left-hand mode
+
+Feel free to make feature requests.
 
 ## <a id="minijs"></a> MiniJS Javascript-to-PNG Codec
 Drag and drop Javascript files into this utility. It will merge them all and

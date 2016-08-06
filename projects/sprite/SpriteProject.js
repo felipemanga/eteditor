@@ -448,6 +448,18 @@ CLAZZ("projects.sprite.SpriteProject", {
             this.applyZoom();
 			evt.preventDefault();
         },
+        pointerdown:function(evt){
+            console.log(evt);
+            evt.preventDefault();
+        },
+        pointermove:function(evt){
+            console.log(evt);
+            evt.preventDefault();
+        },
+        pointerup:function(evt){
+            console.log(evt);
+            evt.preventDefault();
+        },
         mousedown:function(evt){
             this.runTool(evt, "down");
 			this.dragOffsetX = evt.pageX;
