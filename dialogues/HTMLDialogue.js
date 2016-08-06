@@ -152,7 +152,6 @@ CLAZZ("dialogues.HTMLDialogue", {
 
     __show:function(){
         this.DOM.__ROOT__.style.display = "initial";
-        this.bringToTop();
     },
 
     __hide:function(){

@@ -47,4 +47,15 @@ singleton
     ("app", "DOC.Pool")
     ("mainmenu", "mainmenu.MainMenu")
 
+oninit( () => {
+    json( "i18n.main", "i18n.main." + DOC.TEXT.chooseLanguage([
+        "pt-BR",
+        "en-US"
+    ]) )
+});
+
+onready( () => {
+    DOC.TEXT.addTexts( DOC.TEXT.language, i18n.main[DOC.TEXT.language] );
+});
+
 get("mainmenu")
