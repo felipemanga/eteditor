@@ -22,6 +22,17 @@ function strToBuffer(str){
 	return arr;
 }
 
+(function(){
+	var map = {};
+
+	self.arrayToBlobURL = function arrayToBlobURL( array, name ){
+		if( map[name] )
+			URL.revokeObjectURL( map[name] );
+
+		return map[name] = URL.createObjectURL( new Blob([array], {}) );
+	}
+})();
+
 function base64toBlob(base64Data, contentType, sliceSize) {
 
     var byteCharacters,

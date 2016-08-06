@@ -17,9 +17,11 @@ CLAZZ("projects.sprite.SpriteProject", {
         app:"app",
         pool:"Pool",
         settings:RESOLVE("settings.projects.sprite.SpriteProject"),
-		path:"path"
+		path:"path",
+        data:"data"
     },
 
+    data:null,
     DOM:null,
     core:null,
     properties:null,
@@ -65,7 +67,8 @@ CLAZZ("projects.sprite.SpriteProject", {
     		this.core.addFrame(0, false, true);
     		this.core.addLayer(false, true);
 
-            if( this.path ) this.core.loadImage( this.path );
+            if( this.data ) this.core.loadImage( arrayToBlobURL(this.data, this.__uid) );
+            else if( this.path ) this.core.loadImage( this.path );
     		else this.core.push();
 
             var DOM = this.dialogue.DOM;
