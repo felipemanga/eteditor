@@ -1,10 +1,18 @@
 /* */
 implements("dialogues.IDialogue", "dialogues.HTMLDialogue")
-
 json("mainmenuCfg", "mainmenu.config");
+
+singleton
+    ("io.FileReader", "io.WebFileReader")
+    ("io.FileSaver", "io.WebFileSaver")
+    ("io.Settings", "io.WebSettings")
 
 /*/
 implements("dialogues.IDialogue", "dialogues.NWDialogue")
+singleton
+    ("io.FileReader", "io.NodeFileReader")
+    ("io.FileSaver", "io.NodeFileSaver")
+    ("io.Settings", "io.NodeSettings")
 /* */
 
 json("settings", "settings")
@@ -35,9 +43,6 @@ singleton
     ("SecondaryColor", "js.Color")
     ("popups.openfile.IOpenFileDialogue", "popups.openfile.OpenFileDialogue")
     ("popups.colorpicker.IColorPicker", "popups.colorpicker.ColorPicker")
-
-    ("io.FileReader", "io.HTMLFileReader")
-    ("io.FileSaver", "io.WebFileSaver")
 
     ("app", "DOC.Pool")
     ("mainmenu", "mainmenu.MainMenu")

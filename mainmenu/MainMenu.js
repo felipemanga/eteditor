@@ -16,15 +16,20 @@ CLAZZ("mainmenu.MainMenu", {
         }),
 
         openFile:"popups.openfile.IOpenFileDialogue",
-
-        app:"app"
+        app:"app",
+        persist:"io.Settings",
+        settings:"settings"
     },
 
     $DIALOGUE:{
     	load:function(){
+            this.persist.read(this.settings);
     	}
     },
 
+    saveSettings:function(){
+        this.persist.save(this.settings);
+    },
 
     __screenAnchorY:false,
     onResize:function(){

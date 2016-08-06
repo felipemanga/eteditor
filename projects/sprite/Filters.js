@@ -8,6 +8,7 @@ CLAZZ("projects.sprite.Filters", {
             controller:INJECT("this"),
             cfg:RESOLVE("settings.projects.sprite.Filters.dialogue")
         }),
+		app:"app",
 		core:"core",
 		pool:"Pool",
 		filterList:RESOLVE("settings.projects.sprite.filters")
@@ -23,42 +24,61 @@ CLAZZ("projects.sprite.Filters", {
 			this.DOM = this.dialogue.DOM;
 			var THIS=this;
 			var DOM=this.DOM;
-			var pending = this.filterList.length;
+			var pending = 0;
+			this.setTab( DOM.tabHeader[0] );
+
 			this.filterList.forEach(( file ) => {
-				DOC.getURL(file, (src) => {
-					var clazz = this.compile( src );
-					if( !clazz ) return true;
-
-					var id = ++this.id;
-
-					var el = DOM.create("div", DOM.filters, {
-						onclick:THIS.openFilter.bind(THIS, id),
-						id:"filter" + THIS.id,
-						text:DOC.TEXT( file.replace(/.*?\/|\.[a-z]+$/ig, '') )
-					});
-
-					this.filters[id] = {
-						url:file,
-						id:id,
-						clazz:clazz,
-						src:src,
-						el:el
-					};
-
-					pending--;
-
-					if( !pending )
-						this.setTab( DOM.tabHeader[0] );
-				});
+				if( typeof file != "string" )
+					this.addFilter( file.url, file.src )
+				else
+					DOC.getURL(file, (src) => this.addFilter( file, src, undefined, true ) );
 			});
 		}
+	},
+
+	addFilter:function( file, src, clazz, remote ){
+		clazz = clazz || this.compile( src );
+		if( !clazz ) return true;
+
+		var filter;
+
+		if( !this.filters[file] ){
+			var el = this.DOM.create("div", this.DOM.filters, {
+				onclick:this.openFilter.bind(this, file),
+				text:DOC.TEXT( file.replace(/.*?\/|\.[a-z]+$/ig, '') )
+			});
+
+			filter = this.filters[file] = {
+				url:file,
+				src:src,
+				getClazz:() => clazz,
+				setClazz:(c) => clazz = c,
+				getEl:() => el
+			};
+		}else{
+			filter = this.filters[file];
+			filter.setClazz( clazz );
+			filter.src = src;
+		}
+
+		var pos = this.filterList.findIndex( (desc) => desc == file || desc.url == file );
+
+		if( remote ) filter = filter.url;
+		if( pos != -1 ){
+			this.filterList[pos] = filter;
+		}else{
+			this.filterList.push(filter);
+		}
+
+		if( Object.keys(this.filters).length == 1 )
+			filter.getEl().click();
 	},
 
 	openFilter:function(id){
 		var filter = this.filters[id];
 		this.DOM.path.textContent = filter.url;
 		this.DOM.TEXTAREA.value = filter.src;
-		var clazz = filter.clazz;
+		var clazz = filter.getClazz();
 		var inst = clazz ? new clazz() : null;
 		this.meta = null;
 		this.buildMenu( inst );
@@ -147,16 +167,14 @@ CLAZZ("projects.sprite.Filters", {
 		}
 
 		Object.sort( meta ).forEach( (k) => {
-				DOM.create("div", {className:"optionContainer"}, filterOpts, [
-					["div", {className:"optionLabel", text:DOC.TEXT(k)}],
-					createMeta( k )
-				]);
-			});
-
+			DOM.create("div", {className:"optionContainer"}, filterOpts, [
+				["div", {className:"optionLabel", text:DOC.TEXT(k)}],
+				createMeta( k )
+			]);
+		});
 	},
 
 	onSave:function(){
-		var path = "app/include/projects/sprite/filters/";
 		try{
 			var clazz = this.compile();
 			if( !clazz ) return;
@@ -165,24 +183,21 @@ CLAZZ("projects.sprite.Filters", {
 
 			this.buildMenu( instance );
 
-			var file = (clazz.NAME || clazz.name);
-			path += file + ".js";
-			if( !this.parent.filters[file] ){
-				this.parent.filters[file] = instance;
-				var id = this.id++;
-				this.DOM.create("div", this.DOM.filters, {
-						onclick:this.openFilter.bind(this, path, id),
-						id:"filter" + id,
-						text:DOC.TEXT( file )
-					});
-			}
+			var path = (clazz.fullName || clazz.name).replace(/\./g, "/") + ".js";
+
+			this.addFilter(
+				path,
+				this.DOM.TEXTAREA.value,
+				clazz
+			);
+
+			this.app.call("saveSettings");
+
+			this.DOM.path.textContent = path;
 		}catch(err){
 			this.error(err);
 			return;
 		}
-
-		fs.writeFileSync( path, this.DOM.TEXTAREA.value );
-		this.DOM.path.textContent = path;
 	},
 
 	$btnSave:{

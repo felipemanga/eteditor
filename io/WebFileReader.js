@@ -1,4 +1,4 @@
-CLAZZ("io.HTMLFileReader", {
+CLAZZ("io.WebFileReader", {
 	onDropForEach:function(evt, cb){
 		if( evt.dataTransfer.getFilesAndDirectories ){
 			evt.dataTransfer.getFilesAndDirectories().then((files) =>{
