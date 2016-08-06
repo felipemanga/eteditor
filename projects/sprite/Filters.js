@@ -61,17 +61,17 @@ CLAZZ("projects.sprite.Filters", {
 			filter.src = src;
 		}
 
-		var pos = this.filterList.findIndex( (desc) => desc == file || desc.url == file );
-
-		if( remote ) filter = filter.url;
-		if( pos != -1 ){
-			this.filterList[pos] = filter;
-		}else{
-			this.filterList.push(filter);
-		}
+		var pos = this.filterList.findIndex(
+			(desc) => desc == file || desc.url == file
+		);
 
 		if( Object.keys(this.filters).length == 1 )
 			filter.getEl().click();
+
+		if( remote ) filter = filter.url;
+
+		if( pos != -1 ) this.filterList[pos] = filter;
+		else this.filterList.push(filter);
 	},
 
 	openFilter:function(id){
