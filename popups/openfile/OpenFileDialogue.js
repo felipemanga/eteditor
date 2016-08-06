@@ -14,7 +14,7 @@ CLAZZ("popups.openfile.OpenFileDialogue", {
         }),
 
         settings:"settings",
-
+        fileReader:"io.FileReader",
         app:"app"
     },
 
@@ -81,7 +81,7 @@ CLAZZ("popups.openfile.OpenFileDialogue", {
 
     checkReqs:function(){
         var DOM = this.dialogue.DOM;
-        if( this.selected && (this.op == "New" || DOM.savePath.value) ){
+        if( this.selected && (this.op == "New" || DOM.savePath.files.length == 1) ){
             DOM.btnStart.removeAttribute("disabled");
             return true;
         }else{
@@ -93,18 +93,26 @@ CLAZZ("popups.openfile.OpenFileDialogue", {
     start:function(){
         if( !this.checkReqs() ) return;
         var DOM = this.dialogue.DOM;
-
-        var plugin = CLAZZ.get( this.selected, {
-            path: DOM.savePath.value,
-            settings: this.settings[ this.selected ]
-        } );
-
+        this.dialogue.hide();
         this.settings.lastProjectType = this.selected;
         if( !this.settings.recentProjects ) this.settings.recentProjects = [];
         if( DOM.savePath.value ) this.settings.recentProjects.unshift( DOM.savePath.value );
         if( this.settings.recentProjects.length > 10 ) this.settings.recentProjects.pop();
 
-        this.dialogue.hide();
+        var desc = {
+            path: DOM.savePath.value,
+            settings: this.settings[ this.selected ]
+        };
+
+        if( this.op == "New" ){
+            CLAZZ.get( this.selected, desc );
+        }else{
+            this.fileReader.readAsArrayBuffer(DOM.savePath.files[0], (data) => {
+                desc.data = data;
+                CLAZZ.get( this.selected, desc );
+            });
+        }
+
     },
 
     $btnStart:{

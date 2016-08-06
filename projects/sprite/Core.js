@@ -286,7 +286,7 @@ CLAZZ("projects.sprite.Core", {
     },
 
     loadImage:function( path ){
-        MAR.create("img", {
+        DOC.create("img", {
             src:path,
             onload: evt => {
 				var img = evt.target;
