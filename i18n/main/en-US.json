@@ -1,5 +1,6 @@
 {
     "sprite.SpriteProject":"Sprite",
+    "minijs.MiniJSProject":"MiniJS Codec",
     "window:OpenFileDialogue":"Open File:",
     "window:ColorPicker":"Color Picker",
     "window:ToolBox":"Toolbox",
