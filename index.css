@@ -39,7 +39,7 @@ div, embed-body, embed-html {
     box-sizing: border-box;
 }
 
-#windowframeheader_btnCloseWindow {
+#windowframeheader_btnMaxWindow, #windowframeheader_btnCloseWindow {
     float: right;
     background-color: #633;
     width: 20px;
@@ -47,6 +47,7 @@ div, embed-body, embed-html {
     outline-style: solid;
     outline-color: #324;
     cursor: pointer;
+    margin-left: 10px;
 }
 
 .windowframe_hresize {

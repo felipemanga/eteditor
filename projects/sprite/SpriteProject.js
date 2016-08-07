@@ -523,12 +523,12 @@ CLAZZ("projects.sprite.SpriteProject", {
                 this.DOM.stack.style.top  = (parseInt(this.DOM.stack.style.top) +  center.pageY - this.dragOffsetY) + "px";
                 this.applyZoom();
                 this.dragDistance = d;
+                evt.preventDefault();
             }else if( evt.touches.length == 1 && !this.disableTool ){
                 this.runTool(evt.touches[0], "move");
             }
             this.dragOffsetX = center.pageX;
             this.dragOffsetY = center.pageY;
-            evt.preventDefault();
         },
 
         touchend:function(evt){

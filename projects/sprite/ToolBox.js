@@ -2,7 +2,7 @@ CLAZZ("projects.sprite.ToolBox", {
     INJECT:{
         dialogue:INJECT("dialogues.IDialogue", {
             controller:INJECT("this"),
-            cfg:RESOLVE("settings.projects.sprite.Properties.dialogue")
+            cfg:RESOLVE("settings.projects.sprite.ToolBox.dialogue")
         }),
         fileReader:"io.FileReader",
         core:"core",

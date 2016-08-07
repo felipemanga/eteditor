@@ -132,11 +132,11 @@
                     }
                 }
             },
-            "Properties":{
+            "ToolBox":{
                 "dialogue":{
                     "height": 580,
                     "show": false,
-                    "hide_only": true,
+                    "hide_only": "keepEnabled",
                     "always_on_top":true
                 }
             },
