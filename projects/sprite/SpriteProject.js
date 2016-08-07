@@ -447,6 +447,38 @@ CLAZZ("projects.sprite.SpriteProject", {
 
 	disableTool:false,
 
+    log:function(evt){
+        // this.DOM.activeTool.textContent += evt.type + " " + evt.touches;
+		// this.DOM.activeTool.style.display = "initial";
+    },
+
+    pointerdown:function(evt, type){
+        evt.preventDefault();
+        if( window.PointerEvent && type != "pointer" ) return;
+        this.log(evt);
+        this.runTool(evt, "down");
+        this.dragOffsetX = evt.pageX;
+        this.dragOffsetY = evt.pageY;
+    },
+
+    pointermove:function(evt, type){
+        evt.preventDefault();
+        if( window.PointerEvent && type != "pointer" ) return;
+        this.log(evt);
+        this.runTool(evt, "move");
+        this.dragOffsetX = evt.pageX;
+        this.dragOffsetY = evt.pageY;
+    },
+
+    pointerup:function(evt, type){
+        evt.preventDefault();
+        if( window.PointerEvent && type != "pointer" ) return;
+        this.log(evt);
+        this.runTool(evt, "move");
+        this.dragOffsetX = evt.pageX;
+        this.dragOffsetY = evt.pageY;
+    },
+
     $WINDOW:{
         mousewheel:function(evt){
             if( evt.wheelDelta > 0 ) this.zoom *= 2;
@@ -455,41 +487,29 @@ CLAZZ("projects.sprite.SpriteProject", {
 			evt.preventDefault();
         },
         pointerdown:function(evt){
-        	if( evt.pointerType != "pen" ) return;
-            this.runTool(evt, "down");
-			this.dragOffsetX = evt.pageX;
-			this.dragOffsetY = evt.pageY;
-			evt.preventDefault();
+            this.pointerdown(evt, "pointer");
         },
         pointermove:function(evt){
-        	if( evt.pointerType != "pen" ) return;
-            this.runTool(evt, "move");
-			this.dragOffsetX = evt.pageX;
-			this.dragOffsetY = evt.pageY;
-			evt.preventDefault();
+            this.pointermove(evt, "pointer");
         },
         pointerup:function(evt){
-        	if( evt.pointerType != "pen" ) return;
-            this.runTool(evt, "move");
-			this.dragOffsetX = evt.pageX;
-			this.dragOffsetY = evt.pageY;
-			evt.preventDefault();
+            this.pointerup(evt, "pointer");
         },
         mousedown:function(evt){
-            this.runTool(evt, "down");
-			this.dragOffsetX = evt.pageX;
-			this.dragOffsetY = evt.pageY;
+            this.pointerdown(evt, "mouse");
         },
         mousemove:function(evt){
-            if( evt.buttons != 0 )
-                this.runTool(evt, "move");
-            this.drag(evt);
+            this.pointermove(evt, "mouse");
         },
         mouseup:function(evt){
-            this.dragging = null;
-            this.runTool(evt, "up");
+            this.pointerup(evt, "mouse");
         },
         touchstart:function(evt){
+            this.pointerdown(evt, "touch");
+            return;
+
+            if( window.PointerEvent ) return;
+            this.log(evt);
             var center = this.getTouchCenter( evt.touches );
             this.dragOffsetX = center.pageX;
             this.dragOffsetY = center.pageY;
@@ -507,6 +527,11 @@ CLAZZ("projects.sprite.SpriteProject", {
         },
 
         touchmove:function(evt){
+            this.pointermove(evt, "touch");
+            return;
+
+            if( window.PointerEvent ) return;
+            this.log(evt);
             var center = this.getTouchCenter( evt.touches );
 
             if( evt.touches.length == 2 ){
@@ -532,6 +557,11 @@ CLAZZ("projects.sprite.SpriteProject", {
         },
 
         touchend:function(evt){
+            this.pointerup(evt, "touch");
+            return;
+
+            if( window.PointerEvent ) return;
+            this.log(evt);
             if( !this.disableTool ) this.runTool( {pageX:this.dragOffsetX, pageY:this.dragOffsetY}, "up");
             this.dragging = null;
             evt.preventDefault();
