@@ -516,7 +516,7 @@ CLAZZ("projects.sprite.SpriteProject", {
             coord.x = pageCoord.pageX;
             coord.y = pageCoord.pageY;
             if( type == "pointer" && evt.pointerType == "pen" ) coord.pressure = evt.pressure;
-            else if( evt.buttons ) coord.pressure = 1;
+            else if( evt.buttons || evt.touches ) coord.pressure = 1;
             else coord.pressure = 0;
             coord.scale = 1;
             coord.distance = 0;
