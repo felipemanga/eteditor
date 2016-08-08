@@ -128,6 +128,15 @@
                         },
         				"X":{
                             "shortcut":["X"]
+                        },
+                        "zoomIn":{
+                            "shortcut":[17, 187]
+                        },
+                        "zoomOut":{
+                            "shortcut":[17, 189]
+                        },
+                        "zoomFit":{
+                            "shortcut":[17, 48]
                         }
                     }
                 }

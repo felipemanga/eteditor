@@ -29,6 +29,7 @@ CLAZZ("projects.sprite.Layer", {
         this.name = "Layer " + this.id;
         this.context = this.canvas.getContext("2d");
         this.context.imageSmoothingEnabled = false;
+		this.context.msImageSmoothingEnabled = false;
         this.invalidate();
     },
 

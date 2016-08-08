@@ -162,6 +162,31 @@ CLAZZ("projects.sprite.SpriteProject", {
             this.moveLayer( this.core.activeLayer, -1 );
         },
 
+        zoomIn:function(){
+            this.zoom *= 2;
+            this.applyZoom();
+        },
+
+        zoomOut:function(){
+            this.zoom *= 0.5;
+            this.applyZoom();
+        },
+
+        zoom100:function(){
+            this.zoom = 1;
+            this.applyZoom();
+        },
+
+        zoomFit:function(){
+            if( this.zoom == 1 ){
+                this.zoom = Math.min(
+                    this.dialogue.width * 0.98 / this.core.width,
+                    this.dialogue.height * 0.98 / this.core.height
+                );
+            }else this.zoom = 1;
+            this.applyZoom();
+        },
+
     	undo:function(){
     		this.core.undo();
     	},
@@ -171,8 +196,7 @@ CLAZZ("projects.sprite.SpriteProject", {
     	},
 
         endHand:function(){
-            if( this.core.activeTool != this.core.tools.Hand )
-            return;
+            if( this.core.activeTool != this.core.tools.Hand ) return;
             if(this.core.activeTool.deactivate) this.core.activeTool.deactivate();
             this.toolStack.pop();
             this.core.activeTool = null;
@@ -181,8 +205,7 @@ CLAZZ("projects.sprite.SpriteProject", {
         },
 
         endDropper:function(){
-            if( this.core.activeTool != this.core.tools.Dropper )
-            return;
+            if( this.core.activeTool != this.core.tools.Dropper ) return;
             if(this.core.activeTool.deactivate) this.core.activeTool.deactivate();
             this.toolStack.pop();
             this.core.activeTool = null;
@@ -371,15 +394,11 @@ CLAZZ("projects.sprite.SpriteProject", {
     },
 
     drag:function(evt){
-        if( evt.buttons == 0 || !this.dragging )
-            return this.dragging = null;
-
-        if( this.dragging == this.DOM.stack ){
-            this.DOM.stack.style.left = (parseInt(this.DOM.stack.style.left||"0") + (evt.pageX - this.dragOffsetX)) + "px";
-            this.DOM.stack.style.top  = (parseInt(this.DOM.stack.style.top||"0") + (evt.pageY - this.dragOffsetY)) + "px";
-            this.dragOffsetX = evt.pageX;
-            this.dragOffsetY = evt.pageY;
-        }
+        if( this.dragging != this.DOM.stack ) return;
+        this.DOM.stack.style.left = (parseInt(this.DOM.stack.style.left||"0") + (evt.x - this.dragOffsetX)) + "px";
+        this.DOM.stack.style.top  = (parseInt(this.DOM.stack.style.top||"0") + (evt.y - this.dragOffsetY)) + "px";
+        this.dragOffsetX = evt.x;
+        this.dragOffsetY = evt.y;
     },
 
     applyZoom:function(){
@@ -400,83 +419,124 @@ CLAZZ("projects.sprite.SpriteProject", {
 			this.DOM.stack.style.top = "0px";
     },
 
-    getTouchCenter:function( list ){
-        var x=0, y=0, pageX=0, pageY=0;
-
-        for( var i=0; i<list.length; ++i ){
-            x += list[i].pageX;
-            y += list[i].pageY;
-        }
-
-        x /= list.length;
-        y /= list.length;
-
-        pageX = x;
-        pageY = y;
-
-        x = Math.round( (pageX - parseInt(this.DOM.stack.style.left) ) / this.zoom - 0.1 );
-        y = Math.round( (pageY - parseInt(this.DOM.stack.style.top) ) / this.zoom - 0.1 );
-
-        return {
-            x:x,
-            y:y,
-            pageX:pageX,
-            pageY:pageY
-        };
-    },
-
-    runTool:function(evt, type){
+    runTool:function( type ){
         if( this.dragging || !this.core.activeTool || !this.core.activeLayer || !this.core.activeTool[type] )
             return;
+
+        var evt = this.coord;
 		var ref = this.DOM.stack.getBoundingClientRect();
 		ref.left += this.dialogue.window.scrollX;
 		ref.top += this.dialogue.window.scrollY;
 
-        var x = Math.floor( (evt.pageX - (ref.left||0)) / this.zoom );
-        var y = Math.floor( (evt.pageY - (ref.top||0)) / this.zoom );
+        var x = Math.floor( (evt.x - (ref.left||0)) / this.zoom );
+        var y = Math.floor( (evt.y - (ref.top||0)) / this.zoom );
 
-		var w = 1;
-        if( evt.pointerType == "pen" ){
-        	w = evt.pressure;
-        	console.log(w);
-        }
-
-        if( this.core.activeTool[type]( this.core.activeLayer.data, x, y, w ) )
+        if( this.core.activeTool[type]( this.core.activeLayer.data, x, y, evt.pressure ) )
             this.core.activeLayer.redraw();
     },
 
 	disableTool:false,
+    coord:null,
+    prepareEvent:function(evt, type){
+        var coord = this.coord;
+        if( !coord ) coord = this.coord = {
+            x:0,
+            y:0,
+            pressure:0.5,
+            touches:{},
+            touchCount:0,
+            scale:1,
+            refDistance:0,
+            isDragStart:false,
+            distance:0
+        };
 
-    log:function(evt){
-        // this.DOM.activeTool.textContent += evt.type + " " + evt.touches;
-		// this.DOM.activeTool.style.display = "initial";
+        if( type != "pointer" ){
+            evt.preventDefault();
+            if( window.PointerEvent ) return true;
+        }
+
+        var touches = coord.touches, oldTouchCount = coord.touchCount;
+
+        if( evt.pointerType == "touch" ){
+            if( evt.type == "pointerleave" || evt.type == "pointerup" )
+                touches = coord.touches = {};// delete touches[evt.pointerId];
+            else
+                touches[ evt.pointerId ] = evt;
+
+            var keys = Object.keys(touches), count = keys.length;
+            coord.touchCount = keys.length;
+        }else coord.touchCount = 0;
+        // if( evt.type != "pointermove" ) console.log(evt.type, evt.pointerId, evt.buttons, keys);
+
+        if( coord.touchCount == 2 ){
+            var x=0, y=0, pageX=0, pageY=0;
+
+            for( var k in touches ){
+                x += touches[k].pageX;
+                y += touches[k].pageY;
+            }
+
+            x /= count;
+            y /= count;
+            coord.touchCount = count;
+            coord.pressure = 1;
+            coord.x = x; // Math.round( (pageX - parseInt(this.DOM.stack.style.left) ) / this.zoom - 0.1 );
+            coord.y = y; // Math.round( (pageY - parseInt(this.DOM.stack.style.top) ) / this.zoom - 0.1 );
+            var curDist = distance(
+                touches[keys[0]].pageX,
+                touches[keys[0]].pageY,
+                touches[keys[1]].pageX,
+                touches[keys[1]].pageY
+            );
+
+            coord.isDragStart = oldTouchCount == 1;
+            if( oldTouchCount == 1 ) coord.scale = 1;
+            else coord.scale = (curDist / coord.distance) || 1;
+            coord.distance = curDist;
+        }else{
+            coord.x = evt.pageX;
+            coord.y = evt.pageY;
+            if( type == "pointer" && evt.pointerType == "pen" ) coord.pressure = evt.pressure;
+            else if( evt.buttons ) coord.pressure = 1;
+            else coord.pressure = 0;
+            coord.scale = 1;
+            coord.distance = 0;
+            coord.isDragStart = false;
+        }
+
+        return window.PointerEvent && type != "pointer"
     },
 
     pointerdown:function(evt, type){
-        evt.preventDefault();
-        if( window.PointerEvent && type != "pointer" ) return;
-        this.log(evt);
-        this.runTool(evt, "down");
-        this.dragOffsetX = evt.pageX;
-        this.dragOffsetY = evt.pageY;
+        if( this.prepareEvent(evt, type) ) return false;
+        this.disableTool = this.coord.isDragStart;
+        if( this.coord.isDragStart ){
+            this.core.applySnapshot( this.core.historyId );
+            this.dragging = this.DOM.stack;
+            this.disableTool = true;
+        }else this.runTool("down");
+        this.dragOffsetX = this.coord.x;
+        this.dragOffsetY = this.coord.y;
     },
 
     pointermove:function(evt, type){
-        evt.preventDefault();
-        if( window.PointerEvent && type != "pointer" ) return;
-        this.log(evt);
-        this.runTool(evt, "move");
-        this.dragOffsetX = evt.pageX;
-        this.dragOffsetY = evt.pageY;
+        if( this.prepareEvent(evt, type) ) return false;
+        if( this.dragging || this.coord.touchCount == 2 ){
+            this.drag(this.coord);
+            this.zoom *= this.coord.scale;
+            this.applyZoom();
+        }else if( !this.disableTool && this.coord.pressure != 0 ) this.runTool("move");
+        this.dragOffsetX = this.coord.x;
+        this.dragOffsetY = this.coord.y;
     },
 
     pointerup:function(evt, type){
-        evt.preventDefault();
-        if( window.PointerEvent && type != "pointer" ) return;
-        this.log(evt);
-        this.runTool(evt, "move");
-        this.dragOffsetX = evt.pageX;
-        this.dragOffsetY = evt.pageY;
+        if( this.prepareEvent(evt, type) ) return false;
+        if( !this.disableTool ) this.runTool("up");
+        this.dragging = null;
+        this.dragOffsetX = this.coord.x;
+        this.dragOffsetY = this.coord.y;
     },
 
     $WINDOW:{
@@ -487,26 +547,29 @@ CLAZZ("projects.sprite.SpriteProject", {
 			evt.preventDefault();
         },
         pointerdown:function(evt){
-            this.pointerdown(evt, "pointer");
+            return this.pointerdown(evt, "pointer");
         },
         pointermove:function(evt){
-            this.pointermove(evt, "pointer");
+            return this.pointermove(evt, "pointer");
         },
         pointerup:function(evt){
-            this.pointerup(evt, "pointer");
+            return this.pointerup(evt, "pointer");
+        },
+        pointerleave:function(evt){
+            return this.pointerup(evt, "pointer");
+            // this.prepareEvent(evt, "pointer");
         },
         mousedown:function(evt){
-            this.pointerdown(evt, "mouse");
+            return this.pointerdown(evt, "mouse");
         },
         mousemove:function(evt){
-            this.pointermove(evt, "mouse");
+            return this.pointermove(evt, "mouse");
         },
         mouseup:function(evt){
-            this.pointerup(evt, "mouse");
+            return this.pointerup(evt, "mouse");
         },
         touchstart:function(evt){
-            this.pointerdown(evt, "touch");
-            return;
+            return this.pointerdown(evt, "touch");
 
             if( window.PointerEvent ) return;
             this.log(evt);
@@ -527,8 +590,7 @@ CLAZZ("projects.sprite.SpriteProject", {
         },
 
         touchmove:function(evt){
-            this.pointermove(evt, "touch");
-            return;
+            return this.pointermove(evt, "touch");
 
             if( window.PointerEvent ) return;
             this.log(evt);
@@ -557,8 +619,7 @@ CLAZZ("projects.sprite.SpriteProject", {
         },
 
         touchend:function(evt){
-            this.pointerup(evt, "touch");
-            return;
+            return this.pointerup(evt, "touch");
 
             if( window.PointerEvent ) return;
             this.log(evt);

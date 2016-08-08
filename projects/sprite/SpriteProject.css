@@ -6,7 +6,9 @@
 }
 
 #stack canvas {
+    image-rendering: crisp-edges;
     image-rendering: pixelated;
+    -ms-interpolation-mode: nearest-neighbor;
     position: absolute;
     top: 0;
     left: 0;
@@ -22,6 +24,7 @@ body, html {
     font-family: sans-serif;
     font-weight: bold;
     position: relative;
+    touch-action: none;
 }
 
 html {

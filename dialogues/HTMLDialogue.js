@@ -19,6 +19,8 @@ CLAZZ("dialogues.HTMLDialogue", {
         this.window = window;
     },
 
+    prevHeight:0,
+    prevWidth:0,
     toggleMaximized:function( maximized ){
         this.maximized = maximized === undefined ? !this.maximized : maximized;
         var sizestyle = this.DOM.windowframecontents[0].style;
@@ -26,14 +28,20 @@ CLAZZ("dialogues.HTMLDialogue", {
         if( this.maximized ){
             this.x = parseInt(posstyle.left);
             this.y = parseInt(posstyle.top);
+            this.prevHeight = this.height;
+            this.prevWidth = this.width;
             var area = this.getAvailArea();
+            this.width = area.width;
+            this.height = area.height;
             sizestyle.width = area.width+"px";
             sizestyle.height = area.height+"px";
             posstyle.left = "-1px";
             posstyle.top = "-1px";
         }else{
-            sizestyle.width = this.width+"px";
-            sizestyle.height = this.height+"px";
+            this.width = this.prevWidth;
+            this.height = this.prevHeight;
+            sizestyle.width = this.prevWidth+"px";
+            sizestyle.height = this.prevHeight+"px";
             posstyle.left = this.x + "px";
             posstyle.top = this.y + "px";
         }
