@@ -59,6 +59,9 @@ CLAZZ("dialogues.HTMLDialogue", {
     $windowframeheader_btnCloseWindow:{
         click:function(){
             this.onClose();
+        },
+        touchstart:function(){
+            this.onClose();
         }
     },
 

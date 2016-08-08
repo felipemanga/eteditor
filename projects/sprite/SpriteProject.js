@@ -473,7 +473,8 @@ CLAZZ("projects.sprite.SpriteProject", {
             for( var i=0; i<evt.touches.length; ++i ){
                 touches[i] = evt.touches[i];
             }
-            coord.touchCount = evt.touches.length;
+            keys = [0,1];
+            count = coord.touchCount = evt.touches.length;
         }
         // if( evt.type != "pointermove" ) console.log(evt.type, evt.pointerId, evt.buttons, keys);
 
