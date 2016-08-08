@@ -35,7 +35,7 @@ CLAZZ("popups.colorpicker.ColorPicker", {
             if( area.width > area.height )
                 this.dialogue.moveTo( area.width-this.dialogue.width, 0 );
             else
-                this.dialogue.moveTo( 200, area.height-this.height );
+                this.dialogue.moveTo( 128, area.height-this.dialogue.height );
 
             this.ctx = this.DOM.CANVAS.getContext("2d");
             this.data = this.ctx.getImageData( 0, 0, this.DOM.CANVAS.width, this.DOM.CANVAS.height );
