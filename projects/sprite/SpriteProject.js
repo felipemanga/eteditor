@@ -507,6 +507,12 @@ CLAZZ("projects.sprite.SpriteProject", {
             else coord.scale = (curDist / coord.distance) || 1;
             coord.distance = curDist;
         }else{
+            if( !pageCoord ){
+                pageCoord = {
+                    pageX: this.dragOffsetX,
+                    pageY: this.dragOffsetY
+                };
+            }
             coord.x = pageCoord.pageX;
             coord.y = pageCoord.pageY;
             if( type == "pointer" && evt.pointerType == "pen" ) coord.pressure = evt.pressure;
