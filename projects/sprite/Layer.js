@@ -29,6 +29,7 @@ CLAZZ("projects.sprite.Layer", {
         this.name = "Layer " + this.id;
         this.context = this.canvas.getContext("2d");
         this.context.imageSmoothingEnabled = false;
+		this.context.msImageSmoothingEnabled = false;
         this.invalidate();
     },
 
@@ -45,7 +46,11 @@ CLAZZ("projects.sprite.Layer", {
     },
 
     invalidate:function(){
-        this.data = new ImageData( new Uint8ClampedArray(this.canvas.width*this.canvas.height*4), this.canvas.width, this.canvas.height );
+		try{
+        	this.data = new ImageData( new Uint8ClampedArray(this.canvas.width*this.canvas.height*4), this.canvas.width, this.canvas.height );
+		}catch(e){
+			this.data = this.context.createImageData(this.canvas.width, this.canvas.height);
+		}
     },
 
 	clone:function(){

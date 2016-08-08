@@ -25,6 +25,8 @@ CLAZZ("dialogues.IDialogue", {
 	enabled:true,
 	width:0,
 	height:0,
+    x:0,
+    y:0,
 	window:null,
 
 	CONSTRUCTOR:function(){
@@ -167,7 +169,7 @@ CLAZZ("dialogues.IDialogue", {
 
 	onClose:function(){
 		if( this.parent || this.cfg.hide_only ){
-			this.enabled = false;
+			if( this.cfg.hide_only === true ) this.enabled = false;
 			this.hide();
 		}else this.close();
 	},

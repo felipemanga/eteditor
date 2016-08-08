@@ -128,15 +128,24 @@
                         },
         				"X":{
                             "shortcut":["X"]
+                        },
+                        "zoomIn":{
+                            "shortcut":[17, 187]
+                        },
+                        "zoomOut":{
+                            "shortcut":[17, 189]
+                        },
+                        "zoomFit":{
+                            "shortcut":[17, 48]
                         }
                     }
                 }
             },
-            "Properties":{
+            "ToolBox":{
                 "dialogue":{
                     "height": 580,
                     "show": false,
-                    "hide_only": true,
+                    "hide_only": "keepEnabled",
                     "always_on_top":true
                 }
             },

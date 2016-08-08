@@ -11,11 +11,49 @@ CLAZZ("dialogues.HTMLDialogue", {
     },
 
     zIndex:0,
+    maximized:false,
 
     CONSTRUCTOR:function(opt){
         SUPER(opt);
         dialogues.HTMLDialogue.focusZ++;
         this.window = window;
+    },
+
+    prevHeight:0,
+    prevWidth:0,
+    toggleMaximized:function( maximized ){
+        this.maximized = maximized === undefined ? !this.maximized : maximized;
+        var sizestyle = this.DOM.windowframecontents[0].style;
+        var posstyle = this.DOM.__ROOT__.style;
+        if( this.maximized ){
+            this.x = parseInt(posstyle.left);
+            this.y = parseInt(posstyle.top);
+            this.prevHeight = this.height;
+            this.prevWidth = this.width;
+            var area = this.getAvailArea();
+            this.width = area.width;
+            this.height = area.height;
+            sizestyle.width = area.width+"px";
+            sizestyle.height = area.height+"px";
+            posstyle.left = "-1px";
+            posstyle.top = "-1px";
+        }else{
+            this.width = this.prevWidth;
+            this.height = this.prevHeight;
+            sizestyle.width = this.prevWidth+"px";
+            sizestyle.height = this.prevHeight+"px";
+            posstyle.left = this.x + "px";
+            posstyle.top = this.y + "px";
+        }
+    },
+
+    $windowframeheader_btnMaxWindow:{
+        click:function(){
+            this.toggleMaximized();
+        },
+        touchstart:function(){
+            this.toggleMaximized();
+        }
     },
 
     $windowframeheader_btnCloseWindow:{
@@ -42,6 +80,10 @@ CLAZZ("dialogues.HTMLDialogue", {
 
     $windowframe:{
         mousedown:function(evt){
+            this.bringToTop();
+            this.__onFocus();
+        },
+        touchstart:function(evt){
             this.bringToTop();
             this.__onFocus();
         }
@@ -101,6 +143,8 @@ CLAZZ("dialogues.HTMLDialogue", {
     },
 
 	__moveWindow:function( point ){
+        if( (this.isResizing || this.isMoving) && this.maximized ) this.toggleMaximized(false);
+
         var dy = point.screenY - this.moveRefY;
         var dx = point.screenX - this.moveRefX;
 
@@ -212,7 +256,8 @@ CLAZZ("dialogues.HTMLDialogue", {
                     className:"windowframeheader",
                     text:this.cfg.title || DOC.TEXT("window:"+(this.controller.constructor.NAME || this.controller.constructor.name))
                 }, [
-                    !frame?null:[ "div", {id:"windowframeheader_btnCloseWindow", text:"X"} ]
+                    !frame?null:[ "div", {id:"windowframeheader_btnCloseWindow", text:"X"} ],
+                    (!frame||!resizable)?null:["div", {id:"windowframeheader_btnMaxWindow", text:"Δ"}]
                 ]],
                 ["div",{
                     className:"windowframecontents " + html.classes,
