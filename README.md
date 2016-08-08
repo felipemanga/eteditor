@@ -17,6 +17,7 @@ Implemented features:
 - layer blending modes
 - layer alpha
 - reference image as background for quick and easy Rotoscoping
+- stylus pressure support (only works in IE for now, Chrome & Firefox are still working on the APIs)
 - animation
  - onionskinning
  - preview
@@ -43,7 +44,6 @@ Implemented features:
  - GIF (with animation support)
 
 To-do, in no particular order:
- - stylus pressure detection (browsers don't have an API for this yet)
  - Brush scaling
  - blur tool
  - clone stamp
@@ -61,6 +61,9 @@ To-do, in no particular order:
  - app icon and logo
  - text tool
  - left-hand mode
+
+ Known issues:
+ - Stuff looks blurry in IE. Because IE.
 
 Feel free to make feature requests.
 
