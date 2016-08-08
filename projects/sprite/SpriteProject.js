@@ -468,12 +468,15 @@ CLAZZ("projects.sprite.SpriteProject", {
             coord.touchCount = keys.length;
         }else coord.touchCount = 0;
 
+        var pageCoord = evt;
         if( evt.touches ){
             touches = coord.touches = {};
+            keys = [];
             for( var i=0; i<evt.touches.length; ++i ){
                 touches[i] = evt.touches[i];
+                keys[i] = i;
             }
-            keys = [0,1];
+            pageCoord = evt.touches[0];
             count = coord.touchCount = evt.touches.length;
         }
         // if( evt.type != "pointermove" ) console.log(evt.type, evt.pointerId, evt.buttons, keys);
@@ -490,8 +493,8 @@ CLAZZ("projects.sprite.SpriteProject", {
             y /= count;
             coord.touchCount = count;
             coord.pressure = 1;
-            coord.x = x; // Math.round( (pageX - parseInt(this.DOM.stack.style.left) ) / this.zoom - 0.1 );
-            coord.y = y; // Math.round( (pageY - parseInt(this.DOM.stack.style.top) ) / this.zoom - 0.1 );
+            coord.x = x;
+            coord.y = y;
             var curDist = distance(
                 touches[keys[0]].pageX,
                 touches[keys[0]].pageY,
@@ -504,8 +507,8 @@ CLAZZ("projects.sprite.SpriteProject", {
             else coord.scale = (curDist / coord.distance) || 1;
             coord.distance = curDist;
         }else{
-            coord.x = evt.pageX;
-            coord.y = evt.pageY;
+            coord.x = pageCoord.pageX;
+            coord.y = pageCoord.pageY;
             if( type == "pointer" && evt.pointerType == "pen" ) coord.pressure = evt.pressure;
             else if( evt.buttons ) coord.pressure = 1;
             else coord.pressure = 0;
