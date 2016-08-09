@@ -1,5 +1,5 @@
 need([
-    "dialogues.IDialogue",
+    // "dialogues.IDialogue",
     {FQCN:"CanvasTool.PngEncoder", URL:"js/CanvasTool.js"}
 ], function(){
 

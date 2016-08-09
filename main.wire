@@ -3,6 +3,7 @@ implements("dialogues.IDialogue", "dialogues.HTMLDialogue")
 json("mainmenuCfg", "mainmenu.config");
 
 singleton
+    ("io.Store", "io.WebStore")
     ("io.FileReader", "io.WebFileReader")
     ("io.FileSaver", "io.WebFileSaver")
     ("io.Settings", "io.WebSettings")
@@ -23,6 +24,8 @@ implements
     ("projects.IProject", "projects.minijs.MiniJSProject")
     ("io.compressors.FileCompressor", "io.compressors.PNCCompressor")
     ("io.compressors.FileCompressor", "io.compressors.ZIPCompressor")
+
+    ("projects.IProject", "projects.ide.IDEProject")
 
     ("projects.IProject", "projects.sprite.SpriteProject")
     ("projects.sprite.ILayer", "projects.sprite.Layer")

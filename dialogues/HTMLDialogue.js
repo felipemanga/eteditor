@@ -45,6 +45,7 @@ CLAZZ("dialogues.HTMLDialogue", {
             posstyle.left = this.x + "px";
             posstyle.top = this.y + "px";
         }
+        this.raise("DIALOGUE", "resize");
     },
 
     $windowframeheader_btnMaxWindow:{
@@ -210,20 +211,30 @@ CLAZZ("dialogues.HTMLDialogue", {
     },
 
     setHeight:function(height){
+        height = height|0;
+        if( this.height == height ) return;
         this.height = height || 0;
         this.DOM.windowframecontents[0].style.height = this.height + "px";
+        this.raise("DIALOGUE", "resize");
     },
 
     setWidth:function(width){
+        width = width|0;
+        if( width == this.width ) return;
         this.width = width || 0;
         this.DOM.windowframecontents[0].style.width = this.width + "px";
+        this.raise("DIALOGUE", "resize");
     },
 
     setSize:function(width, height){
+        width = width|0;
+        height = height|0;
+        if( this.width == width && this.height == height ) return;
         this.height = height || 0;
         this.width = width || 0;
         this.DOM.windowframecontents[0].style.height = this.height + "px";
         this.DOM.windowframecontents[0].style.width = this.width + "px";
+        this.raise("DIALOGUE", "resize");
     },
 
     moveTo:function(x, y){
