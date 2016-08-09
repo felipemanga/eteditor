@@ -24,6 +24,20 @@
             }
         },
 
+        "ide":{
+            "IDEProject":{
+                "dialogue":{
+                    "title":"JavaScript Editor",
+                    "menu":{
+                        "eval":{
+                            "toggle":true,
+                            "shortcut":[17, 13]
+                        }
+                    }
+                }
+            }
+        },
+
         "sprite":{
             "filters":[
                 "projects/sprite/filters/Blur.js",
