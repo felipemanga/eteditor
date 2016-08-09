@@ -181,10 +181,14 @@ CLAZZ("projects.sprite.SpriteProject", {
             if( this.zoom == 1 ){
                 this.zoom = Math.min(
                     this.dialogue.width * 0.98 / this.core.width,
-                    this.dialogue.height * 0.98 / this.core.height
+                    (this.dialogue.height-40) / this.core.height
                 );
             }else this.zoom = 1;
             this.applyZoom();
+
+            var style  = this.DOM.stack.style;
+            style.left = (this.dialogue.width*0.5  - (this.core.width  * this.zoom * 0.5)) + "px"
+            style.top  = (this.dialogue.height*0.5 - (this.core.height * this.zoom * 0.5)) + "px"
         },
 
     	undo:function(){

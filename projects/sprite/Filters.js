@@ -1,5 +1,6 @@
 need([
-	{FQCN:"esprima", URL:"js/esprima.js"}
+	{FQCN:"esprima", URL:"js/esprima.js"},
+	{FQCN:"ace", URL:"js/ace.js"}
 ], function(){
 
 CLAZZ("projects.sprite.Filters", {
@@ -17,6 +18,7 @@ CLAZZ("projects.sprite.Filters", {
 	id:0,
 	DOM:null,
 	filters:null,
+	ace:null,
 
 	$DIALOGUE:{
 		load:function(){
@@ -26,6 +28,9 @@ CLAZZ("projects.sprite.Filters", {
 			var DOM=this.DOM;
 			var pending = 0;
 			this.setTab( DOM.tabHeader[0] );
+			this.ace = ace.edit( DOM.codeComponent );
+		    this.ace.setTheme("ace/theme/monokai");
+		    this.ace.getSession().setMode("ace/mode/javascript");
 
 			this.filterList.forEach(( file ) => {
 				if( typeof file != "string" )
@@ -33,6 +38,10 @@ CLAZZ("projects.sprite.Filters", {
 				else
 					DOC.getURL(file, (src) => this.addFilter( file, src, undefined, true ) );
 			});
+		},
+
+		resize:function(){
+			this.ace.resize(true);
 		}
 	},
 
@@ -77,7 +86,8 @@ CLAZZ("projects.sprite.Filters", {
 	openFilter:function(id){
 		var filter = this.filters[id];
 		this.DOM.path.textContent = filter.url;
-		this.DOM.TEXTAREA.value = filter.src;
+		// this.DOM.TEXTAREA.value = filter.src;
+		this.ace.setValue( filter.src );
 		var clazz = filter.getClazz();
 		var inst = clazz ? new clazz() : null;
 		this.meta = null;
@@ -86,8 +96,10 @@ CLAZZ("projects.sprite.Filters", {
 
 	error:function(e){
 		if( e.index != undefined ){
-			this.DOM.TEXTAREA.focus();
-			this.DOM.TEXTAREA.selectionStart = this.DOM.TEXTAREA.selectionEnd = e.index;
+			// this.DOM.TEXTAREA.focus();
+			// this.DOM.TEXTAREA.selectionStart = this.DOM.TEXTAREA.selectionEnd = e.index;
+			this.ace.focus();
+			this.ace.navigateTo( e.line, 0 );
 		}
 		this.DOM.path.textContent = e.description || e.message || e.toString();
 	},
@@ -95,7 +107,8 @@ CLAZZ("projects.sprite.Filters", {
 	compile:function( code ){
 		try{
 			if( code == undefined )
-				code=this.DOM.TEXTAREA.value;
+				code = this.ace.getValue();
+				// code=this.DOM.TEXTAREA.value;
 
 			syntax = esprima.parse(code, {
                 tolerant: true,
@@ -187,7 +200,8 @@ CLAZZ("projects.sprite.Filters", {
 
 			this.addFilter(
 				path,
-				this.DOM.TEXTAREA.value,
+				// this.DOM.TEXTAREA.value,
+				this.ace.getValue(),
 				clazz
 			);
 
