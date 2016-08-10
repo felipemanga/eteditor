@@ -24,6 +24,7 @@ CLAZZ("mainmenu.MainMenu", {
     $DIALOGUE:{
     	load:function(){
             this.persist.read(this.settings);
+            this.dialogue.moveTo(0, 28);
     	}
     },
 
@@ -36,7 +37,7 @@ CLAZZ("mainmenu.MainMenu", {
         var area = this.dialogue.getAvailArea(), DOM = this.dialogue.DOM;
         var height = Math.max( 40, DOM.BODY.clientHeight );
 		if( this.__screenAnchorY === false )
-			this.__screenAnchorY = 0;
+			this.__screenAnchorY = 28;
 
 		if( this.__screenAnchorY + height > this.screenHeight )
 			this.__screenAnchorY -= this.__screenAnchorY + height - area.height;
