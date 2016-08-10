@@ -84,13 +84,19 @@ CLAZZ("dialogues.HTMLDialogue", {
 
     $windowframe:{
         mousedown:function(evt){
+			if( window.PointerEvent ) return;
             this.bringToTop();
             this.__onFocus();
         },
         touchstart:function(evt){
+			if( window.PointerEvent ) return;
             this.bringToTop();
             this.__onFocus();
-        }
+        },
+		pointerdown:function(evt){
+			this.bringToTop();
+			this.__onFocus();
+		}
     },
 
 	isMoving:false,

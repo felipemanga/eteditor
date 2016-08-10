@@ -1093,6 +1093,9 @@ var DOC = {
 			process( root, root.name, obj );
 			process( root, root.className, obj, true );
 			process( root, root.tagName, obj );
+			root.className.trim().split(/\s+/).forEach(function(name){
+				process( root, name, obj, true );
+			});
 		}
 
 		if( root.children ){
@@ -1102,7 +1105,7 @@ var DOC = {
 				process( c, c.name, obj );
 				process( c, c.className, obj, true );
 				process( c, c.tagName, obj );
-				c.className.split(/\s+/).forEach(function(n){
+				c.className.trim().split(/\s+/).forEach(function(n){
 					process(c, n, obj, true);
 				});
 				DOC.index( c, obj );
