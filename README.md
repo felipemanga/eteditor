@@ -3,9 +3,16 @@ Editor of EveryThing - v0.5
 
 ETEditor is intended to be an online suite of tools with no back-end.
 It can be used [right here!](http://felipemanga.github.io/eteditor) Check it out!
-Do note, it's still under heavy development and bugs are expected. Please tell me about any bugs you find and be sure to save often!
+Do note, it's still under heavy development and bugs are expected. It requires an up-to-date browser (preferably Chrome), so be sure you're using the latest version.
+Please tell me about any bugs you find and be sure to save often!
 
-Right now ETEditor does [sprite editing](#spriteeditor) and [javascript-as-PNG encoding](#minijs).
+Right now ETEditor has the following main features:
+ 1. [sprite editor](#spriteeditor)
+ 2. [javascript-as-PNG encoder](#minijs)
+ 3. [standalone javascript editor](#jsedit)
+ 4. [project editor](#projectedit)
+
+While ETEditor is in alpha state the latest stable version is the gh-pages branch, while master is being used for development.
 
 ## <a id="spriteeditor"></a> Sprite Editor
 This editor's interface is especially designed to be usable on a small, high-rez
@@ -75,6 +82,13 @@ This is useful in situations where diskspace is limited. If your JS is on a
 server, GZIP encoding is probably a better idea. If your game is going to be
 installed on a small drive, you probably don't want it at the top of the applications-taking-up-most-space list. In this case, compressing with PNG makes sense.
 
+## <a id="jsedit"></a> JavaScript Editor
+This is a simple utility for testing / profiling JavaScript code.
+Press Ctrl+Enter to execute your code. It executes inside a function, so use return values or console.log to see the result. Closing the console clears the log.
+
+## <a id="projectedit"></a> Project Editor
+In progress.
+
 ## Future
 The following is a list of things that I intend to add to ETEditor in the near future:
 - Voxel Editing. A prototype has already been built.
@@ -82,3 +96,12 @@ The following is a list of things that I intend to add to ETEditor in the near f
 - AppInventor2 Editing. Based on my AppInventor2HTML5 project, also on Github.
 - JavaScript Editing. For making games entirely within ETEditor.
 - Google Drive / Dropbox support for storing large projects.
+
+## Libraries
+This project is grateful for, and makes use of, the following libraries:
+- CanvasTool.PngEncoder - imaya https://github.com/imaya/CanvasTool.PngEncoder
+- gif.js - Johan Nordberg https://github.com/jnordberg/gif.js
+- esprima.js - jQuery Foundation http://esprima.org
+- ace.js - Ajax.org B.V. https://github.com/ajaxorg/ace
+- JSZip - Stuart Knightley http://stuartk.com/jszip
+- localforage - Mozilla https://github.com/localForage/localForage
