@@ -28,6 +28,7 @@
             "IDEProject":{
                 "dialogue":{
                     "title":"JavaScript Editor",
+                    "width":530,
                     "menu":{
                         "eval":{
                             "toggle":true,

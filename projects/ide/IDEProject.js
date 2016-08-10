@@ -61,9 +61,7 @@ CLAZZ("projects.ide.IDEProject", {
         }
         var delta = Math.round(performance.now() - start);
 
-
-        if( ret !== undefined )
-        	this.DOM.retVal.textContent = delta + "ms | " + this.logVal( ret );
+        this.DOM.retVal.textContent = delta + "ms | " + this.logVal( ret );
 
        	this.log.forEach( (e) => DOC.create("p", {text:e}, this.DOM.console) );
         this.log = [];
