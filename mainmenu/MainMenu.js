@@ -15,6 +15,10 @@ CLAZZ("mainmenu.MainMenu", {
         	"main":RESOLVE("this")
         }),
 
+        projman:INJECT("popups.projectman.ProjectMan",{
+            "main":RESOLVE("this")
+        }),
+        
         openFile:"popups.openfile.IOpenFileDialogue",
         app:"app",
         persist:"io.Settings",
