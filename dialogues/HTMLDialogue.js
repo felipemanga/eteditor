@@ -198,6 +198,11 @@ CLAZZ("dialogues.HTMLDialogue", {
         };
     },
 
+    show:function(bringToTop){
+        SUPER();
+        if(bringToTop !== false) this.bringToTop();
+    },
+
     __show:function(){
         this.DOM.__ROOT__.style.display = "initial";
     },
@@ -259,10 +264,8 @@ CLAZZ("dialogues.HTMLDialogue", {
             this.height = height;
 
             var el = DOC.create("div", document.body, {
-				className:"windowframe",
+				className:"windowframe " + (frame?"":"noframe"),
 				style:{
-					borderStyle: (frame?"solid":"none"),
-					borderWidth: (frame?"1px":"0"),
                     display: (show?"initial":"none")
 				}
 			}, [
@@ -277,8 +280,7 @@ CLAZZ("dialogues.HTMLDialogue", {
                     className:"windowframecontents " + html.classes,
                     style:{
                         width:  width + "px",
-                        height: height + "px",
-    					resize: resizable?"both":"none"
+                        height: height + "px"
                     }
                 }, [
                     ["embed-html", [

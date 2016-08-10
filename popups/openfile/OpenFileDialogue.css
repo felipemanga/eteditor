@@ -35,8 +35,10 @@ body {
 .project {
     float: left;
     box-sizing: border-box;
-    padding: 5px;
+    padding: 10px;
     color: #235;
+    background-color: #78B;
+    margin: 5px;
     cursor: pointer;
 }
 

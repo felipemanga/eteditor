@@ -1,3 +1,15 @@
 {
-    "sprite.SpriteProject":"Desenho"
+    "sprite.SpriteProject":"Desenho",
+    "minijs.MiniJSProject":"Compressor de JS",
+    "ide.IDEProject":"Editor de JS",
+    "projman.ProjManProject":"Projeto",
+
+    "window:OpenFileDialogue":"Abrir Arquivo:",
+    "window:ColorPicker":"Paleta de Cores",
+    "window:ToolBox":"Ferramentas",
+    "window:ProjManProject":"Projeto",
+    "zoomFit":"Zoom",
+
+    "save":"Salvar",
+    "saveAs":"Salvar como..."
 }
