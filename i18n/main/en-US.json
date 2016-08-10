@@ -1,11 +1,14 @@
 {
     "sprite.SpriteProject":"Sprite",
-    "minijs.MiniJSProject":"MiniJS",
-    "ide.IDEProject":"JavaScript",
-    
+    "minijs.MiniJSProject":"JS Minimizer",
+    "ide.IDEProject":"JS Editor",
+    "projman.ProjManProject":"Multi-File Project",
+
     "window:OpenFileDialogue":"Open File:",
     "window:ColorPicker":"Color Picker",
     "window:ToolBox":"Toolbox",
+    "window:ProjManProject":"Multi-File Project",
+
     "save":"Save",
     "saveAs":"Save as..."
 }

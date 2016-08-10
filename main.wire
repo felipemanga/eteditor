@@ -27,6 +27,8 @@ implements
 
     ("projects.IProject", "projects.ide.IDEProject")
 
+    ("projects.IProject", "projects.projman.ProjManProject")
+
     ("projects.IProject", "projects.sprite.SpriteProject")
     ("projects.sprite.ILayer", "projects.sprite.Layer")
     ("popups.brushpicker.IBrushPicker", "popups.brushpicker.BrushPicker")

@@ -9,7 +9,9 @@ CLAZZ("popups.openfile.OpenFileDialogue", {
             cfg:{
                 hide_only:true,
                 show:false,
-                position: "center"
+                position: "center",
+                width: 276,
+                height: 177
             }
         }),
 

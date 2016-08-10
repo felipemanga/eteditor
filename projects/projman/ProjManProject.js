@@ -1,4 +1,4 @@
-CLAZZ("popups.projectman.ProjectMan", {
+CLAZZ("projects.projman.ProjManProject", {
     INJECT:{
         dialogue:INJECT("dialogues.IDialogue", {
             controller:INJECT("this"),
