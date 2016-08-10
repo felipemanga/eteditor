@@ -161,7 +161,8 @@
             "ToolBox":{
                 "dialogue":{
                     "height": 580,
-                    "show": false,
+                    "show": true,
+                    "enabled": true,
                     "hide_only": "keepEnabled",
                     "always_on_top":true
                 }
