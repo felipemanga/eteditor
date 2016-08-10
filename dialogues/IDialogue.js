@@ -94,7 +94,7 @@ CLAZZ("dialogues.IDialogue", {
     onToggleMenu:function(visible){
 		this.raise("DIALOGUE", "toggleMenu", visible);
         if( !this.parent ) return;
-        if( visible && this.enabled ) this.show();
+        if( visible && this.enabled ) this.show(false);
         else this.hide();
     },
 

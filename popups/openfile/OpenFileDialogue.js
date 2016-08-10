@@ -11,7 +11,7 @@ CLAZZ("popups.openfile.OpenFileDialogue", {
                 show:false,
                 position: "center",
                 width: 276,
-                height: 177
+                height: 225
             }
         }),
 

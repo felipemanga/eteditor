@@ -8,6 +8,7 @@
     "window:ColorPicker":"Color Picker",
     "window:ToolBox":"Toolbox",
     "window:ProjManProject":"Multi-File Project",
+    "zoomFit":"Zoom",
 
     "save":"Save",
     "saveAs":"Save as..."
