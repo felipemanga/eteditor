@@ -1,0 +1,28 @@
+body {
+    padding: 0;
+    height: 100%;
+}
+
+main {
+    display: flex;
+    height: 100%;
+    width: 100%;
+}
+
+main .fileSection {
+    margin: 100px 10px 10px 10px;
+    display: block;
+    position: relative;
+}
+
+.fileSection doc-set {
+    overflow: auto;
+    background-color: #345;
+    width: 100%;
+    height: calc(100% - 30px);
+    box-sizing: border-box;
+    display: block;
+    position: absolute;
+    padding: 5px;
+    margin-top: 10px;
+}

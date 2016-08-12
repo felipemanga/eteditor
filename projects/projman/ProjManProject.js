@@ -4,15 +4,17 @@ CLAZZ("projects.projman.ProjManProject", {
             controller:INJECT("this"),
             cfg:{
                 frame:false
-
             }
         })
     },
 
     DOM:null,
-
-    CONSTRUCTOR:function(){
-
+    project:{
+        files:[
+            "bacon",
+            "doritos",
+            "pancakes"
+        ]
     },
 
     $DIALOGUE:{
@@ -21,6 +23,13 @@ CLAZZ("projects.projman.ProjManProject", {
             var area = this.dialogue.getAvailArea();
             this.dialogue.setSize(area.width, area.height);
             this.dialogue.moveTo(0,0);
+        }
+    },
+
+    $filter:{
+        change:function(e){
+            this.project.files.push(e.target.value);
+            this.DOM.docSet[0].update();
         }
     }
 });

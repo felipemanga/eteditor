@@ -902,6 +902,75 @@ var DOC = {
 		return metrics.width;
 	},
 
+	auto:function( set, ctx ){
+		if( !set ) return;
+		if( Array.isArray(set) ){
+			for( var i=0, l=set.length; i<l; ++i )
+				this.auto(set[i], ctx);
+			return;
+		}
+
+		set.__context = ctx = ctx || set.__context;
+
+		var src = DOC.resolve(set.dataset.array, ctx);
+		var clazz = set.getAttribute("clazz");
+
+		if( !src || !clazz )
+			return;
+
+		if( !Array.isArray(set.__internal) ){
+			set.__external = Array.prototype.slice.call(set.children, 0);
+			set.__internal = [];
+		}
+
+		var data = set.__internal;
+
+		DOC.removeChildren( set );
+		var assoc = [], i, j, l = src.length, reverse = [];
+		for( i=0; i<l; ++i ){
+			var val = src[i];
+			for( j=0; j<l; ++j ){
+				if( data[j] && data[j].value === val && assoc[j] === undefined ){
+					assoc[j] = i;
+					reverse[i] = j;
+					break;
+				}
+			}
+
+			if( j == l ){
+				var controller = CLAZZ.get( clazz, {
+					parent:		set,
+					context:	ctx,
+					data:		val,
+					source: 	src
+				}, null );
+
+				j = data.push({
+					controller:	controller,
+					value:		val,
+					elements:	Array.prototype.slice.call(set.children, 0)
+				})-1;
+
+				assoc[j] = i;
+				reverse[i] = j;
+				DOC.removeChildren(set);
+			}
+		}
+
+		for( j=0; j<set.__external.length; ++j )
+			set.appendChild( set.__external[j] );
+
+		var newData = [];
+		for( i=0; i<l; ++i ){
+			var desc = data[ reverse[i] ];
+			newData.push(desc);
+			for( j=0; j<desc.elements.length; ++j )
+				set.appendChild( desc.elements[j] );
+		}
+
+		set.__internal = newData;
+	},
+
 	create: function()
 	{
 		var tag, type;
@@ -1071,30 +1140,62 @@ var DOC = {
 
 	attachPrefix:"$",
 
-	index: function( root, obj, attach )
+	index: function( root, obj, attach, autoContext )
 	{
 		obj = obj || Object.create(DOC, {});
 		root = root || document.body;
+		autoContext = autoContext || attach;
 
-		function process(c, name, obj, multi){
+		function process(c, name, obj, type){
+			var a;
+
+			if( !c.update && !c.controller && (a=c.getAttribute("clazz")) ){
+				if( c.dataset.array ){
+					c.update = DOC.auto.bind(DOC, c);
+					c.update(autoContext);
+				}else{
+					c.controller = CLAZZ.get(a, {
+						element:c,
+						context:autoContext
+					});
+				}
+			}
+
 			if( !name ) return;
-			if( multi ){
-				var a = obj[name];
+			name = name.trim();
+
+			if( type == "class" ){
+				a = obj[name];
 				if( a && a.push ){
 					if( a.indexOf(c) == -1 ) a.push(c);
 				}
 				else obj[name] = [c];
 			}else obj[name] = c;
+
+			if( type == "tag" ){
+				var parts = name.split("-");
+				if( parts.length > 1 ){
+					name = parts[0].toLowerCase();
+					for( var p=1, l=parts.length; p<l; ++p )
+						name += parts[p].charAt(0).toUpperCase() + parts[p].substr(1).toLowerCase();
+
+					a = obj[name];
+					if( a && a.push ){
+						if( a.indexOf(c) == -1 ) a.push(c);
+					}
+					else obj[name] = [c];
+				}
+			}
 		}
 
 		if(!obj.__ROOT__){
 			obj.__ROOT__ = root;
 			process( root, root.id, obj );
 			process( root, root.name, obj );
-			process( root, root.className, obj, true );
-			process( root, root.tagName, obj );
+			process( root, root.className, obj, "class" );
+			process( root, root.tagName, obj, "tag" );
 			root.className.trim().split(/\s+/).forEach(function(name){
-				process( root, name, obj, true );
+				process( root, name, obj, "class" );
 			});
 		}
 
@@ -1103,12 +1204,12 @@ var DOC = {
 			{
 				process( c, c.id, obj );
 				process( c, c.name, obj );
-				process( c, c.className, obj, true );
-				process( c, c.tagName, obj );
+				process( c, c.className, obj, "class" );
+				process( c, c.tagName, obj, "tag" );
 				c.className.trim().split(/\s+/).forEach(function(n){
-					process(c, n, obj, true);
+					process(c, n, obj, "class");
 				});
-				DOC.index( c, obj );
+				DOC.index( c, obj, null, autoContext );
 			}
 		}
 

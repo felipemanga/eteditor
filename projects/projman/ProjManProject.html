@@ -1,9 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>PM</title>
+    <title>PM</title>
+    <link href="ProjManProject.css" />
 </head>
 <body>
-    tyu
+    <main>
+        <section class="fileSection">
+            <input id="filter" />
+            <doc-set data-array="this.project.files" clazz="projects.projman.IFileListItem">
+            </doc-set>
+        </section>
+        <section class="codeSection">
+            <div id="codeComponent">
+            </div>
+        </section>
+        <section class="previewSection">
+            <header>
+                <button>RUN</button>
+            </header>
+            <div id="preview">
+            </div>
+        </section>
+    </main>
 </body>
 </html>
