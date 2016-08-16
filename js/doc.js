@@ -902,15 +902,20 @@ var DOC = {
 		return metrics.width;
 	},
 
-	auto:function( set, ctx ){
+	auto:function( set, cfg ){
 		if( !set ) return;
 		if( Array.isArray(set) ){
 			for( var i=0, l=set.length; i<l; ++i )
-				this.auto(set[i], ctx);
+				this.auto(set[i], cfg);
 			return;
 		}
+		
+		cfg = cfg || {};
+		var ctx = cfg.ctx || cfg.context;
+		var filter = cfg.filter;
 
 		set.__context = ctx = ctx || set.__context;
+		set.__filter = filter = filter === undefined ? set.__filter : filter;
 
 		var src = DOC.resolve(set.dataset.array, ctx);
 		var clazz = set.getAttribute("clazz");
@@ -929,6 +934,9 @@ var DOC = {
 		var assoc = [], i, j, l = src.length, reverse = [];
 		for( i=0; i<l; ++i ){
 			var val = src[i];
+
+			if( filter && filter(val) === false ) continue;
+
 			for( j=0; j<l; ++j ){
 				if( data[j] && data[j].value === val && assoc[j] === undefined ){
 					assoc[j] = i;
@@ -962,6 +970,8 @@ var DOC = {
 
 		var newData = [];
 		for( i=0; i<l; ++i ){
+			if( reverse[i] === undefined ) continue;
+
 			var desc = data[ reverse[i] ];
 			newData.push(desc);
 			for( j=0; j<desc.elements.length; ++j )
@@ -1140,11 +1150,11 @@ var DOC = {
 
 	attachPrefix:"$",
 
-	index: function( root, obj, attach, autoContext )
+	index: function( root, obj, attach, autoCfg )
 	{
 		obj = obj || Object.create(DOC, {});
 		root = root || document.body;
-		autoContext = autoContext || attach;
+		autoCfg = autoCfg || {ctx:attach};
 
 		function process(c, name, obj, type){
 			var a;
@@ -1152,11 +1162,11 @@ var DOC = {
 			if( !c.update && !c.controller && (a=c.getAttribute("clazz")) ){
 				if( c.dataset.array ){
 					c.update = DOC.auto.bind(DOC, c);
-					c.update(autoContext);
+					c.update(autoCfg);
 				}else{
 					c.controller = CLAZZ.get(a, {
 						element:c,
-						context:autoContext
+						context:autoCfg
 					});
 				}
 			}
@@ -1209,7 +1219,7 @@ var DOC = {
 				c.className.trim().split(/\s+/).forEach(function(n){
 					process(c, n, obj, "class");
 				});
-				DOC.index( c, obj, null, autoContext );
+				DOC.index( c, obj, null, autoCfg );
 			}
 		}
 

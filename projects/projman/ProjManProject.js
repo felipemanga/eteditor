@@ -13,6 +13,7 @@ CLAZZ("projects.projman.ProjManProject", {
         files:[
             "bacon",
             "doritos",
+            "dud",
             "pancakes"
         ]
     },
@@ -23,13 +24,14 @@ CLAZZ("projects.projman.ProjManProject", {
             var area = this.dialogue.getAvailArea();
             this.dialogue.setSize(area.width, area.height);
             this.dialogue.moveTo(0,0);
+            this.DOM.docSet[0].update({ filter:(e) => e.indexOf("d") == -1 });
         }
     },
 
     $filter:{
         change:function(e){
             this.project.files.push(e.target.value);
-            this.DOM.docSet[0].update();
+            this.DOM.docSet[0].update({filter:null});
         }
     }
 });
