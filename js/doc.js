@@ -909,7 +909,7 @@ var DOC = {
 				this.auto(set[i], cfg);
 			return;
 		}
-		
+
 		cfg = cfg || {};
 		var ctx = cfg.ctx || cfg.context;
 		var filter = cfg.filter;
@@ -950,7 +950,9 @@ var DOC = {
 					parent:		set,
 					context:	ctx,
 					data:		val,
-					source: 	src
+					source: 	src,
+					inIndex: 	i,
+					outIndex: 	data.length
 				}, null );
 
 				j = data.push({
