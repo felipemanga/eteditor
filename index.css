@@ -140,3 +140,14 @@ div, embed-body, embed-html {
     margin-right: 60px;
     background: #456;
 }
+
+
+#list {
+    height: 100%;
+    width: 100%;
+    overflow: auto;
+}
+
+div#properties {
+    float: right;
+}
