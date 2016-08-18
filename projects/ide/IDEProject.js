@@ -10,6 +10,9 @@ CLAZZ("projects.ide.IDEProject", {
             cfg:RESOLVE("settings.projects.ide.IDEProject.dialogue")
         }),
 
+        settings:"settings",
+        app:"app",
+
         store:"io.Store",
         fileReader:"io.FileReader",
         fileSaver:"io.FileSaver"
@@ -70,8 +73,22 @@ CLAZZ("projects.ide.IDEProject", {
         	this.DOM.console.style.display = "initial";
     },
 
+    autoSaveIH:null,
+    autoSave:function(){
+        var code = this.code.getValue();
+        if( this.settings.autoSave == code )
+            return;
+
+        this.settings.autoSave = code;
+        this.app.call("saveSettings");
+    },
 
     $DIALOGUE:{
+        close:function(){
+            if( this.autoSaveIH )
+                clearInterval(autoSaveIH);
+        },
+
         load:function(){
             this.log = [];
 
@@ -84,13 +101,19 @@ CLAZZ("projects.ide.IDEProject", {
             this.code = ace.edit( this.DOM.codeComponent );
 		    this.code.setTheme("ace/theme/monokai");
 		    this.code.getSession().setMode("ace/mode/javascript");
+            this.code.setValue( this.settings.autoSave || "" );
 
             this.code.commands.addCommand({
                 name: "replace",
                 bindKey: {win: "Ctrl-Enter", mac: "Command-Option-Enter"},
                 exec: () => this.eval()
             });
+
+            this.code.focus();
+
+            this.autoSaveIH = setInterval( this.autoSave.bind(this), 10000 );
         },
+
         resize:function(){
             this.code.resize(true);
         }

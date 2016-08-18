@@ -106,6 +106,9 @@ CLAZZ("popups.openfile.OpenFileDialogue", {
         if( DOM.savePath.value ) this.settings.recentProjects.unshift( DOM.savePath.value );
         if( this.settings.recentProjects.length > 10 ) this.settings.recentProjects.pop();
 
+        if( !this.settings[ this.selected ] )
+            this.settings[ this.selected ] = {};
+
         var desc = {
             path: DOM.savePath.value,
             settings: this.settings[ this.selected ]
