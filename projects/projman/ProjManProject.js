@@ -8,6 +8,7 @@ CLAZZ("projects.projman.ProjManProject", {
         })
     },
 
+    proportion:0.5,
     DOM:null,
     project:{
         files:[
@@ -25,6 +26,22 @@ CLAZZ("projects.projman.ProjManProject", {
             this.dialogue.setSize(area.width, area.height);
             this.dialogue.moveTo(0,0);
             this.DOM.docSet[0].update({ filter:(e) => e.indexOf("d") == -1 });
+        },
+
+        resize:function(){
+            var fixed = Math.min(this.DOM.fileSection[0].getBoundingClientRect().right, 173);
+
+            var width = this.dialogue.width - fixed;
+            var height = this.dialogue.height;
+            var prop = this.proportion * width;
+            this.DOM.codeSection.forEach((cs) => {
+                cs.style.width = prop + "px";
+            });
+
+            prop = (width - prop) + "px";
+            this.DOM.previewSection.forEach((ps) => {
+                ps.style.width = prop;
+            });
         }
     },
 

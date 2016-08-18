@@ -26,6 +26,15 @@ CLAZZ("popups.openfile.OpenFileDialogue", {
         this.app.add(this);
     },
 
+    getPackageProject:function( package ){
+        var desc = projects[ package ];
+        for( var k in desc ){
+            if( /Project$/.test(k) )
+                return package + "." + k;
+        }
+        return false;
+    },
+
     loadPlugins:function(){
         this.checkReqs();
         var DOM = this.dialogue.DOM;
@@ -33,21 +42,14 @@ CLAZZ("popups.openfile.OpenFileDialogue", {
 
         if( !self.projects ) return;
 
-
         for( var id in projects ){
             var desc = projects[id];
             if( !desc ) continue;
             if( !desc.title ){
-                var invalid = true;
-                for( var k in desc ){
-                    if( /Project$/.test(k) ){
-                        id += "." + k;
-                        desc = DOC.resolve( id, projects );
-                        invalid = false;
-                        break;
-                    }
-                }
-                if( invalid ) continue;
+                var proj = this.getPackageProject(id);
+                if( proj === false ) continue;
+                id = proj;
+                desc = DOC.resolve( id, projects );
             }
 
             var el = DOM.create( "div", {
@@ -97,6 +99,21 @@ CLAZZ("popups.openfile.OpenFileDialogue", {
         }
     },
 
+    autoOpen:function( projectPath, data ){
+        projectPath = this.getPackageProject(projectPath);
+        if( !projectPath ) return;
+        var settings = this.settings[ "projects." + projectPath ];
+
+        if( !settings )
+            settings = this.settings[ "projects." + projectPath ] = {};
+
+        var desc = {
+            data: data,
+            settings: settings
+        };
+        CLAZZ.get("projects." + projectPath, desc);
+    },
+
     start:function(){
         if( !this.checkReqs() ) return;
         var DOM = this.dialogue.DOM;
@@ -105,6 +122,9 @@ CLAZZ("popups.openfile.OpenFileDialogue", {
         if( !this.settings.recentProjects ) this.settings.recentProjects = [];
         if( DOM.savePath.value ) this.settings.recentProjects.unshift( DOM.savePath.value );
         if( this.settings.recentProjects.length > 10 ) this.settings.recentProjects.pop();
+
+        if( !this.settings[ this.selected ] )
+            this.settings[ this.selected ] = {};
 
         var desc = {
             path: DOM.savePath.value,
