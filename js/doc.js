@@ -524,7 +524,7 @@ function getURL( url, cb, cfg )
        		var v = xhr.response || xhr.responseText;
         	if( cfg.binary )
         	{
-        		var r = '';
+        		var r = '', cc;
         		for( var i = 0; i<v.length; ++i )
         		{
         			cc = v.charCodeAt(i);
