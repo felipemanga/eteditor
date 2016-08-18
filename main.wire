@@ -52,6 +52,7 @@ singleton
 
     ("app", "DOC.Pool")
     ("mainmenu", "mainmenu.MainMenu")
+    ("onlineStorage", "io.OnlineStorage")
 
 oninit( () => {
     json( "i18n.main", "i18n.main." + DOC.TEXT.chooseLanguage([
