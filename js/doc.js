@@ -1507,13 +1507,13 @@ if( location.search && location.search[0] == "?" ){
 	var search = location.search.substr(1).split("&");
 	for( var i=0, l=search.length; i<l; ++i ){
 		var eq = search[i].indexOf("=");
-		var key;
+		var key, value;
 		if( eq == -1 ){
 			key = search[i];
 			value = "";
 		}else{
 			key = search[i].substr(0, eq);
-			value = search[i].substr(eq+1);
+			value = decodeURIComponent(search[i].substr(eq+1));
 		}
 		DOC.GET[key] = value;
 	}

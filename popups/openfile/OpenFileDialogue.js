@@ -26,6 +26,15 @@ CLAZZ("popups.openfile.OpenFileDialogue", {
         this.app.add(this);
     },
 
+    getPackageProject:function( package ){
+        var desc = projects[ package ];
+        for( var k in desc ){
+            if( /Project$/.test(k) )
+                return package + "." + k;
+        }
+        return false;
+    },
+
     loadPlugins:function(){
         this.checkReqs();
         var DOM = this.dialogue.DOM;
@@ -33,21 +42,14 @@ CLAZZ("popups.openfile.OpenFileDialogue", {
 
         if( !self.projects ) return;
 
-
         for( var id in projects ){
             var desc = projects[id];
             if( !desc ) continue;
             if( !desc.title ){
-                var invalid = true;
-                for( var k in desc ){
-                    if( /Project$/.test(k) ){
-                        id += "." + k;
-                        desc = DOC.resolve( id, projects );
-                        invalid = false;
-                        break;
-                    }
-                }
-                if( invalid ) continue;
+                var proj = this.getPackageProject(id);
+                if( proj === false ) continue;
+                id = proj;
+                desc = DOC.resolve( id, projects );
             }
 
             var el = DOM.create( "div", {
@@ -95,6 +97,16 @@ CLAZZ("popups.openfile.OpenFileDialogue", {
             DOM.btnStart.setAttribute("disabled", true);
             return false;
         }
+    },
+
+    autoOpen:function( projectPath, data ){
+        projectPath = this.getPackageProject(projectPath);
+        if( !projectPath ) return;
+        var desc = {
+            data: data,
+            settings: this.settings[ "projects." + projectPath ]
+        };
+        CLAZZ.get("projects." + projectPath, desc);
     },
 
     start:function(){
