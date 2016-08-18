@@ -12,6 +12,7 @@ CLAZZ("projects.ide.IDEProject", {
 
         settings:"settings",
         app:"app",
+        onlineStorage:"onlineStorage",
 
         data:"data",
         store:"io.Store",
@@ -134,7 +135,7 @@ CLAZZ("projects.ide.IDEProject", {
     $DIALOGUE:{
         close:function(){
             if( this.autoSaveIH )
-                clearInterval(autoSaveIH);
+                clearInterval(this.autoSaveIH);
         },
 
         load:function(){
@@ -157,6 +158,7 @@ CLAZZ("projects.ide.IDEProject", {
                 exec: () => this.eval()
             });
 
+            this.dialogue.toggleMaximized();
             this.code.focus();
 
             this.autoSaveIH = setInterval( this.autoSave.bind(this), 10000 );
@@ -191,8 +193,11 @@ CLAZZ("projects.ide.IDEProject", {
     $btnShare:{
         click:function(){
             var src = this.code.getValue();
-            var url = location.origin + location.pathname + "?p=ide&d=" + encodeURIComponent(src);
-            window.open( url );
+            var url = this.onlineStorage.share("ide", src);
+            url = location.origin + location.pathname + "?p=ide&os=" + url;
+            // window.open( url );
+            DOC.create("span", this.DOM.retVal, {text:"URL: "} );
+            DOC.create("a", this.DOM.retVal, {text:url, href:url} );
         }
     },
 

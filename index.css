@@ -140,3 +140,9 @@ div, embed-body, embed-html {
     margin-right: 60px;
     background: #456;
 }
+
+
+#retVal {
+    -webkit-user-select: text;
+    user-select: text;
+}

@@ -18,6 +18,7 @@ CLAZZ("mainmenu.MainMenu", {
         openFile:"popups.openfile.IOpenFileDialogue",
         app:"app",
         persist:"io.Settings",
+        onlineStorage:"onlineStorage",
         settings:"settings"
     },
 
@@ -31,6 +32,8 @@ CLAZZ("mainmenu.MainMenu", {
 
                 if( DOC.GET.u )
                     DOC.getURL( DOC.GET.u, (d) => this.openFile.autoOpen( DOC.GET.p, d ) );
+                else if( DOC.GET.os )
+                    this.onlineStorage.readShare( DOC.GET.p, DOC.GET.os, (d) => this.openFile.autoOpen( DOC.GET.p, d ) )
                 else
                     this.openFile.autoOpen( DOC.GET.p, DOC.GET.d || "" );
             }
