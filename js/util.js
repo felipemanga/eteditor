@@ -25,11 +25,14 @@ function strToBuffer(str){
 (function(){
 	var map = {};
 
-	self.arrayToBlobURL = function arrayToBlobURL( array, name ){
+	self.arrayToBlobURL = function arrayToBlobURL( array, name, cfg ){
 		if( map[name] )
 			URL.revokeObjectURL( map[name] );
 
-		return map[name] = URL.createObjectURL( new Blob([array], {}) );
+		if( typeof array == "string" )
+			array = strToBuffer(array);
+
+		return map[name] = URL.createObjectURL( new Blob([array], cfg||{}) );
 	}
 })();
 

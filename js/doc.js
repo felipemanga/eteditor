@@ -524,7 +524,7 @@ function getURL( url, cb, cfg )
        		var v = xhr.response || xhr.responseText;
         	if( cfg.binary )
         	{
-        		var r = '';
+        		var r = '', cc;
         		for( var i = 0; i<v.length; ++i )
         		{
         			cc = v.charCodeAt(i);
@@ -909,7 +909,7 @@ var DOC = {
 				this.auto(set[i], cfg);
 			return;
 		}
-		
+
 		cfg = cfg || {};
 		var ctx = cfg.ctx || cfg.context;
 		var filter = cfg.filter;
@@ -950,7 +950,9 @@ var DOC = {
 					parent:		set,
 					context:	ctx,
 					data:		val,
-					source: 	src
+					source: 	src,
+					inIndex: 	i,
+					outIndex: 	data.length
 				}, null );
 
 				j = data.push({
