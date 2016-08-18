@@ -158,7 +158,7 @@ CLAZZ("projects.ide.IDEProject", {
                 exec: () => this.eval()
             });
 
-            this.dialogue.toggleMaximized();
+            setTimeout( () => this.dialogue.toggleMaximized(), 100 );
             this.code.focus();
 
             this.autoSaveIH = setInterval( this.autoSave.bind(this), 10000 );
