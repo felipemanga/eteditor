@@ -18,7 +18,9 @@ CLAZZ("projects.sprite.filters.Blur", {
     weights:null,
     buffer:null,
     activate:function(layer){
-        this.buffer = new Uint8ClampedArray( layer.data.data );
+        if( this.mode == "gaussian" || this.mode == "box" )
+            this.buffer = new Uint8ClampedArray( layer.data.data );
+
         this.run = this[ this.mode ];
         if( this.mode == "gaussian" ){
             var w = [], amount=this.amount;
@@ -34,23 +36,34 @@ CLAZZ("projects.sprite.filters.Blur", {
         if( this.mode == "gaussian-gpu" ){
             this.initGaussianGPUKernel( layer.data, this.amount );
 
-        	var ret, tmp = [], array = layer.data.data, height = layer.data.height, width = layer.data.width;
-        	var part = width * 4;
-        	for(var i = 0; i < array.length; i += part)
-        		tmp.push(Array.prototype.slice.call(array, i, i + part));
+        	var array = layer.data.data, ret = array;
+        	ret.isActiveClone = true;
 
-        	do{
-        	    console.log("running");
-            	ret = this.kernelA( tmp );
-            	ret = this.kernelB( ret );
-            	tmp = ret;
-        	}while( this.repeat-- > 0 )
+        	var oldIsArray = Array.isArray;
 
-        	var acc = 0;
-        	for( i=0; i<height; ++i ){
-        	    for( var j=0; j<part; ++j )
-        	        array[ acc++ ] = ret[i][j];
-        	}
+        	Array.isArray = function( a ){
+                return a && (
+                    oldIsArray.call(Array, a) ||
+                    a.constructor == Uint8ClampedArray
+                    );
+            };
+
+            try{
+                var start = performance.now();
+            	do{
+                	ret = this.kernelA( ret );
+                	ret = this.kernelB( ret );
+            	}while( this.repeat-- > 0 )
+            	var mid = performance.now();
+
+                array.set( ret.toArray() );
+                console.log("proc time:", mid-start, " transfer time:", performance.now() - mid );
+
+            }catch(ex){
+                console.error(ex);
+            }
+
+            Array.isArray = oldIsArray;
         }
         return true;
     },
@@ -61,20 +74,25 @@ CLAZZ("projects.sprite.filters.Blur", {
         this.repeat = Math.floor((amount-1) / 32);
         if( amount > 32 ) amount = 32;
 
+        var constants = {
+            amount:amount,
+            stride:layerData.width * 4
+        };
+
         var gpu = new GPU();
         this.kernelA = gpu.createKernel(function(src){
             var a = 0, samples = 0;
 
             for( var y=-this.constants.amount; y<this.constants.amount; y++ ){
-                var w = 1-Math.abs(y)/this.constants.amount; // Math.abs( Math.cos(y/this.constants.amount*3.14159265*0.5) );
-                a += src[this.thread.y + y][this.thread.x] * w;
+                var w = 1-Math.abs(y)/this.constants.amount;
+                a += src[ this.thread.x + this.constants.stride*y ] * w;
                 samples += w;
             }
 
             return a / samples;
         })
-        .constants({amount:amount})
-        .dimensions([ layerData.width * 4, layerData.height ])
+        .constants(constants)
+        .dimensions([ layerData.data.length ])
         .outputToTexture(true)
         ;
 
@@ -82,17 +100,17 @@ CLAZZ("projects.sprite.filters.Blur", {
             var a = 0, samples = 0;
 
             for( var x=-this.constants.amount; x<this.constants.amount; x++ ){
-                var w = 1-Math.abs(x)/this.constants.amount; // Math.abs( Math.cos(x/this.constants.amount*3.14159265*0.5) );
-                a += src[this.thread.y][this.thread.x + x*4] * w;
+                var w = 1-Math.abs(x)/this.constants.amount;
+                a += src[this.thread.x + x*4] * w;
                 samples += w;
             }
 
             return a / samples;
         })
-        .constants({amount:amount})
-        .dimensions([ layerData.width * 4, layerData.height ])
+        .constants(constants)
+        .dimensions([ layerData.data.length ])
+        .outputToTexture(true)
         ;
-        this.kernelB.canvas = this.kernelA.canvas;
     },
 
     box:function( color, x, y, w, h ){
