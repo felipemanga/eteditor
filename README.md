@@ -19,6 +19,7 @@ This editor's interface is especially designed to be usable on a small, high-rez
 screen, like those on the MS Surface Pro or Samsung Galaxy Note tablets.
 
 Implemented features:
+- open images from url: eteditor/?p=sprite&u=http://site/image.jpg
 - custom brushes
 - unlimited raster layers
 - layer blending modes
@@ -51,6 +52,7 @@ Implemented features:
  - GIF (with animation support)
 
 To-do, in no particular order:
+ - Adjustment layers
  - Brush scaling
  - blur tool
  - clone stamp
@@ -86,6 +88,14 @@ installed on a small drive, you probably don't want it at the top of the applica
 This is a simple utility for testing / profiling JavaScript code.
 Press Ctrl+Enter to execute your code. It executes inside a function, so use return values or console.log to see the result. Closing the console clears the log.
 
+You can use #include preprocessor directives to embed external JS files into whatever you're writing, like this:
+#include "http://site/a.js"
+#include "js/three.js"
+console.log(a, THREE);
+
+Now includes a share button, so you can share code snippets with others! Also supports opening scripts through the URL: eteditor/?p=ide&u=http://site/a.js
+
+
 ## <a id="projectedit"></a> Project Editor
 In progress.
 
@@ -94,7 +104,7 @@ The following is a list of things that I intend to add to ETEditor in the near f
 - Voxel Editing. A prototype has already been built.
 - Vector Editing.
 - AppInventor2 Editing. Based on my AppInventor2HTML5 project, also on Github.
-- JavaScript Editing. For making games entirely within ETEditor.
+- Multi-File JavaScript Editing. For making games entirely within ETEditor.
 - Google Drive / Dropbox support for storing large projects.
 
 ## Libraries
@@ -105,3 +115,4 @@ This project is grateful for, and makes use of, the following libraries:
 - ace.js - Ajax.org B.V. https://github.com/ajaxorg/ace
 - JSZip - Stuart Knightley http://stuartk.com/jszip
 - localforage - Mozilla https://github.com/localForage/localForage
+- alloworigin.com - limtaesu http://alloworigin.com

@@ -38,7 +38,7 @@
             if( this == self )
                 return new (ret.bind.apply(ret, [null].concat( Array.prototype.slice.call(arguments) )));
 
-            if( nextInstanceName && nextInstanceClazz === ret ){ 
+            if( nextInstanceName && nextInstanceClazz === ret ){
                 ret.singletons[nextInstanceName] = this;
                 nextInstanceName = null;
                 nextInstanceClazz = null;
@@ -223,6 +223,7 @@
     	ret.fullName = name;
     	if( !name ) name = "$Anon" + (nextUID++);
     	var shortName = name.split(".").pop();
+        ret.toString = function(){ return "[CLAZZ " + name + "]"; };
     	ret.NAME = shortName;
     	ret.CLAZZ = clazz;
     	ret.NEW = function(){

@@ -522,9 +522,23 @@ function getURL( url, cb, cfg )
         if( xhr.readyState == 4 && ( xhr.status == 200 || xhr.status === 0 || cfg.anystate ) )
         {
        		var v = xhr.response || xhr.responseText;
+       		if( xhr.status == 0 && v == "" && cfg.proxy ){
+       			var domain = url.match(/([^:]*\/\/[^\/]+).*/);
+       			if( domain && domain[1].toLowerCase() != location.origin ){
+					var altcfg = DOC.mergeTo({}, cfg);
+					altcfg.proxy = null;
+       				getURL( cfg.proxy + encodeURIComponent(url), function(obj){
+						if( !obj ) return;
+						obj = JSON.parse(obj);
+						cb( obj.contents );
+					}, altcfg );
+       				return;
+       			}
+       		}
+
         	if( cfg.binary )
         	{
-        		var r = '';
+        		var r = '', cc;
         		for( var i = 0; i<v.length; ++i )
         		{
         			cc = v.charCodeAt(i);
@@ -909,7 +923,7 @@ var DOC = {
 				this.auto(set[i], cfg);
 			return;
 		}
-		
+
 		cfg = cfg || {};
 		var ctx = cfg.ctx || cfg.context;
 		var filter = cfg.filter;
@@ -950,7 +964,9 @@ var DOC = {
 					parent:		set,
 					context:	ctx,
 					data:		val,
-					source: 	src
+					source: 	src,
+					inIndex: 	i,
+					outIndex: 	data.length
 				}, null );
 
 				j = data.push({
@@ -1507,13 +1523,13 @@ if( location.search && location.search[0] == "?" ){
 	var search = location.search.substr(1).split("&");
 	for( var i=0, l=search.length; i<l; ++i ){
 		var eq = search[i].indexOf("=");
-		var key;
+		var key, value;
 		if( eq == -1 ){
 			key = search[i];
 			value = "";
 		}else{
 			key = search[i].substr(0, eq);
-			value = search[i].substr(eq+1);
+			value = decodeURIComponent(search[i].substr(eq+1));
 		}
 		DOC.GET[key] = value;
 	}
