@@ -283,6 +283,7 @@ CLAZZ("projects.sprite.Core", {
 		this.push();
 
 		this.pool.call("onUpdateLayers", this.layers, this.activeLayer);
+		this.pool.call("onResizeCanvas");
     },
 
     loadImage:function( path ){

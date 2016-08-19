@@ -12,7 +12,6 @@ CLAZZ("projects.ide.IDEProject", {
 
         settings:"settings",
         app:"app",
-        onlineStorage:"onlineStorage",
 
         data:"data",
         store:"io.Store",
@@ -193,7 +192,7 @@ CLAZZ("projects.ide.IDEProject", {
     $btnShare:{
         click:function(){
             var src = this.code.getValue();
-            var url = this.onlineStorage.share("ide", src);
+            var url = CLAZZ.get("onlineStorage").share("ide", src);
             url = location.origin + location.pathname + "?p=ide&os=" + url;
             // window.open( url );
             DOC.create("span", this.DOM.retVal, {text:"URL: "} );

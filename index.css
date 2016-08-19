@@ -138,11 +138,20 @@ div, embed-body, embed-html {
 
 #windowframeheader_btnMaxWindow {
     margin-right: 60px;
-    background: #456;
+    background: #679;
 }
 
 
 #retVal {
     -webkit-user-select: text;
     user-select: text;
+}
+
+.windowframeheader.maximized {
+    padding: 0;
+    height: 0;
+}
+
+.windowframeheader.maximized #windowframeheader_title {
+    display: none;
 }

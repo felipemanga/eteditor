@@ -33,10 +33,12 @@ CLAZZ("dialogues.HTMLDialogue", {
             var area = this.getAvailArea();
             this.width = area.width;
             this.height = area.height;
-            sizestyle.width = area.width+"px";
-            sizestyle.height = area.height+"px";
+            sizestyle.width = this.width+"px";
+            sizestyle.height = this.height+"px";
             posstyle.left = "-1px";
             posstyle.top = "-1px";
+            if( this.DOM.windowframeheader )
+            	this.DOM.windowframeheader[0].className = "windowframeheader maximized";
         }else{
             this.width = this.prevWidth;
             this.height = this.prevHeight;
@@ -44,6 +46,8 @@ CLAZZ("dialogues.HTMLDialogue", {
             sizestyle.height = this.prevHeight+"px";
             posstyle.left = this.x + "px";
             posstyle.top = this.y + "px";
+            if( this.DOM.windowframeheader )
+            	this.DOM.windowframeheader[0].className = "windowframeheader";
         }
         this.raise("DIALOGUE", "resize");
     },
@@ -128,27 +132,33 @@ CLAZZ("dialogues.HTMLDialogue", {
     $windowframe_hresize:{
         mousedown:function(evt){
             this.__startResize("H", evt);
+            evt.preventDefault();
         },
         touchstart:function(evt){
             this.__startResize("H", evt.touches[0]);
+            evt.preventDefault();
         }
     },
 
     $windowframe_vresize:{
         mousedown:function(evt){
             this.__startResize("V", evt);
+            evt.preventDefault();
         },
         touchstart:function(evt){
             this.__startResize("V", evt.touches[0]);
+            evt.preventDefault();
         }
     },
 
     $windowframe_vhresize:{
         mousedown:function(evt){
             this.__startResize("VH", evt);
+            evt.preventDefault();
         },
         touchstart:function(evt){
             this.__startResize("VH", evt.touches[0]);
+            evt.preventDefault();
         }
     },
 
@@ -175,7 +185,7 @@ CLAZZ("dialogues.HTMLDialogue", {
         this.moveRefX = point.screenX;
 	},
 
-	$BODY:{
+	$__BODY:{
 		mousemove:function( evt ){
 			if( evt.buttons != 1 ) this.isMoving = this.isResizing = false;
 			else{
@@ -276,9 +286,12 @@ CLAZZ("dialogues.HTMLDialogue", {
 				}
 			}, [
                 ["div", {
-                    className:"windowframeheader",
-                    text:this.cfg.title || DOC.TEXT("window:"+(this.controller.constructor.NAME || this.controller.constructor.name))
+                    className:"windowframeheader"
                 }, [
+                    ["span", {
+                        id:"windowframeheader_title",
+                        text:this.cfg.title || DOC.TEXT("window:"+(this.controller.constructor.NAME || this.controller.constructor.name))
+                    }],
                     !frame?null:[ "div", {id:"windowframeheader_btnCloseWindow", text:"X"} ],
                     (!frame||!resizable)?null:["div", {id:"windowframeheader_btnMaxWindow", text:"Δ"}]
                 ]],
@@ -318,7 +331,9 @@ CLAZZ("dialogues.HTMLDialogue", {
                 this.app.call("onOpenOSWindow", window);
 
             this.__onDOMReady( el );
-			DOC.attach( document.body, this[DOC.attachPrefix+"BODY"], this );
+			DOC.attach( document.body, this[DOC.attachPrefix+"__BODY"], this );
+
+            DOC.attach( this.DOM.embedBody, this.controller[DOC.attachPrefix+"BODY"], this.controller );
             DOC.attach( this.DOM.__ROOT__, this.controller[DOC.attachPrefix+"WINDOW"], this.controller );
 			this.DOM.attach(this);
         });
