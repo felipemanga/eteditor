@@ -522,6 +522,20 @@ function getURL( url, cb, cfg )
         if( xhr.readyState == 4 && ( xhr.status == 200 || xhr.status === 0 || cfg.anystate ) )
         {
        		var v = xhr.response || xhr.responseText;
+       		if( xhr.status == 0 && v == "" && cfg.proxy ){
+       			var domain = url.match(/([^:]*\/\/[^\/]+).*/);
+       			if( domain && domain[1].toLowerCase() != location.origin ){
+					var altcfg = DOC.mergeTo({}, cfg);
+					altcfg.proxy = null;
+       				getURL( cfg.proxy + encodeURIComponent(url), function(obj){
+						if( !obj ) return;
+						obj = JSON.parse(obj);
+						cb( obj.contents );
+					}, altcfg );
+       				return;
+       			}
+       		}
+
         	if( cfg.binary )
         	{
         		var r = '', cc;

@@ -30,7 +30,11 @@ CLAZZ("mainmenu.MainMenu", {
                 this.toggleVisibility();
 
                 if( DOC.GET.u )
-                    DOC.getURL( DOC.GET.u, (d) => this.openFile.autoOpen( DOC.GET.p, d ), {binary:true} );
+                    DOC.getURL( DOC.GET.u, (d) => this.openFile.autoOpen( DOC.GET.p, d ), {
+                        binary:true,
+                        proxy:"https://alloworigin.com/get?url="
+                        // proxy:"http://www.whateverorigin.org/get?url="
+                    } );
                 else if( DOC.GET.os )
                     CLAZZ.get("onlineStorage").readShare( DOC.GET.p, DOC.GET.os, (d) => this.openFile.autoOpen( DOC.GET.p, d ) )
                 else
