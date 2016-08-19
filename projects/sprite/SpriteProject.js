@@ -249,6 +249,8 @@ CLAZZ("projects.sprite.SpriteProject", {
         }
         else ext = ext[1].toLowerCase();
 
+        if( ext == "jpg" ) ext = "jpeg";
+
 		if( ext == "png" || ext == "jpeg" )
 			this.saveJPNG(ext);
 		else if( ext == "gif" )

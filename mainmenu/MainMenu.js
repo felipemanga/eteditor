@@ -30,7 +30,7 @@ CLAZZ("mainmenu.MainMenu", {
                 this.toggleVisibility();
 
                 if( DOC.GET.u )
-                    DOC.getURL( DOC.GET.u, (d) => this.openFile.autoOpen( DOC.GET.p, d ) );
+                    DOC.getURL( DOC.GET.u, (d) => this.openFile.autoOpen( DOC.GET.p, d ), {binary:true} );
                 else if( DOC.GET.os )
                     CLAZZ.get("onlineStorage").readShare( DOC.GET.p, DOC.GET.os, (d) => this.openFile.autoOpen( DOC.GET.p, d ) )
                 else

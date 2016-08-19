@@ -289,6 +289,9 @@ CLAZZ("projects.sprite.Core", {
     loadImage:function( path ){
         DOC.create("img", {
             src:path,
+            onerror: evt => {
+            	console.warn(evt);
+            },
             onload: evt => {
 				var img = evt.target;
 				this.setCanvasSize( img.width, img.height );
