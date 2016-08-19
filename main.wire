@@ -45,6 +45,7 @@ implements
 
 
 singleton
+    ("preprocessor.IPreprocessor", "preprocessor.DefaultJS")
     ("PrimaryColor", "js.Color")
     ("SecondaryColor", "js.Color")
     ("popups.openfile.IOpenFileDialogue", "popups.openfile.OpenFileDialogue")

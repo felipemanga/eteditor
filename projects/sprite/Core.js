@@ -311,20 +311,22 @@ CLAZZ("projects.sprite.Core", {
         if( filter.activate && !filter.activate( this.activeLayer ) )
             return;
 
-        var w=this.width, h=this.height, i=0, color = this.color, d=this.activeLayer.data.data;
-        for( var y=0; y<h; ++y ){
-            for( var x=0; x<w; ++x ){
-                color.r = d[i];
-                color.g = d[i+1];
-                color.b = d[i+2];
-                color.a = d[i+3];
-                filter.run( color, x, y, w, h, d, i );
-                d[i++] = color.r;
-                d[i++] = color.g;
-                d[i++] = color.b;
-                d[i++] = color.a;
-            }
-        }
+		if( typeof filter.run == "function" ){
+			var w=this.width, h=this.height, i=0, color = this.color, d=this.activeLayer.data.data;
+			for( var y=0; y<h; ++y ){
+				for( var x=0; x<w; ++x ){
+					color.r = d[i];
+					color.g = d[i+1];
+					color.b = d[i+2];
+					color.a = d[i+3];
+					filter.run( color, x, y, w, h, d, i );
+					d[i++] = color.r;
+					d[i++] = color.g;
+					d[i++] = color.b;
+					d[i++] = color.a;
+				}
+			}
+		}
 
         this.activeLayer.redraw();
         this.push();

@@ -88,7 +88,7 @@ CLAZZ("dialogues.IDialogue", {
 
 	toggleEnabled:function(){
 		this.enabled = !this.enabled;
-		this.onToggleMenu(this.mainmenu.toggle);
+		this.onToggleMenu( this.enabled ); // this.mainmenu.toggle);
 	},
 
     onToggleMenu:function(visible){
