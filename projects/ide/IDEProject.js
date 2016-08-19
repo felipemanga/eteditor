@@ -12,7 +12,8 @@ CLAZZ("projects.ide.IDEProject", {
 
         settings:"settings",
         app:"app",
-        onlineStorage:"onlineStorage",
+
+        preprocessor:"preprocessor.IPreprocessor",
 
         data:"data",
         store:"io.Store",
@@ -63,45 +64,8 @@ CLAZZ("projects.ide.IDEProject", {
         	this.DOM.console.style.display = "initial";
     },
 
-    preprocess:function(src, cb){
-        var match, exp = /^\s*#include\s+"([^"]+)"$/mg;
-        var files = [], offset = 0, CONSOLE = this.console;
-
-        do{
-            match = exp.exec(src);
-            if( match ) files.push(match);
-        }while( match );
-
-        function shift(){
-            if( !files.length ){
-                done();
-                return;
-            }
-
-            var file = files.shift();
-            DOC.getURL(file[1], function( ret, state ){
-                if( state != 200 ){
-                    CONSOLE.error("Server returned " + state + " on include " + file);
-                }else{
-                    var start = file.index + offset, end = start + file[0].length;
-                    src = src.substr(0, start) + ret + src.substr(end);
-                    offset += ret.length - file[0].length;
-                }
-                shift();
-            }, {anystate:true});
-        }
-
-        function done(){
-            src = "var console = arguments[0];\n" + src;
-            cb(src);
-        }
-
-        if( files.length ) shift();
-        else done();
-    },
-
     eval:function(){
-        this.preprocess( this.code.getValue(), (src) => {
+        this.preprocessor.run( this.code.getValue(), (src) => {
             var ret;
             this.openConsole = false;
             this.autoUpdateConsole = false;
@@ -119,7 +83,7 @@ CLAZZ("projects.ide.IDEProject", {
 
             this.updateConsole();
             this.autoUpdateConsole = true;
-        } );
+        }, this.console );
     },
 
     autoSaveIH:null,
@@ -193,7 +157,7 @@ CLAZZ("projects.ide.IDEProject", {
     $btnShare:{
         click:function(){
             var src = this.code.getValue();
-            var url = this.onlineStorage.share("ide", src);
+            var url = CLAZZ.get("onlineStorage").share("ide", src);
             url = location.origin + location.pathname + "?p=ide&os=" + url;
             // window.open( url );
             DOC.create("span", this.DOM.retVal, {text:"URL: "} );

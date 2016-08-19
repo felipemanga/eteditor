@@ -23,7 +23,10 @@ CLAZZ("projects.sprite.ToolBox", {
 		load:function(){
             this.DOM = this.dialogue.DOM;
 			var area = this.dialogue.getAvailArea();
-			this.dialogue.moveTo( area.width-this.dialogue.width, area.height-this.dialogue.height );
+			this.dialogue.moveTo(
+                area.width-this.dialogue.width,
+                area.height-this.dialogue.height-this.DOM.windowframeheader[0].clientHeight
+            );
 		}
 	},
 

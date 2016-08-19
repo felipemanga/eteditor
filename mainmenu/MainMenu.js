@@ -18,22 +18,25 @@ CLAZZ("mainmenu.MainMenu", {
         openFile:"popups.openfile.IOpenFileDialogue",
         app:"app",
         persist:"io.Settings",
-        onlineStorage:"onlineStorage",
         settings:"settings"
     },
 
     $DIALOGUE:{
     	load:function(){
             this.persist.read(this.settings);
-            this.dialogue.moveTo(0, 28);
+            this.dialogue.moveTo(0, 0);
             if( DOC.GET.p){
                 this.toggleVisibility();
                 this.toggleVisibility();
 
                 if( DOC.GET.u )
-                    DOC.getURL( DOC.GET.u, (d) => this.openFile.autoOpen( DOC.GET.p, d ), {binary:true} );
+                    DOC.getURL( DOC.GET.u, (d) => this.openFile.autoOpen( DOC.GET.p, d ), {
+                        binary:true,
+                        proxy:"https://alloworigin.com/get?url="
+                        // proxy:"http://www.whateverorigin.org/get?url="
+                    } );
                 else if( DOC.GET.os )
-                    this.onlineStorage.readShare( DOC.GET.p, DOC.GET.os, (d) => this.openFile.autoOpen( DOC.GET.p, d ) )
+                    CLAZZ.get("onlineStorage").readShare( DOC.GET.p, DOC.GET.os, (d) => this.openFile.autoOpen( DOC.GET.p, d ) )
                 else
                     this.openFile.autoOpen( DOC.GET.p, DOC.GET.d || "" );
             }
@@ -49,7 +52,7 @@ CLAZZ("mainmenu.MainMenu", {
         var area = this.dialogue.getAvailArea(), DOM = this.dialogue.DOM;
         var height = Math.max( 40, DOM.BODY.clientHeight );
 		if( this.__screenAnchorY === false )
-			this.__screenAnchorY = 28;
+			this.__screenAnchorY = 0;
 
 		if( this.__screenAnchorY + height > this.screenHeight )
 			this.__screenAnchorY -= this.__screenAnchorY + height - area.height;
@@ -74,10 +77,8 @@ CLAZZ("mainmenu.MainMenu", {
 
 
 		var focus = dialogues.IDialogue.focus;
-
-		dialogues.IDialogue.instances.forEach(function(dialogue){
-			dialogue.onToggleMenu( toggle );
-		});
+        var arr = [].concat(dialogues.IDialogue.instances);
+		arr.forEach( (dialogue) => dialogue.onToggleMenu( toggle ) );
 
 		this.onResize();
 	},

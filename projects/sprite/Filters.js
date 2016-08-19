@@ -9,6 +9,8 @@ CLAZZ("projects.sprite.Filters", {
             controller:INJECT("this"),
             cfg:RESOLVE("settings.projects.sprite.Filters.dialogue")
         }),
+
+		preprocessor:"preprocessor.IPreprocessor",
 		app:"app",
 		core:"core",
 		pool:"Pool",
@@ -46,8 +48,8 @@ CLAZZ("projects.sprite.Filters", {
 	},
 
 	addFilter:function( file, src, clazz, remote ){
-		clazz = clazz || this.compile( src );
-		if( !clazz ) return true;
+		// clazz = clazz || this.compile( src );
+		if( !clazz ) return this.compile( src, (clazz) => this.addFilter( file, src, clazz, remote ) );
 
 		var filter;
 
@@ -102,27 +104,34 @@ CLAZZ("projects.sprite.Filters", {
 			this.ace.navigateTo( e.line, 0 );
 		}
 		this.DOM.path.textContent = e.description || e.message || e.toString();
+		console.warn(e.stack);
 	},
 
-	compile:function( code ){
+	compile:function( code, cb ){
+		var error = this.error.bind(this);
 		try{
 			if( code == undefined )
 				code = this.ace.getValue();
 				// code=this.DOM.TEXTAREA.value;
 
-			syntax = esprima.parse(code, {
-                tolerant: true,
-                loc: true
-            });
-            errors = syntax.errors;
-            if (errors.length > 0) {
-            	debugger;
-            }else{
-				var clazz = eval( code );
-				return clazz;
-            }
+			this.preprocessor.run(code, function(code, syntax){
+				try{
+		            var errors = syntax.errors;
+		            if (errors.length > 0) {
+		            	debugger;
+		            }else{
+						var s = new Function( code );
+						var clazz = s(console);
+						if( typeof clazz == "function" ) cb( clazz );
+		            }
+
+				}catch(e){
+					error(e);
+				}
+			})
+
 		}catch(e){
-			this.error(e);
+			error(e);
 		}
 		return null;
 	},
@@ -188,30 +197,28 @@ CLAZZ("projects.sprite.Filters", {
 	},
 
 	onSave:function(){
-		try{
-			var clazz = this.compile();
-			if( !clazz ) return;
+		this.compile(null, (clazz) => {
+			try{
+				var instance = new clazz();
 
-			var instance = new clazz();
+				this.buildMenu( instance );
 
-			this.buildMenu( instance );
+				var path = (clazz.fullName || clazz.name).replace(/\./g, "/") + ".js";
 
-			var path = (clazz.fullName || clazz.name).replace(/\./g, "/") + ".js";
+				this.addFilter(
+					path,
+					this.ace.getValue(),
+					clazz
+				);
 
-			this.addFilter(
-				path,
-				// this.DOM.TEXTAREA.value,
-				this.ace.getValue(),
-				clazz
-			);
+				this.app.call("saveSettings");
 
-			this.app.call("saveSettings");
-
-			this.DOM.path.textContent = path;
-		}catch(err){
-			this.error(err);
-			return;
-		}
+				this.DOM.path.textContent = path;
+			}catch(err){
+				this.error(err);
+				return;
+			}
+		});
 	},
 
 	$btnSave:{
@@ -222,27 +229,28 @@ CLAZZ("projects.sprite.Filters", {
 
 	$btnRun:{
 		click:function(){
-			var clazz = this.compile();
-			if( !clazz ) return;
-			this.DOM.path.textContent = "Running...";
-			var THIS=this;
-			setTimeout(function(){
+			this.compile(null, (clazz) => {
+				this.DOM.path.textContent = "Running...";
+				setTimeout(run.bind(this, clazz), 10);
+			});
+
+			function run( clazz ){
 				var start = performance.now();
 				try{
 					var f = new clazz();
-					if( THIS.meta ){
-						for( var k in THIS.meta ){
-							f[k] = THIS.meta[k];
+					if( this.meta ){
+						for( var k in this.meta ){
+							f[k] = this.meta[k];
 						}
 					}
-					THIS.core.runFilter(f);
+					this.core.runFilter(f);
 				}catch(err){
-					THIS.error(err);
+					this.error(err);
 					return;
 				}
-				var t = (performance.now() - start) / 1000;
-				THIS.DOM.path.textContent = "Done in " + t + " seconds.";
-			}, 10);
+				var t = (performance.now() - start);
+				this.DOM.path.textContent = "Done in " + t + " ms.";
+			}
 		}
 	}
 });

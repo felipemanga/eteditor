@@ -67,13 +67,16 @@ CLAZZ("projects.sprite.SpriteProject", {
     		this.core.addFrame(0, false, true);
     		this.core.addLayer(false, true);
 
-            if( this.data ) this.core.loadImage( arrayToBlobURL(this.data, this.__uid) );
-            else if( this.path ) this.core.loadImage( this.path );
-    		else this.core.push();
-
             var DOM = this.dialogue.DOM;
             DOM.stack.style.top = Math.round(this.dialogue.height*0.5 - this.core.height*0.5)+"px";
             DOM.stack.style.left = Math.round(this.dialogue.width*0.5 - this.core.width*0.5)+"px";
+
+            if( this.data ) this.core.loadImage( arrayToBlobURL(this.data, this.__uid) );
+            else if( this.path ) this.core.loadImage( this.path );
+    		else{
+                this.core.push();
+                this.onResizeCanvas();
+            }
         }
     },
 
@@ -178,17 +181,7 @@ CLAZZ("projects.sprite.SpriteProject", {
         },
 
         zoomFit:function(){
-            if( this.zoom == 1 ){
-                this.zoom = Math.min(
-                    this.dialogue.width * 0.98 / this.core.width,
-                    (this.dialogue.height-40) / this.core.height
-                );
-            }else this.zoom = 1;
-            this.applyZoom();
-
-            var style  = this.DOM.stack.style;
-            style.left = (this.dialogue.width*0.5  - (this.core.width  * this.zoom * 0.5)) + "px"
-            style.top  = (this.dialogue.height*0.5 - (this.core.height * this.zoom * 0.5)) + "px"
+            this.zoomFit();
         },
 
     	undo:function(){
@@ -407,6 +400,25 @@ CLAZZ("projects.sprite.SpriteProject", {
         this.dragOffsetY = evt.y;
     },
 
+    onResizeCanvas:function(){
+        this.zoom = 1;
+        this.zoomFit();
+    },
+
+    zoomFit:function(){
+        if( this.zoom == 1 ){
+            this.zoom = Math.min(
+                this.dialogue.width * 0.98 / this.core.width,
+                (this.dialogue.height-40) / this.core.height
+            );
+        }else this.zoom = 1;
+        this.applyZoom();
+
+        var style  = this.DOM.stack.style;
+        style.left = (this.dialogue.width*0.5  - (this.core.width  * this.zoom * 0.5)) + "px"
+        style.top  = (this.dialogue.height*0.5 - (this.core.height * this.zoom * 0.5)) + "px"
+    },
+
     applyZoom:function(){
         var zoom = this.zoom, transform = "scale(" + this.zoom + ")";
         Array.prototype.slice.call(this.DOM.stack.children).forEach( layer =>
@@ -441,9 +453,20 @@ CLAZZ("projects.sprite.SpriteProject", {
             this.core.activeLayer.redraw();
     },
 
-	disableTool:false,
+	disableTool:true,
     coord:null,
     prepareEvent:function(evt, type){
+        /*
+        var target = evt.target;
+        var root = this.DOM.BODY;
+        while( target ){
+            if( target == root ) break;
+            if( target == this.DOM.__ROOT__ ) return true;
+            target = target.parent;
+        }
+        if( !target ) return true;
+        */
+
         var coord = this.coord;
         if( !coord ) coord = this.coord = {
             x:0,
@@ -558,12 +581,13 @@ CLAZZ("projects.sprite.SpriteProject", {
     pointerup:function(evt, type){
         if( this.prepareEvent(evt, type) ) return false;
         if( !this.disableTool ) this.runTool("up");
+        this.disableTool = true;
         this.dragging = null;
         this.dragOffsetX = this.coord.x;
         this.dragOffsetY = this.coord.y;
     },
 
-    $WINDOW:{
+    $BODY:{
         mousewheel:function(evt){
             if( evt.wheelDelta > 0 ) this.zoom *= 2;
             else this.zoom *= 0.5;
