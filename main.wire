@@ -48,6 +48,7 @@ singleton
     ("preprocessor.IPreprocessor", "preprocessor.DefaultJS")
     ("PrimaryColor", "js.Color")
     ("SecondaryColor", "js.Color")
+    ("dialogues.IPropertyBuilder", "dialogues.PropertyBuilder")
     ("popups.openfile.IOpenFileDialogue", "popups.openfile.OpenFileDialogue")
     ("popups.colorpicker.IColorPicker", "popups.colorpicker.ColorPicker")
 

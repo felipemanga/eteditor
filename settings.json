@@ -41,6 +41,7 @@
 
         "sprite":{
             "filters":[
+                "projects/sprite/filters/Perlin.js",
                 "projects/sprite/filters/Blur.js",
                 "projects/sprite/filters/Brushify.js",
                 "projects/sprite/filters/ChannelOp.js",

@@ -311,8 +311,33 @@ CLAZZ("projects.sprite.Core", {
         if( filter.activate && !filter.activate( this.activeLayer ) )
             return;
 
+		var d=this.activeLayer.data.data;
+
+		if( typeof filter.kernel == "function" ){
+			var gpu = new GPU();
+			var kernel = gpu.createKernel(filter.kernel, { mode:filter.mode=="cpu"?"cpu":"gpu" });
+			var constants = {
+				width: this.width,
+				height: this.height,
+				stride: this.width*4
+			};
+
+			if( filter.meta ){
+				for( var k in filter.meta ){
+					var m = filter.meta[k];
+					if( m.select ) constants[k] = m.select.indexOf(filter[k]);
+					if( m.int || m.dynamic ) constants[k] = filter[k]|0;
+				}
+			}
+
+			kernel.constants(constants);
+			kernel.dimensions([d.length]);
+
+			d.set( kernel(d) );
+		}
+
 		if( typeof filter.run == "function" ){
-			var w=this.width, h=this.height, i=0, color = this.color, d=this.activeLayer.data.data;
+			var w=this.width, h=this.height, i=0, color = this.color;
 			for( var y=0; y<h; ++y ){
 				for( var x=0; x<w; ++x ){
 					color.r = d[i];

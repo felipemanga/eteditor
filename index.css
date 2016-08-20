@@ -142,6 +142,16 @@ div, embed-body, embed-html {
 }
 
 
+#list {
+    width: 100%;
+    overflow: auto;
+    max-width: 100%;
+    background: none;
+    flex-grow: 1;
+}
+
+div#properties {float: none;display: block;max-width: initial;}
+
 #retVal {
     -webkit-user-select: text;
     user-select: text;
@@ -154,4 +164,10 @@ div, embed-body, embed-html {
 
 .windowframeheader.maximized #windowframeheader_title {
     display: none;
+}
+
+embed-body#propertiesBody {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
