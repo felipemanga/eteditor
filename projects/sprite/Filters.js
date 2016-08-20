@@ -10,6 +10,7 @@ CLAZZ("projects.sprite.Filters", {
             cfg:RESOLVE("settings.projects.sprite.Filters.dialogue")
         }),
 
+		propertyBuilder:"dialogues.IPropertyBuilder",
 		preprocessor:"preprocessor.IPreprocessor",
 		app:"app",
 		core:"core",
@@ -157,45 +158,11 @@ CLAZZ("projects.sprite.Filters", {
 		DOC.removeChildren( this.DOM.filterOpts );
 		this.meta = this.meta || {};
 		if( !filter || !filter.meta ) return;
-		var meta = filter.meta;
-		var DOM=this.DOM, filterOpts=this.DOM.filterOpts, THIS=this;
-
-		function updateMeta(k, m, evt){
-			THIS.meta[k] = evt.target.value;
-			if( m.int ) THIS.meta[k] = parseInt(THIS.meta[k]);
-		}
-
-		function createMeta(k){
-			var m=meta[k];
-			var value = (THIS.meta[k] != undefined ? THIS.meta[k] : filter[k]);
-			if(m.select){
-				return ["select", {onchange:updateMeta.bind(THIS, k, m)},
-					m.select.map( v => ["option", {value:v, text:v, selected:v==value} ] )
-				];
-			}
-			if(m.int){
-				function updateRange(evt){
-					var span = evt.target.parentNode.querySelector("span");
-					span.textContent = evt.target.value;
-					updateMeta.call(THIS, k, m, evt);
-				}
-
-				return ["div",[
-					["span", {className:"rangeLabel", text: value}],
-					["input", {className:"range", onchange:updateRange, type:"range", value: value, min:m.int.min, max:m.int.max}]
-				]];
-			}
-			
-			return ["div", {text:JSON.stringify(m)}];
-		}
+		var meta = filter.meta, filterOpts=this.DOM.filterOpts;
 
 		Object.sort( meta ).forEach( (k) => {
-			if( meta[k].dynamic ) return;
-
-			DOM.create("div", {className:"optionContainer"}, filterOpts, [
-				["div", {className:"optionLabel", text:DOC.TEXT(meta[k].label || k)}],
-				createMeta( k )
-			]);
+			this.meta[k] = (this.meta[k] != undefined ? this.meta[k] : filter[k]);
+			this.propertyBuilder.build(this.meta, k, meta[k], filterOpts);
 		});
 	},
 
