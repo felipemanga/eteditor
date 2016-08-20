@@ -31,6 +31,8 @@ CLAZZ("projects.sprite.filters.Perlin", {
 
             x = x / p;
             y = y / p;
+            a /= c;
+            b /= c;
 
             x1 = Math.floor( x );
             fx = 1 - (x - x1);
@@ -42,10 +44,10 @@ CLAZZ("projects.sprite.filters.Perlin", {
 
             t = t + this.constants.seed;
 
-            r1 = ( ( Math.abs( Math.sin( x1*a + y1*b ) * d ) + Math.abs(Math.sin(t*c)*d) ) % max) / max;
-            r2 = ( ( Math.abs( Math.sin( x2*a + y1*b ) * d ) + Math.abs(Math.sin(t*c)*d) ) % max) / max;
-            r3 = ( ( Math.abs( Math.sin( x1*a + y2*b ) * d ) + Math.abs(Math.sin(t*c)*d) ) % max) / max;
-            r4 = ( ( Math.abs( Math.sin( x2*a + y2*b ) * d ) + Math.abs(Math.sin(t*c)*d) ) % max) / max;
+            r1 = ( ( Math.abs( Math.sin( x1*a + y1*b ) ) + Math.abs(Math.sin(t*c)) ) * d % max) / max;
+            r2 = ( ( Math.abs( Math.sin( x2*a + y1*b ) ) + Math.abs(Math.sin(t*c)) ) * d % max) / max;
+            r3 = ( ( Math.abs( Math.sin( x1*a + y2*b ) ) + Math.abs(Math.sin(t*c)) ) * d % max) / max;
+            r4 = ( ( Math.abs( Math.sin( x2*a + y2*b ) ) + Math.abs(Math.sin(t*c)) ) * d % max) / max;
 
             return (r1*fx+r2*(1-fx)) * fy + (r3*fx+r4*(1-fx)) * (1-fy);
         }
@@ -55,6 +57,7 @@ CLAZZ("projects.sprite.filters.Perlin", {
             ret = 0;
             for( var i=0; i<this.constants.iterations; i++ )
                 ret += prand(x, y, i+1) / Math.pow(2, this.constants.iterations - i);
+                // ret = ( ( Math.abs( Math.sin( (x*2665425599 + y*849233383) / 726169489 ) ) + Math.abs(Math.sin(1*726169489)) ) * 3300550843 % 22381) / 22381;
         }
 
         if( ret > 1 ) ret = 1;
