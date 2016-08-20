@@ -1,5 +1,5 @@
 need([
-	{FQCN:"esprima", URL:"js/esprima.js"},
+	{FQCN:"GPU", URL:"js/gpu.js"},
 	{FQCN:"ace", URL:"js/ace.js"}
 ], function(){
 
@@ -185,6 +185,7 @@ CLAZZ("projects.sprite.Filters", {
 					["input", {className:"range", onchange:updateRange, type:"range", value: value, min:m.int.min, max:m.int.max}]
 				]];
 			}
+			if( m.dynamic ) return;
 			return ["div", {text:JSON.stringify(m)}];
 		}
 

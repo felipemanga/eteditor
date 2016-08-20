@@ -1,5 +1,3 @@
-#include "js/gpu.js"
-
 CLAZZ("projects.sprite.filters.Blur", {
     mode:"gaussian",
     amount:5,
@@ -35,35 +33,16 @@ CLAZZ("projects.sprite.filters.Blur", {
 
         if( this.mode == "gaussian-gpu" ){
             this.initGaussianGPUKernel( layer.data, this.amount );
+        	var ret = layer.data.data;
+            var start = performance.now();
+        	do{
+            	ret = this.kernelA( ret );
+            	ret = this.kernelB( ret );
+        	}while( this.repeat-- > 0 )
+        	var mid = performance.now();
 
-        	var array = layer.data.data, ret = array;
-        	ret.isActiveClone = true;
-
-        	var oldIsArray = Array.isArray;
-
-        	Array.isArray = function( a ){
-                return a && (
-                    oldIsArray.call(Array, a) ||
-                    a.constructor == Uint8ClampedArray
-                    );
-            };
-
-            try{
-                var start = performance.now();
-            	do{
-                	ret = this.kernelA( ret );
-                	ret = this.kernelB( ret );
-            	}while( this.repeat-- > 0 )
-            	var mid = performance.now();
-
-                array.set( ret.toArray() );
-                console.log("proc time:", mid-start, " transfer time:", performance.now() - mid );
-
-            }catch(ex){
-                console.error(ex);
-            }
-
-            Array.isArray = oldIsArray;
+            layer.data.data.set( ret.toArray() );
+            console.log("proc time:", mid-start, " transfer time:", performance.now() - mid );
         }
         return true;
     },
