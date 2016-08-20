@@ -47,7 +47,7 @@ CLAZZ("popups.brushpicker.BrushPicker", {
 
 			var el = DOM.create("div", {
 				before:DOM.clear,
-				className:"active",
+				className:"brush active",
 				id:"b0"
 			},[
 				["span", { text:DOC.TEXT( "1 Pixel" ) }]
@@ -63,7 +63,8 @@ CLAZZ("popups.brushpicker.BrushPicker", {
 
 					var el = DOM.create("div", {
 						before:DOM.clear,
-						id: "b" + id
+						id: "b" + id,
+						className: "brush"
 					},[
 						["img", { src:file, id:"brush" + id }],
 						["span", { text:DOC.TEXT( file.replace(/.*?\/|\.[a-z]+$/ig, '') ) }]
@@ -75,10 +76,10 @@ CLAZZ("popups.brushpicker.BrushPicker", {
 	},
 
 	setBrush:function(id, src, el){
-		if( this.active ) this.active.className = "";
+		if( this.active ) this.active.className = "brush";
 
 		this.active = el;
-		this.active.className = "active";
+		this.active.className = "brush active";
 
 		if( !id ){
 			this.tool.brush = null;
