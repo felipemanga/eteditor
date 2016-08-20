@@ -2,11 +2,13 @@ CLAZZ("projects.sprite.filters.Perlin", {
     seed: 0,
     contrast: 1,
     iterations: 0,
+    greyscale:"Yes",
 
     meta:{
         seed:{int:{min:0, max:0xFFFFFFFF}},
         contrast:{int:{min:0, max:20}},
-        iterations:{dynamic:true}
+        iterations:{dynamic:true},
+        greyscale:{select:["Yes", "No"]}
     },
 
     activate:function( layer ){
@@ -20,7 +22,7 @@ CLAZZ("projects.sprite.filters.Perlin", {
         var channel = x % 4;
         x = Math.floor(x/4);
 
-        function prand(x, y, t){
+        function prand(x, y, t, channel){
             var max = 22381,
                 a   = 2665425599,
                 b   = 849233383,
@@ -42,7 +44,7 @@ CLAZZ("projects.sprite.filters.Perlin", {
             fy = 1 - (y - y1);
             y2 = y1 + 1;
 
-            t = t + this.constants.seed;
+            t = t + this.constants.seed + channel*this.constants.greyscale*21;
 
             r1 = ( ( Math.abs( Math.sin( x1*a + y1*b ) ) + Math.abs(Math.sin(t*c)) ) * d % max) / max;
             r2 = ( ( Math.abs( Math.sin( x2*a + y1*b ) ) + Math.abs(Math.sin(t*c)) ) * d % max) / max;
@@ -56,7 +58,7 @@ CLAZZ("projects.sprite.filters.Perlin", {
         if( channel != 3 ){
             ret = 0;
             for( var i=0; i<this.constants.iterations; i++ )
-                ret += prand(x, y, i+1) / Math.pow(2, this.constants.iterations - i);
+                ret += prand(x, y, i+1, channel) / Math.pow(2, this.constants.iterations - i);
                 // ret = ( ( Math.abs( Math.sin( (x*2665425599 + y*849233383) / 726169489 ) ) + Math.abs(Math.sin(1*726169489)) ) * 3300550843 % 22381) / 22381;
         }
 

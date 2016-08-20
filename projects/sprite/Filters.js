@@ -185,13 +185,15 @@ CLAZZ("projects.sprite.Filters", {
 					["input", {className:"range", onchange:updateRange, type:"range", value: value, min:m.int.min, max:m.int.max}]
 				]];
 			}
-			if( m.dynamic ) return;
+			
 			return ["div", {text:JSON.stringify(m)}];
 		}
 
 		Object.sort( meta ).forEach( (k) => {
+			if( meta[k].dynamic ) return;
+
 			DOM.create("div", {className:"optionContainer"}, filterOpts, [
-				["div", {className:"optionLabel", text:DOC.TEXT(k)}],
+				["div", {className:"optionLabel", text:DOC.TEXT(meta[k].label || k)}],
 				createMeta( k )
 			]);
 		});
