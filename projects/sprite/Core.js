@@ -315,7 +315,7 @@ CLAZZ("projects.sprite.Core", {
 
 		if( typeof filter.kernel == "function" ){
 			var gpu = new GPU();
-			var kernel = gpu.createKernel(filter.kernel);
+			var kernel = gpu.createKernel(filter.kernel, { mode:filter.mode=="cpu"?"cpu":"gpu" });
 			var constants = {
 				width: this.width,
 				height: this.height,
@@ -332,6 +332,7 @@ CLAZZ("projects.sprite.Core", {
 
 			kernel.constants(constants);
 			kernel.dimensions([d.length]);
+
 			d.set( kernel(d) );
 		}
 

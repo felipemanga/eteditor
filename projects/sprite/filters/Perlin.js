@@ -3,12 +3,14 @@ CLAZZ("projects.sprite.filters.Perlin", {
     contrast: 1,
     iterations: 0,
     greyscale:"Yes",
+    mode:"gpu",
 
     meta:{
-        seed:{int:{min:0, max:0xFFFFFFFF}},
-        contrast:{int:{min:1, max:20}},
-        iterations:{dynamic:true},
-        greyscale:{select:["Yes", "No"]}
+        seed : { int:{ min:0, max:0xFFFFFFFF} },
+        contrast : { int:{ min:1, max:20 } },
+        iterations : { dynamic:true },
+        greyscale : { select:["Yes", "No"] },
+        mode : { select:["cpu", "gpu"] }
     },
 
     activate:function( layer ){
@@ -22,22 +24,22 @@ CLAZZ("projects.sprite.filters.Perlin", {
         var channel = x % 4;
         x = Math.floor(x/4);
 
-        function prand(x, y, t, channel){
-            var max = 22381,
-                a   = 2665425599,
-                b   = 849233383,
-                c   = 726169489,
-                d   = 3300550843,
-                p   = Math.pow(2, t-1),
-                r   = Math.sin(this.constants.seed / a),
-                x1, x2, y1, y2, r1, r2, r3, r4, fx, fy;
+        function noise(x, y, s){
+            var f = Math.floor(s);
+            f = s - f;
+            f = f*f*(3.0-2.0*f);
+            var n = x + y*57.0 + 113.0*f;
+            s = Math.abs( (Math.sin(n)*43758.5453) );
+            f = Math.floor(s);
+            return s - f;
+        }
 
+        function prand(x, y, t, channel, seed, greyscale ){
+            var p   = Math.pow(2, t-1), d = 3300550843,
+                x1, x2, y1, y2, r1, r2, r3, r4, fx, fy;
 
             x = x / p;
             y = y / p;
-            a /= c;
-            b /= c;
-            c /= max;
 
             x1 = Math.floor( x );
             fx = 1 - (x - x1);
@@ -47,12 +49,12 @@ CLAZZ("projects.sprite.filters.Perlin", {
             fy = 1 - (y - y1);
             y2 = y1 + 1;
 
-            t = t + this.constants.seed + channel*this.constants.greyscale*d;
+            t = noise(t/2665425599, (t*d) / seed, d / (22381+((channel+1)*greyscale)) );
 
-            r1 = ( ( Math.abs( Math.sin( x1*a + y1*b + r ) ) + Math.abs(Math.sin(t*c)) ) * d % max) / max;
-            r2 = ( ( Math.abs( Math.sin( x2*a + y1*b + r ) ) + Math.abs(Math.sin(t*c)) ) * d % max) / max;
-            r3 = ( ( Math.abs( Math.sin( x1*a + y2*b + r ) ) + Math.abs(Math.sin(t*c)) ) * d % max) / max;
-            r4 = ( ( Math.abs( Math.sin( x2*a + y2*b + r ) ) + Math.abs(Math.sin(t*c)) ) * d % max) / max;
+            r1 = noise(x1, y1, t);
+            r2 = noise(x2, y1, t);
+            r3 = noise(x1, y2, t);
+            r4 = noise(x2, y2, t);
 
             return (r1*fx+r2*(1-fx)) * fy + (r3*fx+r4*(1-fx)) * (1-fy);
         }
@@ -61,7 +63,7 @@ CLAZZ("projects.sprite.filters.Perlin", {
         if( channel != 3 ){
             ret = 0;
             for( var i=0; i<this.constants.iterations; i++ )
-                ret += prand(x, y, i+1, channel) / Math.pow(2, this.constants.iterations - i);
+                ret += prand(x, y, i+1, channel, this.constants.seed, this.constants.greyscale ) / Math.pow(2, this.constants.iterations - i);
                 // ret = ( ( Math.abs( Math.sin( (x*2665425599 + y*849233383) / 726169489 ) ) + Math.abs(Math.sin(1*726169489)) ) * 3300550843 % 22381) / 22381;
         }
 
