@@ -71,8 +71,10 @@ To-do, in no particular order:
  - text tool
  - left-hand mode
 
- Known issues:
+Known issues:
  - Stuff looks blurry in IE. Because IE.
+ - Chrome and Firefox don't support pen pressure yet.
+ - dragging / resizing windows on Android is slow.
 
 Feel free to make feature requests.
 
@@ -88,10 +90,8 @@ installed on a small drive, you probably don't want it at the top of the applica
 This is a simple utility for testing / profiling JavaScript code.
 Press Ctrl+Enter to execute your code. It executes inside a function, so use return values or console.log to see the result. Closing the console clears the log.
 
-You can use #include preprocessor directives to embed external JS files into whatever you're writing, like this:
-#include "http://site/a.js"
-#include "js/three.js"
-console.log(a, THREE);
+You can use #include preprocessor directives to embed external JS files into whatever you're writing, like this: #include "http://site/a.js"
+or with a relative path: #include "js/three.js"
 
 Now includes a share button, so you can share code snippets with others! Also supports opening scripts through the URL: eteditor/?p=ide&u=http://site/a.js
 

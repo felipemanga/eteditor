@@ -25,11 +25,13 @@
         div.active {
             background-color: #468;
         }
-        span {
+
+        #list span {
             display: inline-block;
             height: 100%;
             margin: 12px 5px 5px 60px;
         }
+
         img {
             max-width: 40px;
             max-height: 40px;
@@ -41,6 +43,7 @@
 
             position: absolute;
         }
+        
         #clear {
             clear: both;
             float: none;
@@ -53,7 +56,8 @@
 <body id="propertiesBody">
     <div id="properties">
     </div>
-    <div id="list">
+    <div id="list-container">
+        <div id="list" data-array="this.brushes" clazz="popups.brushpicker.IElement"></div>
         <div id="clear"></div>
     </div>
 </body>

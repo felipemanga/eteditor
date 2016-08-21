@@ -9,6 +9,24 @@ CLAZZ("projects.sprite.tools.Pencil", {
         })
     },
 
+    meta:{
+        ppmul:{
+            label:"Pressure Multiplier",
+            int:{ min:0, max:512 }
+        },
+        bscale:{
+            label:"Brush Scale",
+            int:{ min:10, max:1000 }
+        },
+        step:{
+        	label:"Step",
+        	int:{ min:0, max:100 }
+        }
+    },
+
+    ppmul:255,
+    bscale:100,
+
 	priority:-2,
     shortcutHandler:null,
 	brush:null,
@@ -21,7 +39,7 @@ CLAZZ("projects.sprite.tools.Pencil", {
 
     it:0,
 	blueIt:0,
-    step:0,
+    step:1,
 
     activate:function(){
     	this.win.enable();
@@ -41,7 +59,7 @@ CLAZZ("projects.sprite.tools.Pencil", {
 
 		this.blueIt++;
 
-		if( this.step && (this.it++)%this.step ) return false;
+		if( this.step && (this.it++)%(this.step * Math.round(this.brush && this.brush.width/5*this.bscale/100 || 1)) ) return false;
 
 		var mask = this.core.mask.bind( this.core );
 
@@ -50,9 +68,10 @@ CLAZZ("projects.sprite.tools.Pencil", {
         	if( redraw )
 				this.core.color.write( layer, x, y, z*redraw*255 );
     	}else{
-    		var brush = this.brush, hh = Math.round(brush.height/2), hw = Math.round(brush.width/2);
+            var bscale = this.bscale / 100.0;
+    		var brush = this.brush, hh = Math.round(brush.height*bscale/2), hw = Math.round(brush.width*bscale/2);
     		var bw = brush.width, bd = brush.data, lw = layer.width, ld = layer.data;
-    		var bx=0, by=0, tx=x+(brush.width-hw), ty=y+(brush.height-hh);
+    		var bx=0, by=0, tx=x+(brush.width*bscale-hw), ty=y+(brush.height*bscale-hh);
     		x=x-hw;
     		y=y-hh;
     		if( x<0 ){
@@ -67,16 +86,20 @@ CLAZZ("projects.sprite.tools.Pencil", {
     		if( ty > layer.height ) ty = layer.height;
     		if( z == undefined ) z = 1;
     		if( z == 0 ) return false;
+            z = Math.min(1, Math.max(0, z * this.ppmul / 255));
+
 			var wy = y*lw, wby = by*bw, wty = ty*lw;
 
 			var color = this.core.color;
 			var r=color.r, g=color.g, b=color.b, a=color.a, blueIt = this.blueIt&0xFF;
 
 			redraw = wy<wty && x<tx;
+			var sy = y;
 
-    		for( ; wy<wty; y++, wy += lw, wby += bw ){
+    		for( ; wy<wty; y++, wy += lw ){
+    			wby = Math.floor((by+(y-sy)) / bscale) * bw;
     			for( var ix=x, ibx=bx; ix<tx; ++ix, ++ibx ){
-    				var bi = (wby+ibx)*4;
+    				var bi = (wby+Math.floor(ibx/bscale))*4;
     				var blue = bd[bi+2];
     				if( blue && blue != blueIt ) continue;
 					var fa = a/255.0 * bd[bi+3]/255*z*mask(ix,y), i = (wy+ix)*4;

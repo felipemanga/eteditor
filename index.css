@@ -142,7 +142,7 @@ div, embed-body, embed-html {
 }
 
 
-#list {
+#list-container {
     width: 100%;
     overflow: auto;
     max-width: 100%;
@@ -170,4 +170,19 @@ embed-body#propertiesBody {
     display: flex;
     flex-direction: column;
     height: 100%;
+}
+
+#properties .optionContainer input {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+}
+
+#properties .optionContainer {
+    padding: 10px;
+}
+
+#properties .rangeLabel {
+    float: right;
 }

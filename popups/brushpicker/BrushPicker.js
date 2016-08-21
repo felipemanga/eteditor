@@ -1,3 +1,58 @@
+CLAZZ({
+	PROVIDES:{
+		"popups.brushpicker.IElement":"implements"
+	},
+
+	INJECT:{
+		parent:"parent",
+		context:"context",
+		data:"data"
+	},
+
+	el:null,
+	DOM:null,
+	cfg:null,
+
+	CONSTRUCTOR:function(){
+		var file = this.data.match( /(.+\.)([a-z]+)$/i );
+		var ext = file[2].toLowerCase(), image;
+		if( ext == "png" || ext == "jpg" ){
+			image = this.data;
+			this.cfg = {};
+		}else{
+			image = file[1] + "png";
+			DOC.getURL( this.data, (cfg) => this.cfg = JSON.parse(cfg) );
+		}
+
+		var el = DOC.create("div", this.parent,{
+				className: "brush"
+			},[
+			["img", { src:image }],
+			["span", { text:DOC.TEXT( image.replace(/.*?\/|\.[a-z]+$/ig, '') ) }]
+		]);
+		this.DOM = DOC.index(el, null, this);
+		this.el = el;
+	},
+
+	$brush:{
+		click:function(){
+			if( !this.cfg ){
+				alert(this.data + " not loaded.");
+				return;
+			}
+
+			var others = this.el.parentNode.querySelectorAll(".brush.active");
+			for( var i=0, l=others.length; i<l; ++i ){
+				var other = others[i];
+				other.className = other.className.replace(/\s*active\s*/g, " ");
+			}
+
+			this.context.setBrush( this.DOM.IMG, this.cfg );
+			this.el.className = "brush active";
+		}
+	}
+});
+
 CLAZZ("popups.brushpicker.BrushPicker", {
 	INJECT:{
         dialogue:INJECT("dialogues.IDialogue", {
@@ -10,6 +65,8 @@ CLAZZ("popups.brushpicker.BrushPicker", {
 				title:"Brushes"
 			},
 		}),
+
+		propertyBuilder:"dialogues.IPropertyBuilder",
 		tool:INJECT("tool"),
 		brushes:RESOLVE("settings.popups.brushpicker.brushes")
 	},
@@ -45,67 +102,45 @@ CLAZZ("popups.brushpicker.BrushPicker", {
 			DOC.remove(this.canvas);
 			this.context = this.canvas.getContext("2d");
 
-			var el = DOM.create("div", {
-				before:DOM.clear,
+			var el = DOM.create("div", DOM.list, {
 				className:"brush active",
-				id:"b0"
 			},[
 				["span", { text:DOC.TEXT( "1 Pixel" ) }]
 			]);
 
-			this.active = el;
 			el.onclick = THIS.setBrush.bind(THIS, 0, null, el);
-
-			this.brushes.forEach(( file ) => {
-				var ext = file.match( /.+\.([a-z]+)$/i )[1].toLowerCase();
-				if( ext == "png" ){
-					++id;
-
-					var el = DOM.create("div", {
-						before:DOM.clear,
-						id: "b" + id,
-						className: "brush"
-					},[
-						["img", { src:file, id:"brush" + id }],
-						["span", { text:DOC.TEXT( file.replace(/.*?\/|\.[a-z]+$/ig, '') ) }]
-					]);
-					el.onclick = THIS.setBrush.bind(THIS, id, file, el)
-				}
-			});
+			DOM.list.update({ctx:this});
 		}
 	},
 
-	setBrush:function(id, src, el){
-		if( this.active ) this.active.className = "brush";
+	setBrush:function( img, cfg ){
+		this.tool.brush = img;
+		DOC.mergeTo( this.tool, this.defaults );
 
-		this.active = el;
-		this.active.className = "brush active";
+		DOC.removeChildren(this.DOM.properties);
+		
+		if( !img ) return;
 
-		if( !id ){
-			this.tool.brush = null;
-			DOC.mergeTo( this.tool, this.defaults );
-			return;
+		if( this.tool.meta ){
+			Object.sort( this.tool.meta ).forEach( (k) =>
+				this.propertyBuilder.build(this.tool, k, this.tool.meta[k], this.DOM.properties)
+			);
 		}
 
-		var img = this.active.querySelector("#brush" + id);
-		if( !img ){
-			console.warn(id, " not found.");
-			return;
-		}
-
+		var k;
 		try{
-
-			DOC.mergeTo( this.tool, this.defaults );
-
-			/*
-			if( fs.existsSync(img.dataset.src + ".json") ){
-				var settings = JSON.parse( fs.readFileSync( img.dataset.src + ".json") );
-				for( k in settings ){
+			if( cfg ){
+				for( k in cfg ){
 					if( !(k in this.defaults) ) this.defaults[k] = this.tool[k];
-					this.tool[k] = settings[k];
+					this.tool[k] = cfg[k];
+				}
+
+				if( cfg.meta ){
+					Object.sort( cfg.meta ).forEach( (k) =>
+						this.propertyBuilder.build(this.tool, k, cfg.meta[k], this.DOM.properties)
+					);
 				}
 			}
-			*/
 		}catch(ex){
 			alert(ex.stack);
 		}
