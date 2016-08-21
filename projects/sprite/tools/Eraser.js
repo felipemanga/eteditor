@@ -8,6 +8,20 @@ CLAZZ("projects.sprite.tools.Eraser", {
         })
     },
 
+    meta:{
+        ppmul:{
+            label:"Pressure Multiplier",
+            int:{ min:0, max:512 }
+        },
+        bscale:{
+            label:"Brush Scale",
+            int:{ min:0, max:1000 }
+        }
+    },
+
+    ppmul:255,
+    bscale:100,
+
 	priority:-1,
 
 	brush:null,
@@ -49,6 +63,8 @@ CLAZZ("projects.sprite.tools.Eraser", {
     		if( ty > layer.height ) ty = layer.height;
     		if( z == undefined ) z = 1;
     		if( z == 0 ) return;
+            z = Math.min(1, Math.max(0, z * this.ppmul / 255));
+            
 			var wy = y*lw, wby = by*bw, wty = ty*lw;
 			redraw = wy<wty && x<tx;
 
