@@ -9,6 +9,24 @@ CLAZZ("projects.sprite.tools.Pencil", {
         })
     },
 
+    meta:{
+        ppmul:{
+            label:"Pressure Multiplier",
+            int:{ min:0, max:512 }
+        },
+        bscale:{
+            label:"Brush Scale",
+            int:{ min:0, max:1000 }
+        },
+        step:{
+        	label:"Step",
+        	int:{ min:0, max:100 }
+        }
+    },
+
+    ppmul:255,
+    bscale:100,
+
 	priority:-2,
     shortcutHandler:null,
 	brush:null,
@@ -41,7 +59,7 @@ CLAZZ("projects.sprite.tools.Pencil", {
 
 		this.blueIt++;
 
-		if( this.step && (this.it++)%this.step ) return false;
+		if( this.step && (this.it++)%(this.step * Math.round(this.brush && this.brush.width/5 || 1)) ) return false;
 
 		var mask = this.core.mask.bind( this.core );
 
@@ -67,6 +85,8 @@ CLAZZ("projects.sprite.tools.Pencil", {
     		if( ty > layer.height ) ty = layer.height;
     		if( z == undefined ) z = 1;
     		if( z == 0 ) return false;
+            z = Math.min(1, Math.max(0, z * this.ppmul / 255));
+
 			var wy = y*lw, wby = by*bw, wty = ty*lw;
 
 			var color = this.core.color;
@@ -79,7 +99,7 @@ CLAZZ("projects.sprite.tools.Pencil", {
     				var bi = (wby+ibx)*4;
     				var blue = bd[bi+2];
     				if( blue && blue != blueIt ) continue;
-					var fa = a/255.0 * bd[bi+3]/255*z*mask(ix,y), i = (wy+ix)*4;
+					var fa = a/255 * bd[bi+3]/255*z*mask(ix,y), i = (wy+ix)*4;
 					ld[ i   ] = r *fa + ld[ i   ] * (1-fa);
 					ld[ i+1 ] = g *fa + ld[ i+1 ] * (1-fa);
 					ld[ i+2 ] = b *fa + ld[ i+2 ] * (1-fa);

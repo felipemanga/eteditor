@@ -33,10 +33,12 @@ CLAZZ("projects.sprite.tools.Select", {
 		selection.context.fillStyle = "#FF44AA";
 		selection.context.fillRect( 0, 0, this.core.width, this.core.height );
 		selection.read();
+        this.pool.call("onSelectRect", 0, 0, this.core.width, this.core.height );
 	},
 
 	selectNone:function(){
 		this.selection.context.clearRect( 0, 0, this.core.width, this.core.height );
+        this.pool.call("onSelectRect", 0, 0, 0, 0 );
 	},
 
     down:function(layer, x, y, z){
@@ -69,10 +71,12 @@ CLAZZ("projects.sprite.tools.Select", {
 
 		if( endX == this.startX || endY == this.startY ){
 			selection.enabled = false;
+            this.pool.call("onSelectRect", 0, 0, 0, 0 );
 		}else{
 			selection.context.fillStyle = "#FF44AA";
 			selection.context.fillRect( this.startX, this.startY, endX - this.startX, endY - this.startY );
 			selection.read();
+            this.pool.call("onSelectRect", this.startX, this.startY, endX - this.startX, endY - this.startY );
 		}
 	}
 });
