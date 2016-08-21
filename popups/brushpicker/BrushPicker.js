@@ -113,43 +113,58 @@ CLAZZ("popups.brushpicker.BrushPicker", {
 		}
 	},
 
-	setBrush:function( img, cfg ){
-		this.tool.brush = img;
-		DOC.mergeTo( this.tool, this.defaults );
 
-		DOC.removeChildren(this.DOM.properties);
-		
-		if( !img ) return;
+	setBrush:function( img, cfg, evt ){
+		console.log("set brush", img, evt);
+		var scale = this.tool.bscale/100||1;
 
-		if( this.tool.meta ){
-			Object.sort( this.tool.meta ).forEach( (k) =>
-				this.propertyBuilder.build(this.tool, k, this.tool.meta[k], this.DOM.properties)
-			);
-		}
+		if( this.active != img ){
+			this.active = img;
+			DOC.mergeTo( this.tool, this.defaults );
 
-		var k;
-		try{
-			if( cfg ){
-				for( k in cfg ){
-					if( !(k in this.defaults) ) this.defaults[k] = this.tool[k];
-					this.tool[k] = cfg[k];
-				}
+			DOC.removeChildren(this.DOM.properties);
 
-				if( cfg.meta ){
-					Object.sort( cfg.meta ).forEach( (k) =>
-						this.propertyBuilder.build(this.tool, k, cfg.meta[k], this.DOM.properties)
-					);
-				}
+			if( !img ){
+				this.tool.brush = null;
+				return;
 			}
-		}catch(ex){
-			alert(ex.stack);
+
+			if( this.tool.meta ){
+				Object.sort( this.tool.meta ).forEach( (k) =>
+					this.propertyBuilder
+						.build(this.tool, k, this.tool.meta[k], this.DOM.properties)
+						.addEventListener( "change", this.setBrush.bind(this, img, cfg) )
+				);
+			}
+
+			var k;
+			try{
+				if( cfg ){
+					for( k in cfg ){
+						if( !(k in this.defaults) ) this.defaults[k] = this.tool[k];
+						this.tool[k] = cfg[k];
+					}
+
+					if( cfg.meta ){
+						Object.sort( cfg.meta ).forEach( (k) =>
+							this.propertyBuilder.build(this.tool, k, cfg.meta[k], this.DOM.properties)
+						);
+					}
+				}
+			}catch(ex){
+				alert(ex.stack);
+			}
 		}
 
-		this.canvas.width = img.naturalWidth;
-		this.canvas.height = img.naturalHeight;
-		this.context.drawImage( img, 0, 0 );
+		if( Math.round(img.naturalWidth * scale <= 1) || Math.round(img.naturalHeight * scale <= 1) ){
+			this.tool.brush = null;
+		}else{
+			this.canvas.width = Math.round(img.naturalWidth * scale);
+			this.canvas.height = Math.round(img.naturalHeight * scale);
+			this.context.drawImage( img, 0, 0, this.canvas.width, this.canvas.height );
 
-		this.tool.brush = this.context.getImageData( 0, 0, this.canvas.width, this.canvas.height );
+			this.tool.brush = this.context.getImageData( 0, 0, this.canvas.width, this.canvas.height );
+		}
 	}
 
 });
