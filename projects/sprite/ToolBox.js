@@ -201,7 +201,17 @@ CLAZZ("projects.sprite.ToolBox", {
 		this.DOM.inpLayerAlphaLabel.textContent = this.DOM.inpLayerAlpha.value;
     },
 
+    onSelectRect:function(x,y,w,h){
+        if( w == 0 || h == 0 ){
+            w = this.core.width;
+            h = this.core.height;
+        }
+        this.DOM.canvasWidth.value = w;
+        this.DOM.canvasHeight.value = h;
+    },
+
 	onResize:function(w,h){
+        debugger;
         this.DOM.canvasWidth.value = this.width;
         this.DOM.canvasHeight.value = this.height;
 	},

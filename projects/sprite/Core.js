@@ -249,14 +249,32 @@ CLAZZ("projects.sprite.Core", {
 		this.pool.call("onSetTool", tool);
 	},
 
+	selectOffsetX:0,
+	selectOffsetY:0,
+	selectWidth:0,
+	selectHeight:0,
+	onSelectRect:function(x,y,w,h){
+		this.selectOffsetY = y;
+		this.selectOffsetX = x;
+		this.selectWidth  = w;
+		this.selectHeight = h;
+	},
+
     setCanvasSize:function(width, height, stretch){
-		if(this.selection) this.selection.enabled = false;
+		if(this.selection){
+			this.selection.enabled = false;
+			this.selection.canvas.width = width;
+			this.selection.canvas.height = height;
+			this.selection.invalidate();
+		}
 
         var composite = this.getComposite();
         composite.canvas.width = this.width;
         composite.canvas.height = this.height;
         this.width = width;
         this.height = height;
+		if( this.selectWidth == 0 ) this.selectWidth = width;
+		if( this.selectHeight == 0 ) this.selectHeight = height;
 
 		this.frames.forEach( frame => {
 
@@ -269,13 +287,22 @@ CLAZZ("projects.sprite.Core", {
 					// composite.context.putImageData( layer.data, 0, 0 );
 					// layer.context.drawImage( composite.canvas, 0, 0, width, height );
 				}else{
-					layer.redraw();
+					layer.context.putImageData(
+						layer.data,
+						-this.selectOffsetX,
+						-this.selectOffsetY,
+						0, 0,
+						this.selectWidth + this.selectOffsetX,
+						this.selectHeight + this.selectOffsetY
+					);
+// 					layer.redraw();
 					layer.invalidate();
 					layer.read();
 				}
 			});
-
 		});
+
+		this.onSelectRect(0,0,0,0);
 
 		this.history = [];
 		this.historyId = -1;
