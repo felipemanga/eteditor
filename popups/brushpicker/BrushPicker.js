@@ -115,14 +115,18 @@ CLAZZ("popups.brushpicker.BrushPicker", {
 
 
 	setBrush:function( img, cfg, evt ){
-		console.log("set brush", img, evt);
-		var scale = this.tool.bscale/100||1;
-
 		if( this.active != img ){
 			this.active = img;
 			DOC.mergeTo( this.tool, this.defaults );
 
 			DOC.removeChildren(this.DOM.properties);
+
+			if( cfg ){
+				for( k in cfg ){
+					if( !(k in this.defaults) ) this.defaults[k] = this.tool[k];
+					this.tool[k] = cfg[k];
+				}
+			}
 
 			if( !img ){
 				this.tool.brush = null;
@@ -137,24 +141,19 @@ CLAZZ("popups.brushpicker.BrushPicker", {
 				);
 			}
 
-			var k;
-			try{
-				if( cfg ){
-					for( k in cfg ){
-						if( !(k in this.defaults) ) this.defaults[k] = this.tool[k];
-						this.tool[k] = cfg[k];
-					}
-
-					if( cfg.meta ){
-						Object.sort( cfg.meta ).forEach( (k) =>
-							this.propertyBuilder.build(this.tool, k, cfg.meta[k], this.DOM.properties)
-						);
-					}
+			if( cfg ){
+				if( cfg.meta ){
+					Object.sort( cfg.meta ).forEach( (k) =>
+						this.propertyBuilder
+							.build(this.tool, k, cfg.meta[k], this.DOM.properties)
+							.addEventListener( "change", this.setBrush.bind(this, img, cfg) )
+					);
 				}
-			}catch(ex){
-				alert(ex.stack);
 			}
 		}
+
+		var scale = this.tool.bscale/100;
+		if( isNaN(scale) ) scale=1;
 
 		if( Math.round(img.naturalWidth * scale <= 1) || Math.round(img.naturalHeight * scale <= 1) ){
 			this.tool.brush = null;
