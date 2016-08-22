@@ -20,7 +20,7 @@ screen, like those on the MS Surface Pro or Samsung Galaxy Note tablets.
 
 Implemented features:
 - open images from url: eteditor/?p=sprite&u=http://site/image.jpg
-- custom brushes
+- custom brushes with scaling
 - unlimited raster layers
 - layer blending modes
 - layer alpha
@@ -37,8 +37,8 @@ Implemented features:
 - tools:
  - Pencil/Line/Brush/Spraycan (Shortcut: B)
  - Eraser (Shortcut: E)
- - Dropper (Shortcut: Alt)
- - Fill bucket (Shortcut: G)
+ - Dropper (Shortcut: D)
+ - Fill bucket (Shortcut: F)
  - Select
  - Hand (Shortcuts: Spacebar to pan, Mousewheel to zoom, Pinch to pan and zoom )
  - Move
@@ -53,7 +53,6 @@ Implemented features:
 
 To-do, in no particular order:
  - Adjustment layers
- - Brush scaling
  - blur tool
  - clone stamp
  - better color palette window
