@@ -88,15 +88,15 @@
                         },
                         "startDropper":{
                             "hidden":true,
-                            "shortcut":[18]
+                            "shortcut":["D"]
                         },
                         "endDropper":{
                             "hidden":true,
-                            "shortcut":[-18]
+                            "shortcut":[-68]
                         },
                         "startFill":{
                             "hidden":true,
-                            "shortcut":["G"]
+                            "shortcut":["F"]
                         },
         				"selectAll":{
                             "hidden":true,
