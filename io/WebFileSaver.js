@@ -1,10 +1,12 @@
 need([
-	{FQCN:"saveAs", URL:"js/FileSaver.js"}
+	{FQCN:"saveAs", URL:"js/FileSaver.js"},
+	"popups.download.Download"
 ], function(){
 
 CLAZZ("io.WebFileSaver", {
     INJECT:{
         zip:"io.compressors.IZIPCompressor",
+
         dialogue:INJECT("dialogues.IDialogue", {
             controller:INJECT("this"),
             cfg:{
@@ -15,7 +17,9 @@ CLAZZ("io.WebFileSaver", {
                 hide_only: true,
                 title:"Format"
             }
-        })
+        }),
+
+		download:"popups.download.Download"
     },
 
     saveFile:function( file ){
@@ -36,18 +40,7 @@ CLAZZ("io.WebFileSaver", {
 			}
 		}
 
-        DOC.create("div", {
-            text:"Click To Download: " + file.name,
-            onclick:(evt) => {
-				DOC.remove( evt.target )
-				saveAs( file.data, file.name );
-			},
-            style:{
-                position:"absolute",
-                bottom:0,
-                left:0
-            }
-        }, document.body);
+		this.download.add(file);
     },
 
     requestFormat:function( options, cb ){

@@ -186,3 +186,10 @@ embed-body#propertiesBody {
 #properties .rangeLabel {
     float: right;
 }
+
+#Download .file {
+    background-color: #567;
+    padding: 10px;
+    margin: 2px;
+    cursor: pointer;
+}
