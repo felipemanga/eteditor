@@ -513,6 +513,16 @@ function postJSONURL( url, data, cb )
 
 function getURL( url, cb, cfg )
 {
+	function bindec(v){
+		var r = '', cc;
+		for( var i = 0; i<v.length; ++i )
+		{
+			cc = v.charCodeAt(i);
+			r += String.fromCharCode(cc & 0xFF);
+		}
+		v=r;
+	}
+
     var xhr = new XMLHttpRequest();
     cfg = cfg || {};
 	if( cfg.binary ) xhr.overrideMimeType("text/plain; charset=x-user-defined");
@@ -530,22 +540,15 @@ function getURL( url, cb, cfg )
        				getURL( cfg.proxy + encodeURIComponent(url), function(obj){
 						if( !obj ) return;
 						obj = JSON.parse(obj);
-						cb( obj.contents );
+						var v = obj.contents;
+						if( cfg.binary ) v = bindec(v);
+						cb( v );
 					}, altcfg );
        				return;
        			}
        		}
 
-        	if( cfg.binary )
-        	{
-        		var r = '', cc;
-        		for( var i = 0; i<v.length; ++i )
-        		{
-        			cc = v.charCodeAt(i);
-        			r += String.fromCharCode(cc & 0xFF);
-        		}
-        		v=r;
-        	}
+        	if( cfg.binary ) v = bindec(v);
             cb( v,xhr.status );
         }
     };
