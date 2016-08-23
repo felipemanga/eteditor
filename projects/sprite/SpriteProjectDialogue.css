@@ -42,6 +42,10 @@ html {
     overflow: auto;
 }
 
+#filters {
+    width: 175px;
+}
+
 #layerList {
     width: calc( 100% - 100px );
     height: 100%;
@@ -127,9 +131,9 @@ html {
 #filtersBody #tabs{
     position: absolute;
     top: 80px;
-    left: 110px;
-    height: calc(100% - 100px);
-    width: calc(100% - 120px);
+    right: 0;
+    height: calc(100% - 80px);
+    width: calc(100% - 200px);
 }
 
 #codeComponent {
@@ -143,12 +147,12 @@ html {
 
 #filtersBody #path {
     height: 25px;
-    margin: 7px 5px 0 115px;
+    margin: 7px 5px 0 190px;
 }
 
 #filtersBody #bar {
     height: 50px;
-    margin-left: 115px;
+    margin-left: 190px;
 }
 
 #filtersBody #bar div {
@@ -166,6 +170,12 @@ html {
     float: right !important;
 }
 
+#filterOpts {
+    height: 100%;
+    width: 100%;
+    overflow: auto;
+    position: absolute;
+}
 
 #filterOpts .optionContainer {
     padding: 10px;
