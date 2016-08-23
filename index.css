@@ -193,3 +193,7 @@ embed-body#propertiesBody {
     margin: 2px;
     cursor: pointer;
 }
+
+#filterOpts .optionLabel {
+    float: left;
+}
