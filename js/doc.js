@@ -520,7 +520,7 @@ function getURL( url, cb, cfg )
 			cc = v.charCodeAt(i);
 			r += String.fromCharCode(cc & 0xFF);
 		}
-		v=r;
+		return r;
 	}
 
     var xhr = new XMLHttpRequest();
