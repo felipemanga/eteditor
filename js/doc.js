@@ -71,11 +71,11 @@ Object.sort = function(obj, cb){
 	if( cb === undefined ) cb = "priority";
 	if( typeof cb == "string" ){
 		var key = cb;
-		cb = function(a, b){
+		cb = function(obj, a, b){
 			return (obj[a][key]||0) - (obj[b][key]||0);
 		};
 	}
-	return Object.keys(obj).sort(cb);
+	return Object.keys(obj).sort(cb.bind(null, obj));
 };
 
 // Production steps of ECMA-262, Edition 5, 15.4.4.18
@@ -933,12 +933,17 @@ var DOC = {
 
 		set.__context = ctx = ctx || set.__context;
 		set.__filter = filter = filter === undefined ? set.__filter : filter;
+		set.__sort   = "sort" in cfg ? cfg.sort : set.__sort;
 
 		var src = DOC.resolve(set.dataset.array, ctx);
 		var clazz = set.getAttribute("clazz");
 
 		if( !src || !clazz )
 			return;
+
+		var values;
+		if( !Array.isArray(src) )
+			values = Object.sort(src, set.__sort);
 
 		if( !Array.isArray(set.__internal) ){
 			set.__external = Array.prototype.slice.call(set.children, 0);
@@ -948,9 +953,11 @@ var DOC = {
 		var data = set.__internal;
 
 		DOC.removeChildren( set );
-		var assoc = [], i, j, l = src.length, reverse = [];
+		var assoc = [], i, j, l = (values||src).length, reverse = [];
 		for( i=0; i<l; ++i ){
-			var val = src[i];
+			var val;
+			if( values ) val = src[ values[ i ] ];
+			else val = src[i];
 
 			if( filter && filter(val) === false ) continue;
 
@@ -968,7 +975,7 @@ var DOC = {
 					context:	ctx,
 					data:		val,
 					source: 	src,
-					inIndex: 	i,
+					inIndex: 	values ? values[i] : i,
 					outIndex: 	data.length
 				}, null );
 
@@ -993,8 +1000,11 @@ var DOC = {
 
 			var desc = data[ reverse[i] ];
 			newData.push(desc);
-			for( j=0; j<desc.elements.length; ++j )
+			for( j=0; j<desc.elements.length; ++j ){
 				set.appendChild( desc.elements[j] );
+				if( typeof desc.controller.update == "function" )
+					desc.controller.update(desc.value);
+			}
 		}
 
 		set.__internal = newData;
@@ -1014,7 +1024,7 @@ var DOC = {
 			if( arg && type == "object" ){
 				if( Array.isArray(arg) ) type = "array";
 				else if( arg.constructor.name != "Object" ){
-					if( arg.appendChild && arg.ownerDocument ) type = "Element";
+					if( arg.ownerDocument ) type = "Element";
 					else type = arg.constructor.NAME;
 				}
 			}
@@ -1077,7 +1087,11 @@ var DOC = {
 		if( parent )
 		{
 			if( typeof parent == "string" ) parent=DOC.qs(parent) || DOC.byId(parent);
-			parent.insertBefore(el, before);
+			try{
+				parent.insertBefore(el, before);
+			}catch(ex){
+				debugger;
+			}
 		}
 
 		for( var k=0, v; k<children.length; ++k )
@@ -1085,9 +1099,9 @@ var DOC = {
 			v=children[k];
 			if( v === undefined ) continue;
 
-			type = DOC.typeOf(v, Element);
+			type = DOC.typeOf(v, Node);
 			switch( type ){
-			case "Element": break;
+			case "Node": break;
 			case "string":
 				v={html:v};
 				// fallsthrough
@@ -1490,6 +1504,7 @@ var DOC = {
 					src += "var singleton = function(a, b){ __queue++; need(b, __cb); return singleton; },\n";
 					src += "\timplements = singleton,\n";
 					src += "\tfactory = singleton,\n";
+					src += "\tmethod = function(a, b){ __queue++; need(b, __cb ); return method; },\n";
 					src += "\tjson = function(a, b){ __queue++; need([{URL:b.replace(/\\./g, '/') + '.json'}], __cb ); return json; },\n";
 					src += "\tset = function(){},\n";
 					src += "\tget = function(){},\n";
@@ -1502,7 +1517,8 @@ var DOC = {
 					src += "var singleton = CLAZZ.singleton,\n";
 					src += "\timplements = CLAZZ.implements,\n";
 					src += "\tfactory = CLAZZ.factory,\n";
-					src += "\tjson = function(a, b){ CLAZZ.set(a, self[a] = DOC.resolve(b)); return json; },\n";
+					src += "\tmethod = function(a, b){ CLAZZ.set(a, self[a] = DOC.resolve(b)); return method; },\n";
+					src += "\tjson = method,\n";
 					src += "\tset = CLAZZ.set,\n";
 					src += "\tget = CLAZZ.get,\n";
 					src += "\tonready = function(){},\n";

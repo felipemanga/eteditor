@@ -197,3 +197,50 @@ embed-body#propertiesBody {
 #filterOpts .optionLabel {
     float: left;
 }
+
+#filter {
+    display: block;
+}
+
+
+
+.previewSection #preview {
+    width: calc(100% - 10px);
+    flex-grow: 1;
+    overflow: auto;
+    margin: 5px;
+    background: white;
+    color: black;
+}
+
+section.previewSection {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.FileListItem .btnDelete {
+    float: right;
+    border: 0;
+    height: 100%;
+    color: white;
+    background: red;
+    opacity: 0.1;
+    transition: opacity 0.5s;
+}
+
+.FileListItem .btnDelete:hover {
+    opacity: 1;
+}
+
+.FileListItem {
+    display: flex;
+    margin-bottom: 2px;
+}
+
+.FileListItem input {
+    border: none;
+    flex-grow: 1;
+    background-color: initial;
+    color: white;
+}

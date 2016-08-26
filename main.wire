@@ -29,6 +29,7 @@ implements
 
     ("projects.IProject", "projects.projman.ProjManProject")
     ("projects.projman.IFileListItem", "projects.projman.FileListItem")
+    ("projects.projman.IHTMLListItem", "projects.projman.HTMLListItem")
 
     ("projects.IProject", "projects.sprite.SpriteProject")
     ("projects.sprite.ILayer", "projects.sprite.Layer")
@@ -41,7 +42,7 @@ implements
     ("projects.sprite.ITool", "projects.sprite.tools.Pencil")
     ("projects.sprite.ITool", "projects.sprite.tools.Select")
 
-
+method("embedify", "js.embedify")
 
 
 singleton

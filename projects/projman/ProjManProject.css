@@ -10,19 +10,39 @@ main {
 }
 
 main .fileSection {
-    margin: 100px 10px 10px 10px;
-    display: block;
+    margin: 70px 10px 10px 10px;
+    display: flex;
     position: relative;
+    flex-direction: column;
 }
 
 .fileSection doc-set {
     overflow: auto;
     background-color: #345;
-    width: 100%;
-    height: calc(100% - 30px);
     box-sizing: border-box;
-    display: block;
-    position: absolute;
     padding: 5px;
     margin-top: 10px;
+    flex-grow: 1;
+}
+
+#btnNewFile, #btnUploadFile {
+    width: calc(50% - 4px);
+    margin-top: 10px;
+    box-sizing: border-box;
+    background: #679;
+    color: white;
+    border: none;
+}
+
+.codeSection {
+    position: relative;
+}
+
+#codeComponent {
+    width: 100%;
+    height: 100%;
+    border-width: 0;
+    margin: 0;
+    resize: none;
+    position: absolute;
 }
