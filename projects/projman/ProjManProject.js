@@ -25,13 +25,32 @@ CLAZZ("projects.projman.ProjManProject", {
     dirty:false,
     ace:null,
     currentEditor:null,
-    setEditor:function(name){
-        if( this.currentEditor == name )
-            return;
-        this.currentEditor = name;
-        this.DOM.editor.forEach(
-            (ed) => ed.style.display = ed.id == name ? "initial" : "none"
-        );
+    setEditor:function(name, file){
+        if( this.currentEditor != name ){
+            this.currentEditor = name;
+            this.DOM.editor.forEach(
+                (ed) => ed.style.display = ed.id == name ? "initial" : "none"
+            );
+        }
+
+        this.currentFile = file;
+
+        if( name == "imagePreview" )
+            this.DOM.imagePreview.src = file.data;
+        else if( name == "codeComponent" ){
+            var ext = file.name.toLowerCase().replace(/^.*\.([a-z0-9]+)$/i, "$1");
+            var mode = {
+                js:"javascript",
+                json:"json",
+                txt:"plain_text",
+                md:"markdown",
+                css:"css",
+                html:"html"
+            }[ext] || "plain_text";
+
+            this.ace.getSession().setMode("ace/mode/" + mode);
+            this.ace.setValue( file.data );
+        }
     },
 
     commit:function(){
@@ -46,12 +65,7 @@ CLAZZ("projects.projman.ProjManProject", {
         }
     },
 
-    currentFile:null,
-    openFile:function(file){
-        this.commit();
-
-        this.currentFile = file;
-
+    chooseEditor:function(file){
         var editor = "";
 
         var ext = file.name.toLowerCase().replace(/^.*\.([a-z0-9]+)$/i, "$1");
@@ -59,7 +73,7 @@ CLAZZ("projects.projman.ProjManProject", {
         case "png":
         case "jpg":
         case "gif":
-            this.DOM.imagePreview.src = file.data;
+            return "imagePreview";
             editor = "imagePreview";
             break;
 
@@ -69,22 +83,17 @@ CLAZZ("projects.projman.ProjManProject", {
         case "json":
         case "txt":
         case "md":
-            var mode = {
-                js:"javascript",
-                json:"json",
-                txt:"plain_text",
-                md:"markdown",
-                css:"css",
-                html:"html"
-            }[ext] || "text";
-
-            this.ace.getSession().setMode("ace/mode/" + mode);
-            this.ace.setValue( file.data );
-            editor = "codeComponent";
-            break;
+            return "codeComponent";
         }
 
-        this.setEditor(editor);
+        return "";
+    },
+
+    currentFile:null,
+    openFile:function(file){
+        this.commit();
+
+        this.setEditor(this.chooseEditor(file), file);
     },
 
     autoSaveIH:null,
@@ -184,6 +193,14 @@ CLAZZ("projects.projman.ProjManProject", {
             this.project.files.unshift({name:"rename.me", data:""});
             this.DOM.filter.value = "rename.me";
             this.DOM.docSet[0].update({ filter:(e) => e.name == "rename.me" });
+        }
+    },
+
+    $btnUploadFile:{
+        click:function(){
+            this.project.files.unshift({name:"upload.me", data:""});
+            this.DOM.filter.value = "upload.me";
+            this.DOM.docSet[0].update({ filter:(e) => e.name == "upload.me" });
         }
     },
 

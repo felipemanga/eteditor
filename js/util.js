@@ -22,6 +22,12 @@ function strToBuffer(str){
 	return arr;
 }
 
+function bufferToStr(buf, encoding){
+	var dataView = new DataView(buf);
+	var decoder = new TextDecoder(encoding || "utf-8");
+	return decoder.decode(dataView);
+}
+
 (function(){
 	var map = {};
 
