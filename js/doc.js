@@ -1000,8 +1000,11 @@ var DOC = {
 
 			var desc = data[ reverse[i] ];
 			newData.push(desc);
-			for( j=0; j<desc.elements.length; ++j )
+			for( j=0; j<desc.elements.length; ++j ){
 				set.appendChild( desc.elements[j] );
+				if( typeof desc.controller.update == "function" )
+					desc.controller.update(desc.value);
+			}
 		}
 
 		set.__internal = newData;

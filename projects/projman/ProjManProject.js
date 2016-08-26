@@ -7,7 +7,9 @@ CLAZZ("projects.projman.ProjManProject", {
                 title:" "
             }
         }),
-        embedify:"embedify"
+        settings:"settings",
+        data:"data",
+        app:"app"
     },
 
     proportion:0.5,
@@ -16,10 +18,11 @@ CLAZZ("projects.projman.ProjManProject", {
         files:[
             {name:"style.css", data:"body { background-image: url(cat.jpg); }"},
             {name:"cat.jpg", data:"http://placekitten.com/300/300"},
-            {name:"bbb.html", data:"<html><head><link rel=\"stylesheet\" href=\"style.css\"></head><body>Hello world</body></html>"}
+            {name:"index.html", data:"<html>\n\t<head>\n\t\t<link rel=\"stylesheet\" href=\"style.css\">\n\t</head>\n\t<body>\n\t\tHello world\n\t</body>\n</html>"}
         ]
     },
 
+    dirty:false,
     ace:null,
     currentEditor:null,
     setEditor:function(name){
@@ -35,8 +38,12 @@ CLAZZ("projects.projman.ProjManProject", {
         if( !this.currentFile || !this.currentEditor )
             return;
 
-        if(this.currentEditor == "codeComponent")
-            this.currentFile.data = this.ace.getValue();
+        if(this.currentEditor == "codeComponent"){
+            var code = this.ace.getValue();
+            if( code != this.currentFile.data )
+                this.dirty = true;
+            this.currentFile.data = code;
+        }
     },
 
     currentFile:null,
@@ -45,13 +52,15 @@ CLAZZ("projects.projman.ProjManProject", {
 
         this.currentFile = file;
 
+        var editor = "";
+
         var ext = file.name.toLowerCase().replace(/^.*\.([a-z0-9]+)$/i, "$1");
         switch( ext ){
         case "png":
         case "jpg":
         case "gif":
             this.DOM.imagePreview.src = file.data;
-            this.setEditor("imagePreview");
+            editor = "imagePreview";
             break;
 
         case "html":
@@ -71,9 +80,26 @@ CLAZZ("projects.projman.ProjManProject", {
 
             this.ace.getSession().setMode("ace/mode/" + mode);
             this.ace.setValue( file.data );
-            this.setEditor("codeComponent");
+            editor = "codeComponent";
             break;
         }
+
+        this.setEditor(editor);
+    },
+
+    autoSaveIH:null,
+    autoSave:function(){
+        this.commit();
+
+        if( !this.dirty ) return;
+        this.dirty = false;
+
+        var code = JSON.stringify(this.project);
+        if( this.settings.autoSave == code )
+            return;
+
+        this.settings.autoSave = code;
+        this.app.call("saveSettings");
     },
 
     refresh:function(){
@@ -153,18 +179,50 @@ CLAZZ("projects.projman.ProjManProject", {
         });
     },
 
+    $btnNewFile:{
+        click:function(){
+            this.project.files.unshift({name:"rename.me", data:""});
+            this.DOM.filter.value = "rename.me";
+            this.DOM.docSet[0].update({ filter:(e) => e.name == "rename.me" });
+        }
+    },
+
     $btnRefresh:{
         click:function(){
             this.refresh();
         }
     },
 
+    updateFileList:function(){
+        this.DOM.docSet[0].update({ filter:null });
+        this.DOM.pageSelector.update();
+        this.DOM.filter.value = "";
+    },
+
     $DIALOGUE:{
+        close:function(){
+            if( this.autoSaveIH )
+                clearInterval(this.autoSaveIH);
+        },
+
         load:function(){
             this.DOM = this.dialogue.DOM;
             var area = this.dialogue.getAvailArea();
             this.dialogue.setSize(area.width, area.height);
             this.dialogue.moveTo(0,0);
+
+            if( !this.data ) this.data = this.settings.autoSave;
+
+            if( this.data && typeof this.data == "string" ){
+                try{
+                    this.project = JSON.parse(this.data);
+                }catch(ex){
+                    alert("Broken project file");
+                }
+            }
+            if( !this.project || typeof this.project != "object" ) this.project = {};
+            if( !this.project.files ) this.project.files = [];
+
             this.DOM.docSet[0].update({ filter:null });
             this.DOM.pageSelector.update({
                 filter:(f) => /.html?/i.test(f.name)
@@ -178,6 +236,7 @@ CLAZZ("projects.projman.ProjManProject", {
                 bindKey: {win: "Ctrl-Enter", mac: "Command-Option-Enter"},
                 exec: () => this.refresh()
             });
+            this.autoSaveIH = setInterval( this.autoSave.bind(this), 10000 );
         },
 
         resize:function(){

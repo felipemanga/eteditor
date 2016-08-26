@@ -225,10 +225,22 @@ section.previewSection {
     height: 100%;
     color: white;
     background: red;
-    opacity: 0.2;
+    opacity: 0.1;
     transition: opacity 0.5s;
 }
 
 .FileListItem .btnDelete:hover {
     opacity: 1;
+}
+
+.FileListItem {
+    display: flex;
+    margin-bottom: 2px;
+}
+
+.FileListItem input {
+    border: none;
+    flex-grow: 1;
+    background-color: initial;
+    color: white;
 }

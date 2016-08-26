@@ -4,7 +4,14 @@ CLAZZ("projects.projman.HTMLListItem", {
         data:       "data"
     },
 
+    el:null,
+
     CONSTRUCTOR:function(){
-        DOC.create("option", this.parent, { text:this.data.name });
+        this.el = DOC.create("option", this.parent, { text:this.data.name });
+    },
+
+    update:function(){
+        this.el.textContent = this.data.name;
     }
+
 });
