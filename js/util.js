@@ -38,6 +38,9 @@ function bufferToStr(buf, encoding){
 		if( typeof array == "string" )
 			array = strToBuffer(array);
 
+		if( array == null )
+			return map[name] = null;
+
 		return map[name] = URL.createObjectURL( new Blob([array], cfg||{}) );
 	}
 })();

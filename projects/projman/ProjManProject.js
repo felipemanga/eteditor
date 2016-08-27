@@ -12,12 +12,14 @@ CLAZZ("projects.projman.ProjManProject", {
         app:"app"
     },
 
+    data:null,
+
     proportion:0.5,
     DOM:null,
     project:{
         files:[
-            {name:"style.css", data:"body { background-image: url(cat.jpg); }"},
-            {name:"cat.jpg", data:"http://placekitten.com/300/300"},
+            {name:"style.css", data:"body {\n\tbackground-image: url(cat.jpg);\n}"},
+            {name:"cat.jpg", data:"http://placekitten.com/300/300", cacheURL:true },
             {name:"index.html", data:"<html>\n\t<head>\n\t\t<link rel=\"stylesheet\" href=\"style.css\">\n\t</head>\n\t<body>\n\t\tHello world\n\t</body>\n</html>"}
         ]
     },
@@ -127,7 +129,9 @@ CLAZZ("projects.projman.ProjManProject", {
         var parsed = (new DOMParser()).parseFromString( src, "text/html" );
 
         var m = {};
-        this.project.files.forEach( (f) => m[f.name] = f.data );
+        this.project.files.forEach(
+            (f) => m[f.name] = (f.cacheURL !== true && f.cacheURL) || f.data
+        );
 
         function patchCSS(src){
             if( !src ) return src;
@@ -144,6 +148,12 @@ CLAZZ("projects.projman.ProjManProject", {
         tags.forEach((img) => {
             var src = img.getAttribute("src");
             if( src in m ) img.setAttribute( "src", m[src]  );
+        });
+
+        tags = Array.prototype.slice.call( parsed.querySelectorAll("a"), 0 );
+        tags.forEach((img) => {
+            var src = img.getAttribute("href");
+            if( src in m ) img.setAttribute( "href", m[src]  );
         });
 
         tags = Array.prototype.slice.call( parsed.querySelectorAll("script"), 0 );
@@ -175,7 +185,7 @@ CLAZZ("projects.projman.ProjManProject", {
 
         src = new XMLSerializer().serializeToString(parsed);
 
-        DOC.create("iframe", this.DOM.preview, {
+        var iframe = DOC.create("iframe", this.DOM.preview, {
             src:arrayToBlobURL(src, "preview", {type:"text/html"}),
             width:"100%",
             height:"100%",
@@ -186,6 +196,16 @@ CLAZZ("projects.projman.ProjManProject", {
                 position: "absolute"
             }
         });
+    },
+
+    $btnShare:{
+        click:function(){
+            var src = JSON.stringify(this.project);
+            var url = CLAZZ.get("onlineStorage").share("projman", src);
+            url = location.origin + location.pathname + "?p=projman&os=" + url;
+            DOC.create("span", this.DOM.shareVal, {text:"URL: "} );
+            DOC.create("a", this.DOM.shareVal, {text:url, href:url} );
+        }
     },
 
     $btnNewFile:{
