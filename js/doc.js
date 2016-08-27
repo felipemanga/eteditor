@@ -959,7 +959,7 @@ var DOC = {
 			if( values ) val = src[ values[ i ] ];
 			else val = src[i];
 
-			if( filter && filter(val) === false ) continue;
+			if( filter && filter(val, src, i) === false ) continue;
 
 			for( j=0; j<l; ++j ){
 				if( data[j] && data[j].value === val && assoc[j] === undefined ){

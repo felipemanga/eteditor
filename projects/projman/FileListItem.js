@@ -1,7 +1,6 @@
 CLAZZ("projects.projman.FileListItem", {
     INJECT:{
         fileReader:"io.FileReader",
-
         parent:     "parent",
         data:       "data",
         source:     "source",
@@ -18,13 +17,29 @@ CLAZZ("projects.projman.FileListItem", {
                 value:this.data.name,
                 disabled:true
             }],
+            this.data.cacheURL ? ["img", {
+                src:"img/loading.gif",
+                style:{ mixBlendMode:"screen" }
+            }] : null,
             ["button", {
                 className:"btnDelete",
-                text:"X"
+                text:"X",
+                style:{
+                    display:this.data.cacheURL?"none":"initial"
+                }
             }]
         ]);
 
         this.DOM = DOC.index(el, null, this);
+
+        if(this.data.cacheURL){
+            this.data.cacheURL = true;
+            DOC.getURL(this.data.data, (s) => {
+                DOC.remove( this.DOM.IMG );
+                this.DOM.BUTTON.style.display = "initial";
+                this.data.cacheURL = arrayToBlobURL( s, this.data.data );
+            }, {binary:true});
+        }
     },
 
     update:function(){
@@ -67,6 +82,13 @@ CLAZZ("projects.projman.FileListItem", {
                     if( err ) return;
                     var editor = this.controller.chooseEditor( this.data );
                     if( editor == "codeComponent" ) this.data.data = bufferToStr(data);
+                    else{
+                        this.data.data = data;
+                        CLAZZ.get("onlineStorage").upload( this.data, (url) => {
+                            this.data.cacheURL = arrayToBlobURL( this.data.data, url );
+                            this.data.data = url;
+                        });
+                    }
                 });
             }
             else this.data.name = this.DOM.INPUT.value.trim();
