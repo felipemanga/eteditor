@@ -6,7 +6,7 @@ CLAZZ("projects.sprite.filters.Perlin", {
     mode:"gpu",
 
     meta:{
-        seed : { int:{ min:0, max:0xFFFFFFFF} },
+        seed : { int:{ min:0, max:0xFFFFFFFF, nonlinear:true} },
         contrast : { int:{ min:1, max:20 } },
         iterations : { dynamic:true },
         greyscale : { select:["Yes", "No"] },

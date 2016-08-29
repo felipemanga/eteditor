@@ -16,7 +16,7 @@ CLAZZ("projects.sprite.tools.Pencil", {
         },
         bscale:{
             label:"Brush Scale",
-            int:{ min:0, max:1000 }
+            int:{ min:0, max:1000, nonlinear:true }
         },
         step:{
         	label:"Step",

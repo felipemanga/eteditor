@@ -11,9 +11,9 @@ CLAZZ("projects.sprite.filters.TriplePerlin", {
     mode:"gpu", // no cpu support
 
     meta:{
-        seedA : { label: "A Seed", int:{ min:0, max:0xFFFFFFFF} },
-        seedB : { label: "B Seed", int:{ min:0, max:0xFFFFFFFF} },
-        seedC : { label: "Blend Seed", int:{ min:0, max:0xFFFFFFFF} },
+        seedA : { label: "A Seed", int:{ min:0, max:0xFFFFFFFF, nonlinear:true} },
+        seedB : { label: "B Seed", int:{ min:0, max:0xFFFFFFFF, nonlinear:true} },
+        seedC : { label: "Blend Seed", int:{ min:0, max:0xFFFFFFFF, nonlinear:true} },
 
         contrastA : { label:"A Contrast", int:{ min:1, max:20 } },
         contrastB : { label:"B Contrast", int:{ min:1, max:20 } },

@@ -66,13 +66,12 @@ CLAZZ("projects.sprite.filters.Blur", {
                 a += src[ this.thread.x + this.constants.stride*y ] * w;
                 samples += w;
             }
-
-            return a / samples;
-        })
-        .constants(constants)
-        .dimensions([ layerData.data.length ])
-        .outputToTexture(true)
-        ;
+
+			return a / samples;
+		})
+		.constants(constants)
+		.dimensions([ layerData.data.length ])
+		.outputToTexture(true);
 
         this.kernelB = gpu.createKernel(function(src){
             var a = 0, samples = 0;
