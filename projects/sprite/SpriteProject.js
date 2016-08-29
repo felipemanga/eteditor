@@ -481,7 +481,7 @@ CLAZZ("projects.sprite.SpriteProject", {
         };
 
         if( type != "pointer" ){
-            evt.preventDefault();
+            if( evt.type.indexOf("down") == -1 ) evt.preventDefault();
             if( window.PointerEvent ) return true;
         }
 
