@@ -30,15 +30,17 @@ CLAZZ("mainmenu.MainMenu", {
                 this.toggleVisibility();
 
                 if( DOC.GET.u )
-                    DOC.getURL( DOC.GET.u, (d) => this.openFile.autoOpen( DOC.GET.p, d ), {
+                    DOC.getURL( DOC.GET.u, (d) => this.openFile.autoOpen( DOC.GET.p, null, d ), {
                         binary:true,
                         proxy:"https://alloworigin.com/get?url="
                         // proxy:"http://www.whateverorigin.org/get?url="
                     } );
+                else if( DOC.GET.gs )
+                    CLAZZ.get("onlineStorage").download( DOC.GET.gs, (d) => this.openFile.autoOpen( DOC.GET.p, DOC.GET.gs, d ) )
                 else if( DOC.GET.os )
-                    CLAZZ.get("onlineStorage").readShare( DOC.GET.p, DOC.GET.os, (d) => this.openFile.autoOpen( DOC.GET.p, d ) )
+                    CLAZZ.get("onlineStorage").readShare( DOC.GET.p, DOC.GET.os, (d) => this.openFile.autoOpen( DOC.GET.p, null, d ) )
                 else
-                    this.openFile.autoOpen( DOC.GET.p, DOC.GET.d || "" );
+                    this.openFile.autoOpen( DOC.GET.p, null, DOC.GET.d || "" );
             }
     	}
     },

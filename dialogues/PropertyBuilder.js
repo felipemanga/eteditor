@@ -2,15 +2,10 @@ CLAZZ("dialogues.PropertyBuilder", {
     build:function(target, key, meta, parent){
         if( !target || !meta || meta.dynamic ) return;
 
-        function updateMeta(evt){
-			target[key] = evt.target.value;
-			if( meta.int ) target[key] = parseInt(target[key]);
-		}
-
 		function createMeta(){
 			var value = target[key];
 			if(meta.select){
-				return ["select", { onchange:updateMeta },
+				return ["select", { onchange:(evt) => target[key] = evt.target.value },
 					meta.select.map( v => ["option", {value:v, text:v, selected:v==value} ] )
 				];
 			}
@@ -18,8 +13,19 @@ CLAZZ("dialogues.PropertyBuilder", {
 			if(meta.int){
 				function updateRange(evt){
 					var span = evt.target.parentNode.querySelector("span");
-					span.textContent = evt.target.value;
-					updateMeta(evt);
+					var value = evt.target.value;
+					value = parseInt(value);
+					value += min;
+					if( meta.int.nonlinear ) value *= value;
+					value = Math.floor(value);
+					target[key] = value;
+					span.textContent = value;
+				}
+
+				var min = meta.int.min, max = meta.int.max;
+				if( meta.int.nonlinear ){
+					min = Math.sqrt(min);
+					max = Math.sqrt(max);
 				}
 
 				return ["div",[
@@ -29,8 +35,8 @@ CLAZZ("dialogues.PropertyBuilder", {
                         onchange:updateRange,
                         type:"range",
                         value: value,
-                        min:meta.int.min,
-                        max:meta.int.max
+                        min:0,
+                        max:max-min
                     }]
 				]];
 			}

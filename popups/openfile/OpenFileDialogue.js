@@ -99,7 +99,7 @@ CLAZZ("popups.openfile.OpenFileDialogue", {
         }
     },
 
-    autoOpen:function( projectPath, data ){
+    autoOpen:function( projectPath, path, data ){
         projectPath = this.getPackageProject(projectPath);
         if( !projectPath ) return;
         var settings = this.settings[ "projects." + projectPath ];
@@ -108,6 +108,7 @@ CLAZZ("popups.openfile.OpenFileDialogue", {
             settings = this.settings[ "projects." + projectPath ] = {};
 
         var desc = {
+            path: path,
             data: data,
             settings: settings
         };

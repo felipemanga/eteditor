@@ -32,13 +32,29 @@ CLAZZ("projects.projman.FileListItem", {
 
         this.DOM = DOC.index(el, null, this);
 
+        if( !("storeJSON" in this.data && this.data.name.match(/\.json$/i)) )
+            this.storeJSON();
+
         if(this.data.cacheURL){
             this.data.cacheURL = true;
-            DOC.getURL(this.data.data, (s) => {
-                DOC.remove( this.DOM.IMG );
+            var raw = null;
+
+            this.data.raw = function(){
+                return raw;
+            };
+
+            this.data.reload = function(cb){
+                DOC.getURL(this.data, (s) => {
+                    raw = s;
+                    this.cacheURL = arrayToBlobURL( s, this.data );
+                    if( cb ) cb(this);
+                }, {binary:true});
+            }
+
+            this.data.reload(() => {
                 this.DOM.BUTTON.style.display = "initial";
-                this.data.cacheURL = arrayToBlobURL( s, this.data.data );
-            }, {binary:true});
+                DOC.remove( this.DOM.IMG );
+            });
         }
     },
 

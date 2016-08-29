@@ -201,3 +201,26 @@ embed-body#propertiesBody {
 #filter {
     display: block;
 }
+
+
+.FileListItem input[type="file"] {
+    width: 169px;
+    color: rgba(0,0,0,0) !important;
+}
+
+embed-body#SignIn {
+    text-align: center;
+}
+
+#SignIn #btnSignIn {
+    border: none;
+    background-color: #789;
+    color: white;
+    padding: 10px 20px;
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+#imageComponent header {
+    padding: 5px 0;
+}

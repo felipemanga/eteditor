@@ -49,7 +49,6 @@ CLAZZ("projects.sprite.filters.Blur", {
 
     repeat:0,
     initGaussianGPUKernel:function( layerData, amount ){
-
         this.repeat = Math.floor((amount-1) / 32);
         if( amount > 32 ) amount = 32;
 
@@ -68,12 +67,11 @@ CLAZZ("projects.sprite.filters.Blur", {
                 samples += w;
             }
 
-            return a / samples;
-        })
-        .constants(constants)
-        .dimensions([ layerData.data.length ])
-        .outputToTexture(true)
-        ;
+			return a / samples;
+		})
+		.constants(constants)
+		.dimensions([ layerData.data.length ])
+		.outputToTexture(true);
 
         this.kernelB = gpu.createKernel(function(src){
             var a = 0, samples = 0;
