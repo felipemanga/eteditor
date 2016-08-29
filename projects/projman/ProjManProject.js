@@ -37,8 +37,8 @@ CLAZZ("projects.projman.ProjManProject", {
 
         this.currentFile = file;
 
-        if( name == "imagePreview" )
-            this.DOM.imagePreview.src = file.data;
+        if( name == "imageComponent" )
+            this.DOM.imagePreview.src = file.cacheURL;
         else if( name == "codeComponent" ){
             var ext = file.name.toLowerCase().replace(/^.*\.([a-z0-9]+)$/i, "$1");
             var mode = {
@@ -51,7 +51,7 @@ CLAZZ("projects.projman.ProjManProject", {
             }[ext] || "plain_text";
 
             this.ace.getSession().setMode("ace/mode/" + mode);
-            this.ace.setValue( file.data );
+            this.ace.setValue( file.data||"" );
         }
     },
 
@@ -75,9 +75,7 @@ CLAZZ("projects.projman.ProjManProject", {
         case "png":
         case "jpg":
         case "gif":
-            return "imagePreview";
-            editor = "imagePreview";
-            break;
+            return "imageComponent";
 
         case "html":
         case "css":
@@ -128,9 +126,23 @@ CLAZZ("projects.projman.ProjManProject", {
         var src = obj.data;
         var parsed = (new DOMParser()).parseFromString( src, "text/html" );
 
+        var data = { BASE64:{}, JSON:{}, JS:{} };
+
         var m = {};
         this.project.files.forEach(
-            (f) => m[f.name] = (f.cacheURL !== true && f.cacheURL) || f.data
+            (f) => {
+                m[f.name] = (f.cacheURL !== true && f.cacheURL) || f.data;
+                if( f.storeRaw ) data.BASE64[f.name] = btoa(f.raw());
+                if( f.storeJSON ){
+                    try{
+                        data.JSON[f.name] = JSON.parse(f.data);
+                    }catch(ex){
+                        data.JSON[f.name] = ex.toString();
+                    }
+                }else if(f.name.match(/\.js$/i) ){
+                    data.JS[f.name] = f.data;
+                }
+            }
         );
 
         function patchCSS(src){
@@ -143,6 +155,10 @@ CLAZZ("projects.projman.ProjManProject", {
             }
             return src;
         }
+
+        var dataScript = parsed.createElement("script");
+        dataScript.textContent = "var FS = " + JSON.stringify(data) + ";\n";
+        parsed.head.insertBefore(dataScript, parsed.head.children[0]);
 
         var tags = Array.prototype.slice.call( parsed.querySelectorAll("img"), 0 );
         tags.forEach((img) => {
@@ -230,10 +246,33 @@ CLAZZ("projects.projman.ProjManProject", {
         }
     },
 
+    $btnReloadImage:{
+        click:function(){
+            this.currentFile.reload( () => this.DOM.imagePreview.src = this.currentFile.cacheURL );
+        }
+    },
+
+    $btnEditImage:{
+        click:function(){
+            var url = this.currentFile.data;
+            var match = url.match(/^https:\/\/firebasestorage\.googleapis\.com\/(?:.*\/)*([^?]+)/i);
+            if(match) url = decodeURIComponent(match[1]);
+            window.open( location.origin + location.pathname + "?p=sprite&gs=" + url );
+        }
+    },
+
     updateFileList:function(){
         this.DOM.docSet[0].update({ filter:null });
         this.DOM.pageSelector.update();
         this.DOM.filter.value = "";
+    },
+
+    $DESKTOP:{
+        resize:function(){
+            var area = this.dialogue.getAvailArea();
+            this.dialogue.setSize(area.width, area.height);
+            this.dialogue.moveTo(0,0);
+        }
     },
 
     $DIALOGUE:{

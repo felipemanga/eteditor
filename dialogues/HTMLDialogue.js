@@ -1,3 +1,4 @@
+
 need("dialogues.IDialogue", function(){
 "use strict";
 
@@ -21,6 +22,10 @@ CLAZZ("dialogues.HTMLDialogue", {
         SUPER(opt);
         dialogues.HTMLDialogue.focusZ++;
         this.window = window;
+        if( !window.onresize )
+            window.onresize = (function(){
+                dialogues.IDialogue.instances.forEach((i) => i.raise("DESKTOP", "resize"));
+            }).bind(dialogues.HTMLDialogue);
     },
 
     prevHeight:0,
@@ -336,6 +341,7 @@ CLAZZ("dialogues.HTMLDialogue", {
 
             this.__onDOMReady( el );
 			DOC.attach( document.body, this[DOC.attachPrefix+"__BODY"], this );
+			DOC.attach( window, this[DOC.attachPrefix+"__WINDOW"], this );
 
             DOC.attach( this.DOM.embedBody, this.controller[DOC.attachPrefix+"BODY"], this.controller );
             DOC.attach( this.DOM.__ROOT__, this.controller[DOC.attachPrefix+"WINDOW"], this.controller );

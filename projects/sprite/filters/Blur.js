@@ -49,7 +49,6 @@ CLAZZ("projects.sprite.filters.Blur", {
 
     repeat:0,
     initGaussianGPUKernel:function( layerData, amount ){
-
         this.repeat = Math.floor((amount-1) / 32);
         if( amount > 32 ) amount = 32;
 
@@ -67,10 +66,10 @@ CLAZZ("projects.sprite.filters.Blur", {
                 a += src[ this.thread.x + this.constants.stride*y ] * w;
                 samples += w;
             }
-
+
             return a / samples;
         })
-        .constants(constants)
+        .constants(constants)
         .dimensions([ layerData.data.length ])
         .outputToTexture(true)
         ;

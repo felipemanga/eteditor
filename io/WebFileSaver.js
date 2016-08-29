@@ -40,7 +40,8 @@ CLAZZ("io.WebFileSaver", {
 			}
 		}
 
-		this.download.add(file);
+		if( file.name.match(/^user\//) ) CLAZZ.get("onlineStorage").save(file);
+		else this.download.add(file);
     },
 
     requestFormat:function( options, cb ){
