@@ -224,3 +224,14 @@ embed-body#SignIn {
 #imageComponent header {
     padding: 5px 0;
 }
+
+.codeSection header {
+    display: flex;
+    position: relative;
+    flex-direction: row;
+}
+
+.codeSection header * {
+    flex-grow: 1;
+    margin: 5px;
+}

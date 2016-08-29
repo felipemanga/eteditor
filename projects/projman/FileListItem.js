@@ -32,9 +32,6 @@ CLAZZ("projects.projman.FileListItem", {
 
         this.DOM = DOC.index(el, null, this);
 
-        if( !("storeJSON" in this.data && this.data.name.match(/\.json$/i)) )
-            this.storeJSON();
-
         if(this.data.cacheURL){
             this.data.cacheURL = true;
             var raw = null;

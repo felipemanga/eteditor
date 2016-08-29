@@ -16,9 +16,16 @@ function intToBuffer(i){
 	]);
 }
 
+function atoURL(str, mime){
+	var arr = new Uint8ClampedArray(str.length), obj = {};
+	for(var i=0, l=str.length; i!=l; ++i) arr[i] = str.charCodeAt(i);
+	if( mime ) obj.type = mime;
+	return URL.createObjectURL(new Blob([arr], obj));
+}
+
 function strToBuffer(str){
 	var arr = new Uint8ClampedArray(str.length);
-	for(i=0; i<str.length; ++i) arr[i] = str.charCodeAt(i);
+	for(var i=0, l=str.length; i<l; ++i) arr[i] = str.charCodeAt(i);
 	return arr;
 }
 
