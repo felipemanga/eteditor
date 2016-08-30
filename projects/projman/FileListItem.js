@@ -34,25 +34,31 @@ CLAZZ("projects.projman.FileListItem", {
 
         if(this.data.cacheURL){
             this.data.cacheURL = true;
-            var raw = null;
-
-            this.data.raw = function(){
-                return raw;
-            };
-
-            this.data.reload = function(cb){
-                DOC.getURL(this.data, (s) => {
-                    raw = s;
-                    this.cacheURL = arrayToBlobURL( s, this.data );
-                    if( cb ) cb(this);
-                }, {binary:true});
-            }
-
-            this.data.reload(() => {
-                this.DOM.BUTTON.style.display = "initial";
-                DOC.remove( this.DOM.IMG );
-            });
+            this.setupData();
         }
+    },
+
+    setupData:function(){
+        if( this.data.raw ) return;
+
+        var raw = null;
+
+        this.data.raw = function(){
+            return raw;
+        };
+
+        this.data.reload = function(cb){
+            DOC.getURL(this.data, (s) => {
+                raw = s;
+                this.cacheURL = arrayToBlobURL( s, this.data );
+                if( cb ) cb(this);
+            }, {binary:true});
+        }
+
+        this.data.reload(() => {
+            this.DOM.BUTTON.style.display = "initial";
+            DOC.remove( this.DOM.IMG );
+        });
     },
 
     update:function(){
@@ -100,6 +106,8 @@ CLAZZ("projects.projman.FileListItem", {
                         CLAZZ.get("onlineStorage").upload( this.data, (url) => {
                             this.data.cacheURL = arrayToBlobURL( this.data.data, url );
                             this.data.data = url;
+                            this.setupData();
+                            this.controller.dirty = true;
                         });
                     }
                 });
@@ -115,6 +123,7 @@ CLAZZ("projects.projman.FileListItem", {
     $btnDelete:{
         click:function(){
             this.source.splice( this.source.indexOf(this.data), 1 );
+            this.controller.dirty = true;
             this.controller.updateFileList();
         }
     }

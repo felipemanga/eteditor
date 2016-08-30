@@ -30,112 +30,67 @@ function atoURL(str, mime){
 }
 
 function btoURL(str, mime){
-	var arr = new Uint8ClampedArray(str.length), obj = {};
-	for(var j=0, i=0, l=str.length; i<l; ++i){
-		var c = str.charCodeAt(i);
-		if(c == 0xFF) c = 0x7F;
-		else if(c == 0xFE) c = 220;
-		else if(c == 0xFD) c = 162;
-		else if(c == 0x7F) c = str.charCodeAt(++i) | 0x80;
-		arr[j++] = c;
-	}
+	var arr = removeslashes(str), obj = {};
 	if( mime ) obj.type = mime;
 	return URL.createObjectURL(new Blob([arr], obj));
 }
 
+function removeslashes(str){
+	var start = performance.now();
+	var arr = new Uint8ClampedArray(str.length);
+	var ofbc=0, buf = [], c;
+	for(var j=0, i=0, l=str.length; i<l; ++i, ++ofbc){
+		buf[ofbc] = str.charCodeAt(i);
+		if(buf[ofbc] == 65533) buf[ofbc] = 0;
+		if(ofbc == 6){
+			var bm = str.charCodeAt(++i);
+			if(bm==65533) bm = 0;
+			for( var k=0; k<7; ++k ){
+				c = buf[k];
+				if(bm & (1<<k)) c |= 0x80;
+				arr[j++] = c;
+			}
+			ofbc = -1;
+		}
+	}
+	var timeDelta = performance.now() - start;
+	console.log("decode time:", timeDelta);
+	return arr;
+}
+
 function addslashes(b){
-	var acc = "";
-
-	function pad(n){
-		var r = "\\";
-		n=n.toString(8);
-		if(i<l-1){
-			var nc = b.charCodeAt(i+1);
-			if( nc>=0x30 && nc<=0x37 ){
-				while(n.length<3) n = "0" + n;
+	var start = performance.now();
+	var acc = "", i, l=b.length, c, t;
+	var ofbc=0, ofbacc=0;
+	function esc(c, useOFB){
+		var ofb = "";
+		if(useOFB){
+			if(c&0x80) ofbacc = ofbacc | (1<<ofbc);
+			ofbc++;
+			if(ofbc==7){
+				ofbc=0;
+				ofb = esc(ofbacc);
+				ofbacc = 0;
 			}
 		}
-		r += n;
-		return r;
+		c = c & 0x7F;
+		if(c==10) return '\\n' + ofb;
+		if(c==13) return '\\r' + ofb;
+		if(c==34) return '\\"' + ofb;
+		if(c==92) return '\\\\' + ofb;
+		return String.fromCharCode(c) + ofb;
 	}
 
-	for( var i=0, l=b.length; i<l; ++i ){
-		var c=b.charCodeAt(i) & 0xFF, t = b[i];
+	acc = "";
+	for( i=0; i<l; ++i )
+		acc += esc(b.charCodeAt(i) & 0xFF, true);
 
-		if(c==0){
-			acc += pad(0);
-			continue;
-		}
-		if(t=='"' || t=='\\'){
-			acc += "\\" + t;
-			continue;
-		}
-		if(c==13){
-			acc += '\\r';
-			continue;
-		}
-		if(c==10){
-			acc += '\\n';
-			continue;
-		}
-		if(c<0x7F){
-			acc += t;
-			continue;
-		}
-		if(c==0x7F){
-			acc += "\\xFF";
-			continue;
-		}
-		if(c>0x7F){
-			c = c & 0x7F;
-			if( c == 10 ){
-				t="\x7F\\n";
-			}else if( c == 13 ){
-				t="\x7F\\r";
-			}else if( c == 0 ){
-				t="\x7F"+pad(0);
-			}else if(c == 92){
-				t="\\xFE";
-			}else if(c == 34){
-				t="\\xFD";
-			}else{
-				t = "\x7F" + String.fromCharCode(c);
-			}
-			acc += t;
-			continue;
-		}
+	while(ofbc) esc(0, true);
 
-		debugger;
-
-
-		if( c<0x7F && c>=32 && t != '\\' && t != '"' ) t = t;
-		else{
-			t = c.toString(8);
-			while(t.length<3) t = "0" + t;
-			t = '\\' + t;
-		}
-		acc += t;
-
-		/*
-		else if(c==0x7F) t = "\\uC282";
-		else t = "\x7F" + String.fromCharCode(c&0x7F);
-
-		acc += {
-			"\0":'\\0',
-			"\\":'\\\\',
-			"\"":'\\"',
-			"\x0A":'\\n',
-			"\x0D":"\\r",
-			"\x7F\x00":"\\x80",
-			"\x7F\x0A":"\\x8A",
-			"\x7F\x0D":"\\x8D",
-			"\x7F\x22":"\\xA2",
-			"\x7F\x5C":"\x7F\\\\"
-		}[t] || t;
-		*/
-
-		// if( acc.length % 1024 == 0 ) acc += "\"\n + \"";
-	}
+	var timeDelta = performance.now() - start;
+	console.log("addslashes: final size:", acc.length, " input size:", l, "("+ Math.floor(acc.length / l * 100) + "%)", " time:", timeDelta);
+	var b64 = btoa(b);
+	console.log("base64:", b64.length, " addslashes:", Math.floor(acc.length / b64.length * 100) + "%");
 
 	return acc;
 }

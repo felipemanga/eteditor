@@ -200,7 +200,10 @@ CLAZZ("projects.projman.ProjManProject", {
         );
 
 		data = "var FS = {\nBASE64:{\n" + BASE64 + "},\nJSON:" + JSON.stringify(data.JSON) + "\n};\n";
-		if( needsConverter ) data += btoURL.toString() + "\n";
+		if( needsConverter ) {
+			data += removeslashes.toString() + "\n";
+			data += btoURL.toString() + "\n";
+		}
 
         function patchCSS(src){
             if( !src ) return src;
