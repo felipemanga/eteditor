@@ -33,6 +33,11 @@ CLAZZ("io.OnlineStorage", {
     },
 
     upload:function(file, cb){
+        if(!user){
+            CLAZZ.get("popups.signin.SignIn", { callback:(success) => success && this.upload(file, cb) });
+            return;
+        }
+        
         var folder = "user/" + user.uid + "/";
         this.save(  {name:folder + this.ID() + file.name.replace(/[^a-z0-9_.]/gi, "_"), data:file.data}, cb );
     },
