@@ -195,7 +195,7 @@ CLAZZ("projects.projman.ProjManProject", {
             }
         );
 
-		data = "{\nBASE64:{\n" + BASE64 + "},\nJSON:" + JSON.stringify(data.JSON) + "\n};\n";
+		data = "var FS = {\nBASE64:{\n" + BASE64 + "},\nJSON:" + JSON.stringify(data.JSON) + "\n};\n";
 		if( needsConverter ) data += atoURL.toString() + "\n";
 
         function patchCSS(src){
@@ -210,7 +210,7 @@ CLAZZ("projects.projman.ProjManProject", {
         }
 
         var dataScript = parsed.createElement("script");
-        dataScript.textContent = "var FS = " + data + ";\n";
+        dataScript.textContent = data;
         parsed.head.insertBefore(dataScript, parsed.head.children[0]);
 
         var tags = Array.prototype.slice.call( parsed.querySelectorAll("img"), 0 );
@@ -252,7 +252,7 @@ CLAZZ("projects.projman.ProjManProject", {
             if( s ) tag.setAttribute("style", patchCSS(s));
         });
 
-        src = new XMLSerializer().serializeToString(parsed);
+        src = this.htmlToString(parsed);
 
         var iframe = DOC.create("iframe", this.DOM.preview, {
             src:arrayToBlobURL(src, "preview", {type:"text/html"}),
@@ -265,6 +265,28 @@ CLAZZ("projects.projman.ProjManProject", {
                 position: "absolute"
             }
         });
+    },
+
+
+    htmlToString:function(e){
+    	var close = false, a = "";
+    	if( e.nodeType != e.DOCUMENT_NODE ){
+        	a = "<" + e.tagName + " ";
+			forEach(e.attributes, (at) => {
+                a += at.name;
+                if( at.value ) a += "=\"" + at.value +"\"";
+			});
+			a += ">";
+            close = ["area", "base", "br", "col", "hr", "img", "input", "link", "meta", "param", "command", "keygen", "source"].indexOf(e.tagName.toLowerCase()) == -1;
+    	}
+
+        forEach(e.childNodes, (c) => {
+            if( c.nodeType == c.TEXT_NODE ) a += c.textContent;
+            else a += this.htmlToString(c);
+        });
+
+        if(close) a += "</" + e.tagName + ">";
+        return a;
     },
 
     $btnShare:{

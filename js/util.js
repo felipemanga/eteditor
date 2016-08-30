@@ -1,3 +1,8 @@
+function forEach(al, cb){
+	if( al )
+		for( var i=0, l=al.length; i<l; i++ ) cb(al[i], i, al);
+}
+
 function intToSTR4B(i){
 	i=i|0;
 	var r = String.fromCharCode((i>>24)&0xFF) +
@@ -17,8 +22,9 @@ function intToBuffer(i){
 }
 
 function atoURL(str, mime){
+	str=atob(str);
 	var arr = new Uint8ClampedArray(str.length), obj = {};
-	for(var i=0, l=str.length; i!=l; ++i) arr[i] = str.charCodeAt(i);
+	for(var i=0, l=str.length; i<l; ++i) arr[i] = str.charCodeAt(i) & 0xFF;
 	if( mime ) obj.type = mime;
 	return URL.createObjectURL(new Blob([arr], obj));
 }
