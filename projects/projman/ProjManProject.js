@@ -53,7 +53,34 @@ CLAZZ("projects.projman.ProjManProject", {
             this.ace.getSession().setMode("ace/mode/" + mode);
             this.ace.setValue( file.data||"" );
         }
+
+		var DOM = this.DOM;
+
+		setHeader("all", "initial", file);
+		setHeader("image", name=="imageComponent"?"initial":"none", file);
+		setHeader("code", name=="codeComponent"?"initial":"none", file);
+
+		function setHeader(type, display, file ){
+			var props = DOM[type + "Property"];
+			if( !props ) return;
+			props.forEach(prop => {
+				prop.style.display = display;
+				if( prop.tagName == "SPAN" ) prop = prop.querySelector("INPUT");
+				var attrval = file[ prop.id ];
+				if( prop.tagName == "INPUT" && prop.getAttribute("type") == "checkbox" ){
+					if( attrval === true ) prop.checked = true;
+					else prop.checked = false;
+				}
+			});
+		}
     },
+
+	$checkboxProperty:{
+		change:function(evt){
+			if(this.currentFile)
+				this.currentFile[ evt.target.id ] = evt.target.checked;
+		}
+	},
 
     commit:function(){
         if( !this.currentFile || !this.currentEditor )
@@ -126,13 +153,36 @@ CLAZZ("projects.projman.ProjManProject", {
         var src = obj.data;
         var parsed = (new DOMParser()).parseFromString( src, "text/html" );
 
-        var data = { BASE64:{}, JSON:{}, JS:{} };
+		var BASE64 = "";
+        var data = { JSON:{}, JS:{} };
 
-        var m = {};
+        var m = {}, needsConverter = false;
         this.project.files.forEach(
             (f) => {
                 m[f.name] = (f.cacheURL !== true && f.cacheURL) || f.data;
-                if( f.storeRaw ) data.BASE64[f.name] = btoa(f.raw());
+                if( f.storeBASE64 ){
+					var a;
+					if( f.cacheURL ) a = btoa(f.raw());
+					else a = btoa(f.data);
+					if(BASE64.length) BASE64 += ",\n";
+					BASE64 += JSON.stringify(f.name) + ":\"" + a + "\"";
+				}
+				if( f.storeURL ){
+					needsConverter = true;
+					var a;
+					if( f.cacheURL ) a = btoa(f.raw());
+					else a = btoa(f.data);
+					if(BASE64.length) BASE64 += ",\n";
+					var type = f.name.replace(/.*\.([a-z0-9]*)$/g, "$1").toLowerCase();
+					type = {
+						png:"image/png",
+						gif:"image/gif",
+						jpg:"image/jpeg"
+					}[type]||"";
+					if(type) type = ",\"" + type + "\"";
+
+					BASE64 += JSON.stringify(f.name) + ":atoURL(\"" + a + "\"" + type + ")";
+				}
                 if( f.storeJSON ){
                     try{
                         data.JSON[f.name] = JSON.parse(f.data);
@@ -144,6 +194,9 @@ CLAZZ("projects.projman.ProjManProject", {
                 }
             }
         );
+
+		data = "var FS = {\nBASE64:{\n" + BASE64 + "},\nJSON:" + JSON.stringify(data.JSON) + "\n};\n";
+		if( needsConverter ) data += atoURL.toString() + "\n";
 
         function patchCSS(src){
             if( !src ) return src;
@@ -157,7 +210,7 @@ CLAZZ("projects.projman.ProjManProject", {
         }
 
         var dataScript = parsed.createElement("script");
-        dataScript.textContent = "var FS = " + JSON.stringify(data) + ";\n";
+        dataScript.textContent = data;
         parsed.head.insertBefore(dataScript, parsed.head.children[0]);
 
         var tags = Array.prototype.slice.call( parsed.querySelectorAll("img"), 0 );
@@ -199,7 +252,7 @@ CLAZZ("projects.projman.ProjManProject", {
             if( s ) tag.setAttribute("style", patchCSS(s));
         });
 
-        src = new XMLSerializer().serializeToString(parsed);
+        src = this.htmlToString(parsed);
 
         var iframe = DOC.create("iframe", this.DOM.preview, {
             src:arrayToBlobURL(src, "preview", {type:"text/html"}),
@@ -212,6 +265,28 @@ CLAZZ("projects.projman.ProjManProject", {
                 position: "absolute"
             }
         });
+    },
+
+
+    htmlToString:function(e){
+    	var close = false, a = "";
+    	if( e.nodeType != e.DOCUMENT_NODE ){
+        	a = "<" + e.tagName + " ";
+			forEach(e.attributes, (at) => {
+                a += at.name;
+                if( at.value ) a += "=\"" + at.value +"\"";
+			});
+			a += ">";
+            close = ["area", "base", "br", "col", "hr", "img", "input", "link", "meta", "param", "command", "keygen", "source"].indexOf(e.tagName.toLowerCase()) == -1;
+    	}
+
+        forEach(e.childNodes, (c) => {
+            if( c.nodeType == c.TEXT_NODE ) a += c.textContent;
+            else a += this.htmlToString(c);
+        });
+
+        if(close) a += "</" + e.tagName + ">";
+        return a;
     },
 
     $btnShare:{
