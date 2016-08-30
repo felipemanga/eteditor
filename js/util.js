@@ -29,6 +29,118 @@ function atoURL(str, mime){
 	return URL.createObjectURL(new Blob([arr], obj));
 }
 
+function btoURL(str, mime){
+	var arr = new Uint8ClampedArray(str.length), obj = {};
+	for(var j=0, i=0, l=str.length; i<l; ++i){
+		var c = str.charCodeAt(i);
+		if(c == 0xFF) c = 0x7F;
+		else if(c == 0xFE) c = 220;
+		else if(c == 0xFD) c = 162;
+		else if(c == 0x7F) c = str.charCodeAt(++i) | 0x80;
+		arr[j++] = c;
+	}
+	if( mime ) obj.type = mime;
+	return URL.createObjectURL(new Blob([arr], obj));
+}
+
+function addslashes(b){
+	var acc = "";
+
+	function pad(n){
+		var r = "\\";
+		n=n.toString(8);
+		if(i<l-1){
+			var nc = b.charCodeAt(i+1);
+			if( nc>=0x30 && nc<=0x37 ){
+				while(n.length<3) n = "0" + n;
+			}
+		}
+		r += n;
+		return r;
+	}
+
+	for( var i=0, l=b.length; i<l; ++i ){
+		var c=b.charCodeAt(i) & 0xFF, t = b[i];
+
+		if(c==0){
+			acc += pad(0);
+			continue;
+		}
+		if(t=='"' || t=='\\'){
+			acc += "\\" + t;
+			continue;
+		}
+		if(c==13){
+			acc += '\\r';
+			continue;
+		}
+		if(c==10){
+			acc += '\\n';
+			continue;
+		}
+		if(c<0x7F){
+			acc += t;
+			continue;
+		}
+		if(c==0x7F){
+			acc += "\\xFF";
+			continue;
+		}
+		if(c>0x7F){
+			c = c & 0x7F;
+			if( c == 10 ){
+				t="\x7F\\n";
+			}else if( c == 13 ){
+				t="\x7F\\r";
+			}else if( c == 0 ){
+				t="\x7F"+pad(0);
+			}else if(c == 92){
+				t="\\xFE";
+			}else if(c == 34){
+				t="\\xFD";
+			}else{
+				t = "\x7F" + String.fromCharCode(c);
+			}
+			acc += t;
+			continue;
+		}
+
+		debugger;
+
+
+		if( c<0x7F && c>=32 && t != '\\' && t != '"' ) t = t;
+		else{
+			t = c.toString(8);
+			while(t.length<3) t = "0" + t;
+			t = '\\' + t;
+		}
+		acc += t;
+
+		/*
+		else if(c==0x7F) t = "\\uC282";
+		else t = "\x7F" + String.fromCharCode(c&0x7F);
+
+		acc += {
+			"\0":'\\0',
+			"\\":'\\\\',
+			"\"":'\\"',
+			"\x0A":'\\n',
+			"\x0D":"\\r",
+			"\x7F\x00":"\\x80",
+			"\x7F\x0A":"\\x8A",
+			"\x7F\x0D":"\\x8D",
+			"\x7F\x22":"\\xA2",
+			"\x7F\x5C":"\x7F\\\\"
+		}[t] || t;
+		*/
+
+		// if( acc.length % 1024 == 0 ) acc += "\"\n + \"";
+	}
+
+	return acc;
+}
+
+
 function strToBuffer(str){
 	var arr = new Uint8ClampedArray(str.length);
 	for(var i=0, l=str.length; i<l; ++i) arr[i] = str.charCodeAt(i);
