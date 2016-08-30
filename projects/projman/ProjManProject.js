@@ -77,8 +77,10 @@ CLAZZ("projects.projman.ProjManProject", {
 
 	$checkboxProperty:{
 		change:function(evt){
-			if(this.currentFile)
+			if(this.currentFile){
 				this.currentFile[ evt.target.id ] = evt.target.checked;
+                this.dirty = true;
+            }
 		}
 	},
 
@@ -162,16 +164,18 @@ CLAZZ("projects.projman.ProjManProject", {
                 m[f.name] = (f.cacheURL !== true && f.cacheURL) || f.data;
                 if( f.storeBASE64 ){
 					var a;
-					if( f.cacheURL ) a = btoa(f.raw());
-					else a = btoa(f.data);
+					if( f.cacheURL ) a = f.raw();
+					else a = f.data;
+                    a = addslashes(a);
 					if(BASE64.length) BASE64 += ",\n";
 					BASE64 += JSON.stringify(f.name) + ":\"" + a + "\"";
 				}
 				if( f.storeURL ){
 					needsConverter = true;
 					var a;
-					if( f.cacheURL ) a = btoa(f.raw());
-					else a = btoa(f.data);
+					if( f.cacheURL ) a = f.raw();
+					else a = f.data;
+                    a = addslashes(a);
 					if(BASE64.length) BASE64 += ",\n";
 					var type = f.name.replace(/.*\.([a-z0-9]*)$/g, "$1").toLowerCase();
 					type = {
@@ -181,7 +185,7 @@ CLAZZ("projects.projman.ProjManProject", {
 					}[type]||"";
 					if(type) type = ",\"" + type + "\"";
 
-					BASE64 += JSON.stringify(f.name) + ":atoURL(\"" + a + "\"" + type + ")";
+					BASE64 += JSON.stringify(f.name) + ":btoURL(\"" + a + "\"" + type + ")";
 				}
                 if( f.storeJSON ){
                     try{
@@ -196,7 +200,7 @@ CLAZZ("projects.projman.ProjManProject", {
         );
 
 		data = "var FS = {\nBASE64:{\n" + BASE64 + "},\nJSON:" + JSON.stringify(data.JSON) + "\n};\n";
-		if( needsConverter ) data += atoURL.toString() + "\n";
+		if( needsConverter ) data += btoURL.toString() + "\n";
 
         function patchCSS(src){
             if( !src ) return src;
@@ -271,14 +275,15 @@ CLAZZ("projects.projman.ProjManProject", {
     htmlToString:function(e){
     	var close = false, a = "";
     	if( e.nodeType != e.DOCUMENT_NODE ){
-        	a = "<" + e.tagName + " ";
+        	a = "<" + e.tagName;
 			forEach(e.attributes, (at) => {
-                a += at.name;
+                a += " " + at.name;
                 if( at.value ) a += "=\"" + at.value +"\"";
 			});
 			a += ">";
             close = ["area", "base", "br", "col", "hr", "img", "input", "link", "meta", "param", "command", "keygen", "source"].indexOf(e.tagName.toLowerCase()) == -1;
-    	}
+    	}else a = "<!DOCTYPE html>";
+
 
         forEach(e.childNodes, (c) => {
             if( c.nodeType == c.TEXT_NODE ) a += c.textContent;
