@@ -32,10 +32,8 @@ CLAZZ("projects.projman.FileListItem", {
 
         this.DOM = DOC.index(el, null, this);
 
-        if(this.data.cacheURL){
-            this.data.cacheURL = true;
+        if(this.data.cacheURL)
             this.setupData();
-        }
     },
 
     setupData:function(){
@@ -55,6 +53,7 @@ CLAZZ("projects.projman.FileListItem", {
             }, {binary:true});
         }
 
+        this.data.cacheURL = true;
         this.data.reload(() => {
             this.DOM.BUTTON.style.display = "initial";
             DOC.remove( this.DOM.IMG );

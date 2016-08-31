@@ -2,12 +2,10 @@ CLAZZ("projects.projman.ProjManProject", {
     INJECT:{
         dialogue:INJECT("dialogues.IDialogue", {
             controller:INJECT("this"),
-            cfg:{
-                frame:false,
-                title:" "
-            }
+            cfg:RESOLVE("settings.projects.projman.ProjManProject.dialogue")
         }),
         settings:"settings",
+        fileSaver:"io.FileSaver",
         data:"data",
         app:"app"
     },
@@ -75,6 +73,19 @@ CLAZZ("projects.projman.ProjManProject", {
 		}
     },
 
+    $MENU:{
+        HTML:function(){
+            this.fileSaver.saveFile({
+                name: this.DOM.pageSelector.value,
+                data: this.createHTML(true)
+            });
+        },
+
+        ZIP:function(){
+
+        }
+    },
+
 	$checkboxProperty:{
 		change:function(evt){
 			if(this.currentFile){
@@ -140,9 +151,8 @@ CLAZZ("projects.projman.ProjManProject", {
         this.app.call("saveSettings");
     },
 
-    refresh:function(){
+    createHTML:function( embed ){
         this.commit();
-
         var fileName = this.DOM.pageSelector.value;
         var obj = this.project.files.find( (f) => f.name == fileName );
         if( !obj ){
@@ -166,7 +176,7 @@ CLAZZ("projects.projman.ProjManProject", {
 					var a;
 					if( f.cacheURL ) a = f.raw();
 					else a = f.data;
-                    a = addslashes(a);
+                    a = encbin(a);
 					if(BASE64.length) BASE64 += ",\n";
 					BASE64 += JSON.stringify(f.name) + ":\"" + a + "\"";
 				}
@@ -175,7 +185,7 @@ CLAZZ("projects.projman.ProjManProject", {
 					var a;
 					if( f.cacheURL ) a = f.raw();
 					else a = f.data;
-                    a = addslashes(a);
+                    a = encbin(a);
 					if(BASE64.length) BASE64 += ",\n";
 					var type = f.name.replace(/.*\.([a-z0-9]*)$/g, "$1").toLowerCase();
 					type = {
@@ -201,9 +211,11 @@ CLAZZ("projects.projman.ProjManProject", {
 
 		data = "var FS = {\nBASE64:{\n" + BASE64 + "},\nJSON:" + JSON.stringify(data.JSON) + "\n};\n";
 		if( needsConverter ) {
-			data += removeslashes.toString() + "\n";
+			data += decbin.toString() + "\n";
 			data += btoURL.toString() + "\n";
 		}
+
+        data += "document.head.removeChild( document.scripts[0] );"
 
         function patchCSS(src){
             if( !src ) return src;
@@ -237,7 +249,7 @@ CLAZZ("projects.projman.ProjManProject", {
             var src = tag.getAttribute("src");
             if( src in m ){
                 tag.removeAttribute("src");
-                tag.textContent = m[src];
+                tag.textContent = m[src]+"\n";
             }
         });
 
@@ -259,7 +271,11 @@ CLAZZ("projects.projman.ProjManProject", {
             if( s ) tag.setAttribute("style", patchCSS(s));
         });
 
-        src = this.htmlToString(parsed);
+        return this.htmlToString(parsed);
+    },
+
+    refresh:function(){
+        var src = this.createHTML(true);
 
         var iframe = DOC.create("iframe", this.DOM.preview, {
             src:arrayToBlobURL(src, "preview", {type:"text/html"}),
@@ -273,7 +289,6 @@ CLAZZ("projects.projman.ProjManProject", {
             }
         });
     },
-
 
     htmlToString:function(e){
     	var close = false, a = "";

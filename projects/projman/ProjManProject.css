@@ -36,15 +36,15 @@ main .fileSection {
 
 .codeSection {
     position: relative;
+    display: flex;
+    flex-direction: column;
 }
 
 #codeComponent {
-    width: 100%;
-    height: 100%;
+    flex-grow: 1;
     border-width: 0;
     margin: 0;
     resize: none;
-    position: absolute;
 }
 
 
