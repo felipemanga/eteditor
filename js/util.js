@@ -37,21 +37,22 @@ function btoURL(str, mime){
 
 function decbin(str){
 	var start = performance.now();
-	var arr = new Uint8ClampedArray(str.length);
+	var arr = new Uint8ClampedArray(str.length/8*7);
 	var ofbc=0, buf = [], c;
-	for(var j=0, i=0, l=str.length; i<l; ++i, ++ofbc){
-		buf[ofbc] = str.charCodeAt(i);
-		if(buf[ofbc] == 65533) buf[ofbc] = 0;
-		if(ofbc == 6){
-			var bm = str.charCodeAt(++i);
-			if(bm==65533) bm = 0;
-			for( var k=0; k<7; ++k ){
-				c = buf[k];
-				if(bm & (1<<k)) c |= 0x80;
-				arr[j++] = c;
-			}
-			ofbc = -1;
-		}
+	var mask = str.charCodeAt(7);
+	if(mask==65533) mask = 0;
+
+	for(var j=0, i=0, l=str.length; i<l; ++j, ++ofbc){
+		bm = str.charCodeAt(i++);
+		if(bm == 65533) bm = 0;
+
+		arr[j] = bm | (((mask>>ofbc)&1)<<7);
+
+		if(ofbc != 6) continue;
+		i++;
+		mask = str.charCodeAt(i + 7);
+		if(mask==65533) mask = 0;
+		ofbc = -1;
 	}
 	var timeDelta = performance.now() - start;
 	console.log("decode time:", timeDelta);

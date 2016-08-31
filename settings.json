@@ -39,6 +39,23 @@
             }
         },
 
+        "projman":{
+            "ProjManProject":{
+                "dialogue":{
+                    "frame":false,
+                    "title":" ",
+                    "menu":{
+						"HTML":{
+							"toggle":true
+						},
+                        "ZIP":{
+                            "toggle":true
+                        }
+                    }
+                }
+            }
+        },
+
         "sprite":{
             "filters":[
                 "projects/sprite/filters/Perlin.js",
