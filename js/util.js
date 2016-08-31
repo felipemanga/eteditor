@@ -30,12 +30,12 @@ function atoURL(str, mime){
 }
 
 function btoURL(str, mime){
-	var arr = removeslashes(str), obj = {};
+	var arr = decbin(str), obj = {};
 	if( mime ) obj.type = mime;
 	return URL.createObjectURL(new Blob([arr], obj));
 }
 
-function removeslashes(str){
+function decbin(str){
 	var start = performance.now();
 	var arr = new Uint8ClampedArray(str.length);
 	var ofbc=0, buf = [], c;
@@ -58,39 +58,45 @@ function removeslashes(str){
 	return arr;
 }
 
-function addslashes(b){
+(function(){
+	var LUT = [], i;
+	for(i=0;i<=0x7F;++i)
+		LUT[i] = String.fromCharCode(i);
+	LUT[10] = "\\n";
+	LUT[13] = "\\r";
+	LUT[34] = '\\"';
+	LUT[92] = "\\\\";
+	self.__STRLUT = LUT;
+})();
+
+function encbin(b){
+	"use strict";
 	var start = performance.now();
-	var acc = "", i, l=b.length, c, t;
-	var ofbc=0, ofbacc=0;
-	function esc(c, useOFB){
-		var ofb = "";
-		if(useOFB){
-			if(c&0x80) ofbacc = ofbacc | (1<<ofbc);
-			ofbc++;
-			if(ofbc==7){
-				ofbc=0;
-				ofb = esc(ofbacc);
-				ofbacc = 0;
-			}
-		}
-		c = c & 0x7F;
-		if(c==10) return '\\n' + ofb;
-		if(c==13) return '\\r' + ofb;
-		if(c==34) return '\\"' + ofb;
-		if(c==92) return '\\\\' + ofb;
-		return String.fromCharCode(c) + ofb;
+
+	var LUT = __STRLUT, acc = "", i=0, l=b.length, c;
+	var ofbc=7, ofbacc=0;
+
+	while( i<l ){
+		c=b.charCodeAt(i++);
+		ofbacc |= (((c&0x80)>>7)<<(7-ofbc));
+		acc += LUT[c&0x7F];
+		if(--ofbc) continue;
+		ofbc=7;
+		acc += LUT[ofbacc];
+		ofbacc = 0;
 	}
 
-	acc = "";
-	for( i=0; i<l; ++i )
-		acc += esc(b.charCodeAt(i) & 0xFF, true);
-
-	while(ofbc) esc(0, true);
+	while(ofbc--)
+		acc += "\0";
+	acc += LUT[ofbacc];
 
 	var timeDelta = performance.now() - start;
 	console.log("addslashes: final size:", acc.length, " input size:", l, "("+ Math.floor(acc.length / l * 100) + "%)", " time:", timeDelta);
-	var b64 = btoa(b);
-	console.log("base64:", b64.length, " addslashes:", Math.floor(acc.length / b64.length * 100) + "%");
+
+	// start = performance.now();
+	// var b64 = btoa(b);
+	// timeDelta = performance.now() - start;
+	// console.log("base64:", b64.length, " addslashes:", Math.floor(acc.length / b64.length * 100) + "%", "time:", timeDelta);
 
 	return acc;
 }

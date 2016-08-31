@@ -166,7 +166,7 @@ CLAZZ("projects.projman.ProjManProject", {
 					var a;
 					if( f.cacheURL ) a = f.raw();
 					else a = f.data;
-                    a = addslashes(a);
+                    a = encbin(a);
 					if(BASE64.length) BASE64 += ",\n";
 					BASE64 += JSON.stringify(f.name) + ":\"" + a + "\"";
 				}
@@ -175,7 +175,7 @@ CLAZZ("projects.projman.ProjManProject", {
 					var a;
 					if( f.cacheURL ) a = f.raw();
 					else a = f.data;
-                    a = addslashes(a);
+                    a = encbin(a);
 					if(BASE64.length) BASE64 += ",\n";
 					var type = f.name.replace(/.*\.([a-z0-9]*)$/g, "$1").toLowerCase();
 					type = {
@@ -201,7 +201,7 @@ CLAZZ("projects.projman.ProjManProject", {
 
 		data = "var FS = {\nBASE64:{\n" + BASE64 + "},\nJSON:" + JSON.stringify(data.JSON) + "\n};\n";
 		if( needsConverter ) {
-			data += removeslashes.toString() + "\n";
+			data += decbin.toString() + "\n";
 			data += btoURL.toString() + "\n";
 		}
 
