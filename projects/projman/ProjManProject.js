@@ -165,37 +165,32 @@ CLAZZ("projects.projman.ProjManProject", {
         var src = obj.data;
         var parsed = (new DOMParser()).parseFromString( src, "text/html" );
 
-		var BASE64 = "";
+		var BASE64 = "", FSURL = "";
         var data = { JSON:{}, JS:{} };
 
         var m = {}, needsConverter = false;
         this.project.files.forEach(
             (f) => {
                 m[f.name] = (f.cacheURL !== true && f.cacheURL) || f.data;
-                if( f.storeBASE64 ){
-					var a;
+                if( f.storeFILE ){
+					var a, jname = JSON.stringify(f.name);
 					if( f.cacheURL ) a = f.raw();
 					else a = f.data;
                     a = encbin(a);
-					if(BASE64.length) BASE64 += ",\n";
-					BASE64 += JSON.stringify(f.name) + ":\"" + a + "\"";
-				}
-				if( f.storeURL ){
-					needsConverter = true;
-					var a;
-					if( f.cacheURL ) a = f.raw();
-					else a = f.data;
-                    a = encbin(a);
-					if(BASE64.length) BASE64 += ",\n";
-					var type = f.name.replace(/.*\.([a-z0-9]*)$/g, "$1").toLowerCase();
-					type = {
-						png:"image/png",
-						gif:"image/gif",
-						jpg:"image/jpeg"
-					}[type]||"";
-					if(type) type = ",\"" + type + "\"";
-
-					BASE64 += JSON.stringify(f.name) + ":btoURL(\"" + a + "\"" + type + ")";
+    				if(BASE64.length){
+                        BASE64 += ",\n";
+                        FSURL += ",\n";
+                    }
+					BASE64 += jname + ":decbin(\"" + a + "\")";
+                    needsConverter = true;
+                    var type = f.name.replace(/.*\.([a-z0-9]*)$/g, "$1").toLowerCase();
+                    type = {
+                        png:"image/png",
+                        gif:"image/gif",
+                        jpg:"image/jpeg"
+                    }[type]||"";
+                    if(type) type = ", {type:\"" + type + "\"}";
+                    FSURL += jname + ":URL.createObjectURL(new Blob([FS.FILE[" + jname + "]]" + type + "))";
 				}
                 if( f.storeJSON ){
                     try{
@@ -209,13 +204,15 @@ CLAZZ("projects.projman.ProjManProject", {
             }
         );
 
-		data = "var FS = {\nBASE64:{\n" + BASE64 + "},\nJSON:" + JSON.stringify(data.JSON) + "\n};\n";
+		var strdata = "var FS = {\nFILE:{\n" + BASE64 + "}\n };\n"
+                + "FS.JSON = " + JSON.stringify(data.JSON) + ";\n"
+                + "FS.URL = {\n" + FSURL + "\n};\n";
 		if( needsConverter ) {
-			data += decbin.toString() + "\n";
-			data += btoURL.toString() + "\n";
+			strdata += decbin.toString() + "\n";
 		}
 
-        data += "document.head.removeChild( document.scripts[0] );"
+        strdata += "document.head.removeChild( document.scripts[0] );";
+        data = strdata;
 
         function patchCSS(src){
             if( !src ) return src;
