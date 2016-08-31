@@ -96,14 +96,19 @@ Now includes a share button, so you can share code snippets with others! Also su
 
 
 ## <a id="projectedit"></a> Project Editor
-In progress.
+This editor is for making HTML5 games. You can add images, HTML, CSS and JavaScript files and it will bundle them up in a way that works offline (even using "file://" urls).
+(Here)[http://localhost/eteditor/?p=projman&os=9ge6zeyhisg2pcpb7rpfowvnt11lci] is one of the Phaser.js examples, with some very slight modifications (using FS.URL["file.png"]
+instead of simply "file.png").
+To run a game, click on Load in the rightmost pane, or type Ctrl+Enter in a code pane.
+To export a game, simply click Menu->HTML and download the file.
+Double click a file in the files list to rename it.
+
 
 ## Future
 The following is a list of things that I intend to add to ETEditor in the near future:
 - Voxel Editing. A prototype has already been built.
 - Vector Editing.
 - AppInventor2 Editing. Based on my AppInventor2HTML5 project, also on Github.
-- Multi-File JavaScript Editing. For making games entirely within ETEditor.
 - Google Drive / Dropbox support for storing large projects.
 
 ## Libraries
