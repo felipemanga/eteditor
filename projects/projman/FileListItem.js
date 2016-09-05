@@ -17,46 +17,52 @@ CLAZZ("projects.projman.FileListItem", {
                 value:this.data.name,
                 disabled:true
             }],
-            this.data.cacheURL ? ["img", {
+            ["img", {
                 src:"img/loading.gif",
                 style:{ mixBlendMode:"screen" }
-            }] : null,
+            }],
             ["button", {
                 className:"btnDelete",
                 text:"X",
                 style:{
-                    display:this.data.cacheURL?"none":"initial"
+                    display:"initial"
                 }
             }]
         ]);
 
         this.DOM = DOC.index(el, null, this);
 
-        if(this.data.cacheURL)
-            this.setupData();
+        this.setupData();
     },
 
     setupData:function(){
-        if( this.data.raw ) return;
+        if( !this.data.raw ){
+            var raw = null;
+            this.cacheURL = null;
 
-        var raw = null;
+            this.data.raw = function(){
+                return raw;
+            };
 
-        this.data.raw = function(){
-            return raw;
-        };
+            this.data.reload = function(cb){
+                if( !this.data.match(/^https?:\/\/[a-z0-9]+.*$/i) ){
+                    raw = this.data;
+                    if(cb) cb(this);
+                    return;
+                }
 
-        this.data.reload = function(cb){
-            DOC.getURL(this.data, (s) => {
-                raw = s;
-                this.cacheURL = arrayToBlobURL( s, this.data );
-                if( cb ) cb(this);
-            }, {binary:true});
+                this.cacheURL = true;
+                DOC.getURL(this.data, (s) => {
+                    raw = s;
+                    this.cacheURL = arrayToBlobURL( s, this.data );
+                    if( cb ) cb(this);
+                }, {binary:true});
+            }
         }
 
-        this.data.cacheURL = true;
         this.data.reload(() => {
             this.DOM.BUTTON.style.display = "initial";
-            DOC.remove( this.DOM.IMG );
+            this.DOM.IMG.style.display = "none";
         });
     },
 

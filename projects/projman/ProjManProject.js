@@ -16,8 +16,8 @@ CLAZZ("projects.projman.ProjManProject", {
     DOM:null,
     project:{
         files:[
-            {name:"style.css", data:"body {\n\tbackground-image: url(cat.jpg);\n}"},
-            {name:"cat.jpg", data:"http://placekitten.com/300/300", cacheURL:true },
+            {name:"style.css", data:"body {\n\tbackground-image: url(logo.jpg);\n}"},
+            {name:"logo.jpg", data:"img/logo.png", cacheURL:true },
             {name:"index.html", data:"<html>\n\t<head>\n\t\t<link rel=\"stylesheet\" href=\"style.css\">\n\t</head>\n\t<body>\n\t\tHello world\n\t</body>\n</html>"}
         ]
     },
