@@ -7,8 +7,13 @@ CLAZZ("io.compressors.PNCCompressor", {
     fileData:null,
 
     CONSTRUCTOR:function(){
-        this.files = [];
+		this.clear();
     },
+
+	clear:function(){
+        this.files = [];
+		this.dataSize = 0;
+	},
 
     dataSize:0,
     getTotalSize:function(){
