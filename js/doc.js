@@ -484,7 +484,7 @@ function postURL( url, data, cb )
         if( xhr.readyState == 4 && ( xhr.status == 200 || xhr.status === 0 ) )
             cb( xhr.response || xhr.responseText );
     };
-	var acc="";
+	var acc="", v;
 	for( var k in data ){
 		v = data[k];
 		if( typeof v != "string" ) v = JSON.stringify(v);

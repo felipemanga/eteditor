@@ -5,6 +5,7 @@ CLAZZ("projects.projman.ProjManProject", {
             cfg:RESOLVE("settings.projects.projman.ProjManProject.dialogue")
         }),
         settings:"settings",
+        compressor:"io.compressors.IPNCCompressor",
         fileSaver:"io.FileSaver",
         data:"data",
         app:"app"
@@ -75,10 +76,12 @@ CLAZZ("projects.projman.ProjManProject", {
 
     $MENU:{
         HTML:function(){
-            this.fileSaver.saveFile({
-                name: this.DOM.pageSelector.value,
-                data: this.createHTML(true)
-            });
+            this.createHTML(true, true, (src) =>
+                this.fileSaver.saveFile({
+                    name: this.DOM.pageSelector.value,
+                    data: src
+                })
+            );
         },
 
         ZIP:function(){
@@ -151,7 +154,7 @@ CLAZZ("projects.projman.ProjManProject", {
         this.app.call("saveSettings");
     },
 
-    createHTML:function( embed ){
+    createHTML:function( embed, minimize, cb ){
         this.commit();
         var fileName = this.DOM.pageSelector.value;
         var obj = this.project.files.find( (f) => f.name == fileName );
@@ -181,7 +184,7 @@ CLAZZ("projects.projman.ProjManProject", {
                         BASE64 += ",\n";
                         FSURL += ",\n";
                     }
-					BASE64 += jname + ":decbin(\"" + a + "\")";
+					BASE64 += jname + ":decbin(" + a + ")";
                     needsConverter = true;
                     var type = f.name.replace(/.*\.([a-z0-9]*)$/g, "$1").toLowerCase();
                     type = {
@@ -241,15 +244,6 @@ CLAZZ("projects.projman.ProjManProject", {
             if( src in m ) img.setAttribute( "href", m[src]  );
         });
 
-        tags = Array.prototype.slice.call( parsed.querySelectorAll("script"), 0 );
-        tags.forEach((tag) => {
-            var src = tag.getAttribute("src");
-            if( src in m ){
-                tag.removeAttribute("src");
-                tag.textContent = m[src]+"\n";
-            }
-        });
-
         tags = Array.prototype.slice.call( parsed.querySelectorAll("link"), 0 );
         tags.forEach((tag) => {
             var src = tag.getAttribute("href");
@@ -268,22 +262,65 @@ CLAZZ("projects.projman.ProjManProject", {
             if( s ) tag.setAttribute("style", patchCSS(s));
         });
 
-        return this.htmlToString(parsed);
+        tags = Array.prototype.slice.call( parsed.querySelectorAll("script"), 0 );
+        if( minimize ){
+            var accSrc = "(function(){\n";
+            tags.forEach((tag) => {
+                if( tag == dataScript ) return;
+
+                var src = tag.getAttribute("src");
+                if( src in m ){
+                    accSrc += m[src] + "\n";
+                }
+
+                accSrc += tag.textContent;
+                DOC.remove(tag);
+            });
+
+            accSrc += "\n})();\n";
+
+            console.log("Pre-Closure size:", accSrc.length);
+
+            DOC.postURL('https://closure-compiler.appspot.com/compile', {
+                js_code: accSrc,
+                compilation_level: 'ADVANCED_OPTIMIZATIONS',
+                output_format: 'text',
+                output_info: 'compiled_code'
+            }, (src) => {
+                console.log("Pre-PNC size:", src.length);
+                this.compressor.clear();
+                this.compressor.addFile("s.js", strToBuffer(src) );
+                this.compressor.compress("__URL__", (files) => {
+                    src = files[1].data.split('"__URL__"').join("URL.createObjectURL(new Blob([decbin(" + encbin(files[0].data) + ")], {type:'image/png'}))");
+                    dataScript.textContent += "\n" + src;
+                    cb( this.htmlToString(parsed) );
+                });
+            });
+        }else{
+            tags.forEach((tag) => {
+                var src = tag.getAttribute("src");
+                if( src in m ){
+                    tag.removeAttribute("src");
+                    tag.textContent = m[src]+"\n";
+                }
+            });
+            cb( this.htmlToString(parsed) );
+        }        
     },
 
     refresh:function(){
-        var src = this.createHTML(true);
-
-        var iframe = DOC.create("iframe", this.DOM.preview, {
-            src:arrayToBlobURL(src, "preview", {type:"text/html"}),
-            width:"100%",
-            height:"100%",
-            style:{
-                width:  "100%",
-                height: "100%",
-                border: "none",
-                position: "absolute"
-            }
+        this.createHTML(true, false, (src) => {
+            var iframe = DOC.create("iframe", this.DOM.preview, {
+                src:arrayToBlobURL(src, "preview", {type:"text/html"}),
+                width:"100%",
+                height:"100%",
+                style:{
+                    width:  "100%",
+                    height: "100%",
+                    border: "none",
+                    position: "absolute"
+                }
+            });
         });
     },
 

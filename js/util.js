@@ -35,7 +35,9 @@ function btoURL(str, mime){
 	return URL.createObjectURL(new Blob([arr], obj));
 }
 
-function decbin(str){
+function decbin(c){var f=new Uint8ClampedArray(c.length/8*7),d=0,b=c.charCodeAt(7);65533==b&&(b=0);for(var g=0,e=0,h=c.length;e<h;++g,++d)bm=c.charCodeAt(e++),65533==bm&&(bm=0),f[g]=bm|(b>>d&1)<<7,6==d&&(e++,b=c.charCodeAt(e+7),65533==b&&(b=0),d=-1);return f};
+
+function __decbin(str){
 	var start = performance.now();
 	var arr = new Uint8ClampedArray(str.length/8*7);
 	var ofbc=0, buf = [], c;
@@ -65,7 +67,7 @@ function decbin(str){
 		LUT[i] = String.fromCharCode(i);
 	LUT[10] = "\\n";
 	LUT[13] = "\\r";
-	LUT[34] = '\\"';
+	LUT[39] = "\\'";
 	LUT[92] = "\\\\";
 	self.__STRLUT = LUT;
 })();
@@ -74,7 +76,7 @@ function encbin(b){
 	"use strict";
 	var start = performance.now();
 
-	var LUT = __STRLUT, acc = "", i=0, l=b.length, c;
+	var LUT = __STRLUT, acc = "'", i=0, l=b.length, c;
 	var ofbc=7, ofbacc=0;
 
 	while( i<l ){
@@ -89,7 +91,7 @@ function encbin(b){
 
 	while(ofbc--)
 		acc += "\0";
-	acc += LUT[ofbacc];
+	acc += LUT[ofbacc] + "'";
 
 	var timeDelta = performance.now() - start;
 	console.log("addslashes: final size:", acc.length, " input size:", l, "("+ Math.floor(acc.length / l * 100) + "%)", " time:", timeDelta);
