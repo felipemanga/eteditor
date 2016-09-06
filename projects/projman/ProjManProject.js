@@ -291,7 +291,8 @@ CLAZZ("projects.projman.ProjManProject", {
                 this.compressor.clear();
                 this.compressor.addFile("s.js", strToBuffer(src) );
                 this.compressor.compress("__URL__", (files) => {
-                    src = files[1].data.split('"__URL__"').join("URL.createObjectURL(new Blob([decbin(" + encbin(files[0].data) + ")], {type:'image/png'}))");
+                    src = "var SOURCE_URL = URL.createObjectURL(new Blob([decbin(" + encbin(files[0].data) + ")], {type:'image/png'}));\n";
+                    src += files[1].data.split('"__URL__"').join("SOURCE_URL");
                     dataScript.textContent += "\n" + src;
                     cb( this.htmlToString(parsed) );
                 });
