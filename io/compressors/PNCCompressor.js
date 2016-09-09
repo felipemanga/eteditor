@@ -33,7 +33,12 @@ CLAZZ("io.compressors.PNCCompressor", {
     },
 
     compress:function( path, cb ){
-        var dim = Math.ceil( Math.sqrt( this.getTotalSize() ) );
+		var total, singleFileMode = this.files.length==1 && /.*\.js$/i.test(this.files[0].name);
+		
+		if( singleFileMode ) total = this.files[0].data.length;
+		else total = this.getTotalSize();
+
+        var dim = Math.ceil( Math.sqrt( total ) );
 		var dest = new Uint8Array( dim*dim*4 );
 		var skip=4, off = 0;
 
@@ -48,12 +53,16 @@ CLAZZ("io.compressors.PNCCompressor", {
 			}
 		}
 
-		copy( intToBuffer(this.files.length) );
-		for (var i = 0, f; f = this.files[i]; i++){
-			copy( intToBuffer(f.name.length) );
-			copy( strToBuffer(f.name) );
-			copy( intToBuffer(f.data.length) );
-			copy( f.data );
+		if( singleFileMode ){
+			copy( this.files[0].data );
+		}else{
+			copy( intToBuffer(this.files.length) );
+			for (var i = 0, f; f = this.files[i]; i++){
+				copy( intToBuffer(f.name.length) );
+				copy( strToBuffer(f.name) );
+				copy( intToBuffer(f.data.length) );
+				copy( f.data );
+			}
 		}
 
 		var enc = new CanvasTool.PngEncoder( dest, {
@@ -62,7 +71,10 @@ CLAZZ("io.compressors.PNCCompressor", {
 			colourType: CanvasTool.PngEncoder.ColourType.GRAYSCALE
 		});
 
-        var codecSrc = "(" + this.codec.toString().replace("__DECODE__", path.replace(/.*[\/\\]/g, '') ) + ")();";
+        var codecSrc = "(" + (this.codec||(singleFileMode?this.singleFileCodec:this.defaultCodec)).toString()
+			.replace("__DECODE__", path.replace(/.*[\/\\]/g, '') )
+			.replace("__FILE_SIZE__", total)
+			+ ")();";
 
 		cb( [
             {name:path, data:enc.convert()},
@@ -70,8 +82,12 @@ CLAZZ("io.compressors.PNCCompressor", {
         ] );
     },
 
-    codec: function(){function c(){return k[g+=4]}function l(){var b=c()<<24,b=b+(c()<<16),b=b+(c()<<8);return b+=c()}function m(){for(var b="",d=l(),n=0;n<d;++n)b+=String.fromCharCode(c());return b}var g=-4,k,h=document,f=h.createElement("img");f.onload=function(){try{var b=h.createElement("canvas"),d=b.height=b.width=f.width,c=b.getContext("2d");c.drawImage(f,0,0);k=c.getImageData(0,0,d,d).data;var g=l(),b="",e;window.a=window.a||{};for(d=0;d<g;++d){var p=m();e=window.a[p]=m();/\.js$/i.test(p)&&(b+=e)}b.length&&(e=h.createElement("script"),e.textContent=b,document.head.appendChild(e))}catch(q){console.error(q)}};f.src="__DECODE__"},
-	__codec:function(){
+	codec:null,
+    defaultCodec: function(){function c(){return k[g+=4]}function l(){var b=c()<<24,b=b+(c()<<16),b=b+(c()<<8);return b+=c()}function m(){for(var b="",d=l(),n=0;n<d;++n)b+=String.fromCharCode(c());return b}var g=-4,k,h=document,f=h.createElement("img");f.onload=function(){try{var b=h.createElement("canvas"),d=b.height=b.width=f.width,c=b.getContext("2d");c.drawImage(f,0,0);k=c.getImageData(0,0,d,d).data;var g=l(),b="",e;window.a=window.a||{};for(d=0;d<g;++d){var p=m();e=window.a[p]=m();/\.js$/i.test(p)&&(b+=e)}b.length&&(e=h.createElement("script"),e.textContent=b,document.head.appendChild(e))}catch(q){console.error(q)}};f.src="__DECODE__"},
+
+	singleFileCodec:function(){var g=-4,f,d=document,e=d.createElement("img");e.onload=()=>{try{var a=d.createElement("canvas"),b=a.height=a.width=e.width,c=a.getContext("2d");c.drawImage(e,0,0);f=c.getImageData(0,0,b,b).data;a=tmp=d.createElement("script");b="";for(c=0;__FILE_SIZE__>c;++c)b+=String.fromCharCode(f[g+=4]);a.textContent=b;d.head.appendChild(tmp)}catch(h){d.body.innerHTML="Browser Bug Found"}};e.src="__DECODE__"},
+	
+	debugCodec:function(){
 		var off = -4, src;
 
 		function POP(){
