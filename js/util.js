@@ -35,25 +35,32 @@ function btoURL(str, mime){
 	return URL.createObjectURL(new Blob([arr], obj));
 }
 
-function decbin(c){var f=new Uint8ClampedArray(c.length/8*7),d=0,b=c.charCodeAt(7);65533==b&&(b=0);for(var g=0,e=0,h=c.length;e<h;++g,++d)bm=c.charCodeAt(e++),65533==bm&&(bm=0),f[g]=bm|(b>>d&1)<<7,6==d&&(e++,b=c.charCodeAt(e+7),65533==b&&(b=0),d=-1);return f};
+function decbin(a){var d={65533:0},b;for(b=0;128>b;)d[b]=b++;[10,13,39,92].forEach((c,e)=>{b=a.charCodeAt(e);d[b]=c;d[c]=b});a=a.substr(4);for(var f=new Uint8ClampedArray(a.length/8*7),c=0,g=d[a.charCodeAt(7)],h=0,e=0,k=a.length;e<k;++h,++c)bm=d[a.charCodeAt(e++)],f[h]=bm|(g>>c&1)<<7,6==c&&(e++,g=d[a.charCodeAt(e+7)],c=-1);return f};
 
 function __decbin(str){
 	var start = performance.now();
+	var map={65533:0}, t;
+	for(t=0; t<128;) map[t]=t++;
+	[10,13,39,92].forEach((code, pos)=>{
+		t=str.charCodeAt(pos);
+		map[t]  = code;
+		map[code] = t;
+	});
+	
+	str = str.substr(4);
+	
 	var arr = new Uint8ClampedArray(str.length/8*7);
 	var ofbc=0, buf = [], c;
-	var mask = str.charCodeAt(7);
-	if(mask==65533) mask = 0;
+	var mask = map[str.charCodeAt(7)];
 
 	for(var j=0, i=0, l=str.length; i<l; ++j, ++ofbc){
-		bm = str.charCodeAt(i++);
-		if(bm == 65533) bm = 0;
+		bm = map[str.charCodeAt(i++)];
 
 		arr[j] = bm | (((mask>>ofbc)&1)<<7);
 
 		if(ofbc != 6) continue;
 		i++;
-		mask = str.charCodeAt(i + 7);
-		if(mask==65533) mask = 0;
+		mask = map[str.charCodeAt(i + 7)];
 		ofbc = -1;
 	}
 	var timeDelta = performance.now() - start;
@@ -62,25 +69,69 @@ function __decbin(str){
 }
 
 (function(){
-	var LUT = [], i;
-	for(i=0;i<=0x7F;++i)
-		LUT[i] = String.fromCharCode(i);
-	LUT[10] = "\\n";
-	LUT[13] = "\\r";
-	LUT[39] = "\\'";
-	LUT[92] = "\\\\";
-	self.__STRLUT = LUT;
-})();
+	var STRLUT = [], i, freq = new Uint32Array(127);
 
-function encbin(b){
+self.encbin = function encbin(b){
 	"use strict";
 	var start = performance.now();
 
-	var LUT = __STRLUT, acc = "'", i=0, l=b.length, c;
-	var ofbc=7, ofbacc=0;
+	var LUT = STRLUT, acc = "'", i=0, l=b.length, c;
+	var ofbc=7, ofbacc=0, map={65533:0};
 
-	while( i<l ){
-		c=b.charCodeAt(i++);
+	for(i=0;i<=0x7F;++i)
+		STRLUT[i] = String.fromCharCode(i);
+	STRLUT[10] = "\\n";
+	STRLUT[13] = "\\r";
+	STRLUT[39] = "\\'";
+	STRLUT[92] = "\\\\";
+
+	freq.fill(0);
+	while( i < l ){
+		c = b.charCodeAt(i++);
+		ofbacc |= (((c&0x80)>>7)<<(7-ofbc));
+		freq[c&0x7F]++;
+
+		if(--ofbc) continue;
+		ofbc=7;
+		c = ofbacc;
+		freq[c]++;
+		ofbacc = 0;
+	}
+
+	ofbacc = 0;
+	ofbc = 7;
+
+	var lf=[freq[0]], lfp=[0];
+	for(i=0; i < 127; ++i ){
+		var freqi = freq[i];
+		for(var j=0; j<4; ++j ){
+			if( !(freqi >= lf[j]) && STRLUT[i].length==1 ){
+				for(var k=3; k>j; --k){
+					lf[k]=lf[k-1];
+					lfp[k]=lfp[k-1];
+				}
+				lf[j]=freqi;
+				lfp[j]=i;
+				break;
+			}
+		}
+	}
+
+	var specials = [10, 13, 39, 92];
+	specials.sort(
+		(a,b) => freq[a] - freq[b]
+	).forEach((k,i) => {
+		var t = LUT[k];
+		LUT[k] = LUT[lfp[i]];
+		LUT[lfp[i]] = t;
+	});
+	// console.log("LF / LFP:", lf, lfp, specials, specials.map(k => freq[k]));
+
+	acc += LUT[10] + LUT[13] + LUT[39] + LUT[92];
+
+	i=0;
+	while( i < l ){
+		c = b.charCodeAt(i++);
 		ofbacc |= (((c&0x80)>>7)<<(7-ofbc));
 		acc += LUT[c&0x7F];
 		if(--ofbc) continue;
@@ -94,7 +145,7 @@ function encbin(b){
 	acc += LUT[ofbacc] + "'";
 
 	var timeDelta = performance.now() - start;
-	console.log("addslashes: final size:", acc.length, " input size:", l, "("+ Math.floor(acc.length / l * 100) + "%)", " time:", timeDelta);
+	console.log("encbin: final size:", acc.length, " input size:", l, "("+ Math.floor(acc.length / l * 100) + "%)", " time:", timeDelta);
 
 	// start = performance.now();
 	// var b64 = btoa(b);
@@ -103,6 +154,7 @@ function encbin(b){
 
 	return acc;
 }
+})();
 
 
 function strToBuffer(str){
