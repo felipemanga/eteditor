@@ -37,7 +37,7 @@ CLAZZ("projects.projman.ProjManProject", {
         this.currentFile = file;
 
         if( name == "imageComponent" )
-            this.DOM.imagePreview.src = file.cacheURL;
+            this.DOM.imageComponent.style.backgroundImage = "url(" + file.cacheURL + ")";
         else if( name == "codeComponent" ){
             var ext = file.name.toLowerCase().replace(/^.*\.([a-z0-9]+)$/i, "$1");
             var mode = {
@@ -381,7 +381,7 @@ CLAZZ("projects.projman.ProjManProject", {
 
     $btnReloadImage:{
         click:function(){
-            this.currentFile.reload( () => this.DOM.imagePreview.src = this.currentFile.cacheURL );
+            this.currentFile.reload( () => this.DOM.imageComponent.style.backgroundImage = "url(" + this.currentFile.cacheURL + ")" );
         }
     },
 
