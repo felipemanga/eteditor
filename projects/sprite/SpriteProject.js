@@ -426,6 +426,7 @@ CLAZZ("projects.sprite.SpriteProject", {
         );
 
         this.core.selection.canvas.style.transform = transform;
+        this.core.toolOverlay.canvas.style.transform = transform;
 
         this.DOM.stack.style.width = this.core.width * zoom + "px";
         this.DOM.stack.style.height = this.core.height * zoom + "px";
@@ -573,7 +574,10 @@ CLAZZ("projects.sprite.SpriteProject", {
             this.drag(this.coord);
             this.zoom *= this.coord.scale;
             this.applyZoom();
-        }else if( !this.disableTool && this.coord.pressure != 0 ) this.runTool("move");
+        }else if( !this.disableTool ){ 
+            if( this.coord.pressure != 0 ) this.runTool("move");
+            else this.runTool("over");
+        }
         this.dragOffsetX = this.coord.x;
         this.dragOffsetY = this.coord.y;
     },
