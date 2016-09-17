@@ -165,7 +165,8 @@ CLAZZ("popups.colorpicker.ColorPicker", {
     },
 
     sample:function(x, y){
-        this.setColor( this.color.fromData( this.data, x, y ) );
+        this.color.fromData( this.data, x, y );
+        this.setColor( this.color );
     },
 
     $CANVAS:{
