@@ -248,7 +248,7 @@ CLAZZ("projects.sprite.Core", {
 
         if( oldTool && oldTool.deactivate ) oldTool.deactivate();
 		
-		this.toolOverlay.context.clear();
+		this.toolOverlay.context.clearRect(0,0,this.width,this.height);
 		this.activeTool = tool;
 		if( tool.activate ) this.activeTool.activate();
 		this.pool.call("onSetTool", tool);
