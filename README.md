@@ -12,14 +12,14 @@ Right now ETEditor has the following main features:
  3. [standalone javascript editor](#jsedit)
  4. [project editor](#projectedit)
 
-While ETEditor is in alpha state the latest stable version is the gh-pages branch, while master is being used for development.
+While ETEditor is in alpha state the latest stable version is the gh-pages branch, while master is being used for development. It's just simpler to get things done this way, for now.
 
 ## <a id="spriteeditor"></a> Sprite Editor
 This editor's interface is especially designed to be usable on a small, high-rez
-screen, like those on the MS Surface Pro or Samsung Galaxy Note tablets.
+screen, like those on the MS Surface Pro or Samsung Galaxy Note tablets. I haven't actually tested this on a Note, though. If anyone does, I'd be glad to hear feedback.
 
 Implemented features:
-- open images from url: eteditor/?p=sprite&u=http://site/image.jpg
+- open images from url, provided the target server allows cross-domain requests: eteditor/?p=sprite&u=http://site/image.jpg
 - custom brushes with scaling
 - unlimited raster layers
 - layer blending modes
@@ -52,22 +52,22 @@ Implemented features:
  - GIF (with animation support)
 
 To-do, in no particular order:
- - Adjustment layers
  - blur tool
  - clone stamp
+ - text tool
+ - Adjustment layers
+ - Vector layers
+ - 3D layers
  - better color palette window
- - tool preview overlay. Necessary for Pencil, Eraser and Select.
  - animation: import spritesheet support
  - animation: layer references
  - animation: action list
  - reference image - tile mode
  - reference image - use webcam
  - Resize image dialogue
- - tool - dropper color preview
  - clipboard support
  - filter preview
  - app icon and logo
- - text tool
  - left-hand mode
 
 Known issues:
@@ -100,9 +100,17 @@ This editor is for making HTML5 games. You can add images, HTML, CSS and JavaScr
 [Here](https://felipemanga.github.io/eteditor/?p=projman&os=9ge6zeyhisg2pcpb7rpfowvnt11lci) is one of the Phaser.js examples, with some very slight modifications (using FS.URL["file.png"]
 instead of simply "file.png").
 To run a game, click on Load in the rightmost pane, or type Ctrl+Enter in a code pane.
-To export a game, simply click Menu->HTML and download the file.
-Double click a file in the files list to rename it.
+When you want to export the project, you have two options in the main menu: SimpleHTML and AdvancedHTML.
+In both cases, all javascript code will be minimized with Google's Closure compiler. SimpleHTML uses Closure's SIMPLE_OPTIMIZATIONS flag, which minimizes most code without breaking it. AdvancedHTML does much more aggressive minimization and code has to be written with this in mind so as not to break.
+If you wish to export the example above, you must use the SimpleHTML option, as Phaser.js does not survive an advanced minimization.
 
+In the file list you can upload, rename (Double-click a file), and delete files.
+When you click on an image file, you'll see a preview with options for:
+- editing: will open the Sprite editor in a new tab. After you save, click "reload" in the preview.
+- embedding the image into the HTML: Useful for HTML5 projects that need to run without a server.
+
+Known issues:
+- Undo/Redo gets messed up when you navigate from one JS file to another.
 
 ## Future
 The following is a list of things that I intend to add to ETEditor in the near future:
@@ -119,4 +127,3 @@ This project is grateful for, and makes use of, the following libraries:
 - ace.js - Ajax.org B.V. https://github.com/ajaxorg/ace
 - JSZip - Stuart Knightley http://stuartk.com/jszip
 - localforage - Mozilla https://github.com/localForage/localForage
-- alloworigin.com - limtaesu http://alloworigin.com
