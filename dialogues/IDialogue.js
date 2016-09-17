@@ -171,7 +171,9 @@ CLAZZ("dialogues.IDialogue", {
 
 	onClose:function(){
 		if( this.parent || this.cfg.hide_only ){
-			if( this.cfg.hide_only === true ) this.enabled = false;
+			if( this.cfg.hide_only !== true && this.cfg.hide_only != "keepEnabled" ) 
+				this.enabled = false;
+				
 			this.hide();
 		}else this.close();
 	},

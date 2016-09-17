@@ -242,3 +242,8 @@ embed-body#SignIn {
     flex-grow: 1;
     margin: 5px;
 }
+
+
+#windowframeheader_title {
+    pointer-events: none;
+}

@@ -62,7 +62,8 @@ CLAZZ("popups.brushpicker.BrushPicker", {
 				show:false,
 				width: 200,
 				always_on_top: true,
-				title:"Brushes"
+				title:"Brushes",
+				hide_only:true
 			},
 		}),
 
