@@ -155,15 +155,17 @@ CLAZZ("popups.colorpicker.ColorPicker", {
         this.ctx.putImageData( this.data, 0, 0 );
     },
 
-    sample:function(x, y){
-        var c = this.color;
-        c.fromData( this.data, x, y );
-        this.DOM.fieldR.value = c.r;
-        this.DOM.fieldG.value = c.g;
-        this.DOM.fieldB.value = c.b;
-        this.DOM.fieldA.value = c.a;
+    setColor:function(c){
+        this.DOM.fieldR.value = this.color.r = c.r;
+        this.DOM.fieldG.value = this.color.g = c.g;
+        this.DOM.fieldB.value = this.color.b = c.b;
+        this.DOM.fieldA.value = this.color.a = c.a;
         var hex = this.DOM.fieldHex.value = c.toHex();
         this.DOM.BODY.style.backgroundColor = "#" + hex;
+    },
+
+    sample:function(x, y){
+        this.setColor( this.color.fromData( this.data, x, y ) );
     },
 
     $CANVAS:{
