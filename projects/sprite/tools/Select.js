@@ -52,9 +52,17 @@ CLAZZ("projects.sprite.tools.Select", {
 
 		this.startX = x;
 		this.startY = y;
+
+        var to = this.core.toolOverlay;
+        if( to ) to.context.clearRect(0,0,to.canvas.width,to.canvas.height);
 	},
 
-    // move:function(layer, x, y, z){},
+    move:function(layer, x, y, z){
+        var to = this.core.toolOverlay;
+        if( !to ) return;
+        to.context.clearRect(0,0,to.canvas.width,to.canvas.height);
+        to.context.strokeRect( this.startX, this.startY, x-this.startX, y-this.startY );
+    },
 
     up:function(layer, x, y, z){
 		var endX = x, endY = y;
@@ -78,5 +86,8 @@ CLAZZ("projects.sprite.tools.Select", {
 			selection.read();
             this.pool.call("onSelectRect", this.startX, this.startY, endX - this.startX, endY - this.startY );
 		}
+
+        var to = this.core.toolOverlay;
+        if( to ) to.context.clearRect(0,0,to.canvas.width,to.canvas.height);
 	}
 });

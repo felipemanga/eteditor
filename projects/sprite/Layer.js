@@ -1,6 +1,7 @@
 CLAZZ("projects.sprite.Layer", {
 	PROVIDES:{
 		"projects.sprite.selectionLayer":"implements",
+		"projects.sprite.toolOverlayLayer":"implements"
 	},
 	INJECT:{
 		core:"core"

@@ -6,6 +6,7 @@ CLAZZ("projects.sprite.Core", {
 		color:"PrimaryColor"
 	},
 
+	toolOverlay:null,
 	selection:null,
     tools:null,
     activeLayer:null,
@@ -52,6 +53,8 @@ CLAZZ("projects.sprite.Core", {
 
 	loadTools:function( toolset ){
         this.tools = {};
+		
+		this.toolOverlay = CLAZZ.get("projects.sprite.toolOverlayLayer", {core:this});
 		Object.keys(toolset).forEach(k => {
 			this.tools[ k ] = CLAZZ.get(toolset[k].fullName, {
 				Pool:this.pool,
@@ -244,6 +247,8 @@ CLAZZ("projects.sprite.Core", {
 		if( tool == oldTool ) return;
 
         if( oldTool && oldTool.deactivate ) oldTool.deactivate();
+		
+		this.toolOverlay.context.clearRect(0,0,this.width,this.height);
 		this.activeTool = tool;
 		if( tool.activate ) this.activeTool.activate();
 		this.pool.call("onSetTool", tool);
@@ -267,6 +272,9 @@ CLAZZ("projects.sprite.Core", {
 			this.selection.canvas.height = height;
 			this.selection.invalidate();
 		}
+
+		this.toolOverlay.canvas.width = width;
+		this.toolOverlay.canvas.height = height;
 
         var composite = this.getComposite();
         composite.canvas.width = this.width;
