@@ -10,6 +10,8 @@ CLAZZ("dialogues.IDialogue", {
 	cfg:{},
 
 	STATIC:{
+		panicEnabled:true,
+		
 		dialoguePaths:"",
 		focusTarget:null,
 		focusRoot:null,
@@ -56,11 +58,7 @@ CLAZZ("dialogues.IDialogue", {
 			if( this.children.length == this.__loadedChildrenCount )
 				this.onLoad();
 			else this.__onLoadQueued = true;
-		}catch(ex){
-			alert(ex + "\n" + ex.stack);
-			throw(ex);
-		}
-		try{
+
 			var parent = this.parent;
 			if( parent ){
 				parent.__loadedChildrenCount++;
@@ -71,8 +69,9 @@ CLAZZ("dialogues.IDialogue", {
 				}
 			}else this.__onFocus();
 		}catch(ex){
-			alert(ex + "\n" + ex.stack);
-			throw(ex);
+			if( !dialogues.IDialogue.panicEnabled ) return;
+			dialogues.IDialogue.panicEnabled = false;
+			this.raise("SYSTEM", "panic", ex);
 		}
 	},
 
@@ -141,7 +140,10 @@ CLAZZ("dialogues.IDialogue", {
 
 	raise:function(scope, event){
 		scope = DOC.attachPrefix + scope;
-		var func = this.controller &&
+		var func = this[scope] && this[scope][event];
+		if( func ) return func.apply(this, Array.prototype.splice.call(arguments, 2, arguments.length-2));
+
+		func = this.controller &&
 		this.controller[scope] &&
 		this.controller[scope][event] &&
 		this.controller[scope][event];
@@ -169,7 +171,9 @@ CLAZZ("dialogues.IDialogue", {
 
 	onClose:function(){
 		if( this.parent || this.cfg.hide_only ){
-			if( this.cfg.hide_only === true ) this.enabled = false;
+			if( this.cfg.hide_only !== true && this.cfg.hide_only != "keepEnabled" ) 
+				this.enabled = false;
+				
 			this.hide();
 		}else this.close();
 	},

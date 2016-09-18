@@ -50,8 +50,6 @@ CLAZZ("projects.sprite.SpriteProject", {
         this.toolbox = CLAZZ.get("projects.sprite.ToolBox", ctx);
         this.framesview = CLAZZ.get("projects.sprite.Frames", ctx);
         this.filtersview = CLAZZ.get("projects.sprite.Filters", ctx);
-
-        this.core.loadTools( projects.sprite.tools );
     },
 
     $DIALOGUE:{
@@ -62,6 +60,7 @@ CLAZZ("projects.sprite.SpriteProject", {
             this.core.width = this.settings.width || 64;
             this.core.height = this.settings.height || 64;
 
+            this.core.loadTools( projects.sprite.tools );
             this.pool.call("onLoadTools", this.core.tools);
 
     		this.core.addFrame(0, false, true);
@@ -91,6 +90,8 @@ CLAZZ("projects.sprite.SpriteProject", {
 			l.canvas.style.opacity = l.alpha;
 			l.canvas.style.mixBlendMode = l.blend;
 		});
+
+        this.DOM.stack.appendChild( this.core.toolOverlay.canvas );
 
 		this.updateOnionSkins( this.core.frames );
 	},
@@ -574,10 +575,10 @@ CLAZZ("projects.sprite.SpriteProject", {
             this.drag(this.coord);
             this.zoom *= this.coord.scale;
             this.applyZoom();
-        }else if( !this.disableTool ){ 
-            if( this.coord.pressure != 0 ) this.runTool("move");
-            else this.runTool("over");
+        }else if( !this.disableTool ){
+	        this.runTool("move");
         }
+		this.runTool("over");
         this.dragOffsetX = this.coord.x;
         this.dragOffsetY = this.coord.y;
     },
@@ -589,6 +590,11 @@ CLAZZ("projects.sprite.SpriteProject", {
         this.dragging = null;
         this.dragOffsetX = this.coord.x;
         this.dragOffsetY = this.coord.y;
+    },
+
+    pointerout:function(evt, type){
+        if( this.prepareEvent(evt, type) ) return false;
+        this.runTool("out");
     },
 
     $BODY:{
@@ -611,6 +617,9 @@ CLAZZ("projects.sprite.SpriteProject", {
             return this.pointerup(evt, "pointer");
             // this.prepareEvent(evt, "pointer");
         },
+        pointerout:function(evt){
+            return this.pointerout(evt, "pointer");
+        },
         mousedown:function(evt){
             return this.pointerdown(evt, "mouse");
         },
@@ -619,6 +628,9 @@ CLAZZ("projects.sprite.SpriteProject", {
         },
         mouseup:function(evt){
             return this.pointerup(evt, "mouse");
+        },
+        mouseout:function(evt){
+            return this.pointerout(evt, "mouse");
         },
         touchstart:function(evt){
             return this.pointerdown(evt, "touch");

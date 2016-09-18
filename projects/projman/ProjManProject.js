@@ -75,8 +75,8 @@ CLAZZ("projects.projman.ProjManProject", {
     },
 
     $MENU:{
-        HTML:function(){
-            this.createHTML(true, true, (src) =>
+        SimpleHTML:function(){
+            this.createHTML(true, 1, (src) =>
                 this.fileSaver.saveFile({
                     name: this.DOM.pageSelector.value,
                     data: src
@@ -84,8 +84,13 @@ CLAZZ("projects.projman.ProjManProject", {
             );
         },
 
-        ZIP:function(){
-
+        AdvancedHTML:function(){
+            this.createHTML(true, 2, (src) =>
+                this.fileSaver.saveFile({
+                    name: this.DOM.pageSelector.value,
+                    data: src
+                })
+            );
         }
     },
 
@@ -283,7 +288,7 @@ CLAZZ("projects.projman.ProjManProject", {
 
             DOC.postURL('https://closure-compiler.appspot.com/compile', {
                 js_code: accSrc,
-                compilation_level: 'ADVANCED_OPTIMIZATIONS',
+                compilation_level: minimize==1?'SIMPLE_OPTIMIZATIONS':'ADVANCED_OPTIMIZATIONS',
                 output_format: 'text',
                 output_info: 'compiled_code'
             }, (src) => {
@@ -306,7 +311,7 @@ CLAZZ("projects.projman.ProjManProject", {
                 }
             });
             cb( this.htmlToString(parsed) );
-        }        
+        }
     },
 
     refresh:function(){

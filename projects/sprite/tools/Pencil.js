@@ -191,5 +191,20 @@ CLAZZ("projects.sprite.tools.Pencil", {
     up:function(layer, x, y, z){
         this.core.push();
         return true;
+    },
+
+    over:function(layer, x, y, z){
+        if( !this.brush || !this.core.toolOverlay )
+            return;
+
+        var to = this.core.toolOverlay;
+        to.context.clearRect(0,0,to.canvas.width,to.canvas.height);
+        to.context.putImageData(this.brush, Math.floor(x-this.brush.width/2), Math.floor(y-this.brush.height/2));
+    },
+
+    out:function(layer, x, y, z){
+        var to = this.core.toolOverlay;
+        if( !to ) return;
+        to.context.clearRect(0,0,to.canvas.width,to.canvas.height);
     }
 });

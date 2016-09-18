@@ -46,9 +46,9 @@ function __decbin(str){
 		map[t]  = code;
 		map[code] = t;
 	});
-	
+
 	str = str.substr(4);
-	
+
 	var arr = new Uint8ClampedArray(str.length/8*7);
 	var ofbc=0, buf = [], c;
 	var mask = map[str.charCodeAt(7)];
@@ -102,7 +102,7 @@ self.encbin = function encbin(b){
 	ofbc = 7;
 
 	var lf=[freq[0]], lfp=[0];
-	for(i=0; i < 127; ++i ){
+	for(i=1; i < 127; ++i ){
 		var freqi = freq[i];
 		for(var j=0; j<4; ++j ){
 			if( !(freqi >= lf[j]) && STRLUT[i].length==1 ){

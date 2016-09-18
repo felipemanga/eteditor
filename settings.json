@@ -45,10 +45,10 @@
                     "frame":false,
                     "title":" ",
                     "menu":{
-						"HTML":{
+						"SimpleHTML":{
 							"toggle":true
 						},
-                        "ZIP":{
+                        "AdvancedHTML":{
                             "toggle":true
                         }
                     }

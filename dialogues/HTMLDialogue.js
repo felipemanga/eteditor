@@ -61,6 +61,16 @@ CLAZZ("dialogues.HTMLDialogue", {
         this.raise("DIALOGUE", "resize");
     },
 
+    $SYSTEM:{
+    	panic:function(ex){
+    		console.warn(ex.stack);
+    		if( confirm("Something went wrong. This is usually caused by a bug or having an old settings file with a newer version of ETEditor. Delete settings and reload?") ){
+    			localStorage.removeItem("settings");
+    			location.href = location.href;
+    		}
+    	}
+    },
+
     $windowframeheader_btnMaxWindow:{
         click:function(){
             this.toggleMaximized();
