@@ -64,7 +64,11 @@ CLAZZ("ETSign", {
     manifest:null,
 
     hash:function(d){
-        return sha1(d);
+        var hex = sha1(d);
+        var buff = "";
+        for( var i=0; i<hex.length; i+=2 )
+            buff += String.fromCharCode( parseInt(hex.substr(i, 2), 16) );
+        return btoa(buff);
     },
 
     sign:function( files ){
