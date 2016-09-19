@@ -50,6 +50,12 @@
 						},
                         "AdvancedHTML":{
                             "toggle":true
+                        },
+                        "ZIP":{
+                            "toggle":true
+                        },
+                        "AndroidAPK":{
+                            "toggle":true
                         }
                     }
                 }

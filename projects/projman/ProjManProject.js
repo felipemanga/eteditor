@@ -1,3 +1,9 @@
+need([
+    {FQCN:"sha1", URL:"js/sha1.js"},
+    {FQCN:"KJUR", URL:"js/jsrsasign-latest-all-min.js"},
+    {FQCN:"ETSign", URL:"js/ETSign.js"},
+], function(){
+
 CLAZZ("projects.projman.ProjManProject", {
     INJECT:{
         dialogue:INJECT("dialogues.IDialogue", {
@@ -6,6 +12,7 @@ CLAZZ("projects.projman.ProjManProject", {
         }),
         settings:"settings",
         compressor:"io.compressors.IPNCCompressor",
+        zipCompressor:"io.compressors.IZIPCompressor",
         fileSaver:"io.FileSaver",
         data:"data",
         app:"app"
@@ -85,12 +92,31 @@ CLAZZ("projects.projman.ProjManProject", {
         },
 
         AdvancedHTML:function(){
-            this.createHTML(true, 2, (src) =>
+            this.createHTML(true, 3, (src) =>
                 this.fileSaver.saveFile({
                     name: this.DOM.pageSelector.value,
                     data: src
                 })
             );
+        },
+
+        ZIP:function(){
+            this.createHTML(false, 1, (files) => {
+                files.name = this.DOM.pageSelector.value.replace(/\.[a-zA-Z]*$/, ".zip");
+                this.fileSaver.saveFile(files);
+            });
+        },
+
+        AndroidAPK:function(){
+            this.createHTML(false, 1, (files) => {
+                files.name = this.DOM.pageSelector.value.replace(/\.[a-zA-Z]*$/, ".apk");
+
+                (new ETSign()).sign(files);
+
+                files.forEach( file => this.zipCompressor.addFile(file.name, file.data) );
+
+                this.zipCompressor.compress( files.name, file => this.fileSaver.saveFile(file) );
+            });
         }
     },
 
@@ -233,85 +259,98 @@ CLAZZ("projects.projman.ProjManProject", {
             return src;
         }
 
-        var dataScript = parsed.createElement("script");
+        var dataScript = parsed.createElement("script"), files = [];
         dataScript.textContent = data;
         parsed.head.insertBefore(dataScript, parsed.head.children[0]);
 
-        var tags = Array.prototype.slice.call( parsed.querySelectorAll("img"), 0 );
-        tags.forEach((img) => {
-            var src = img.getAttribute("src");
-            if( src in m ) img.setAttribute( "src", m[src]  );
-        });
-
-        tags = Array.prototype.slice.call( parsed.querySelectorAll("a"), 0 );
-        tags.forEach((img) => {
-            var src = img.getAttribute("href");
-            if( src in m ) img.setAttribute( "href", m[src]  );
-        });
-
-        tags = Array.prototype.slice.call( parsed.querySelectorAll("link"), 0 );
-        tags.forEach((tag) => {
-            var src = tag.getAttribute("href");
-            if( src in m ){
-                DOC.create("style", {
-                    text: patchCSS(m[src]),
-                    before: tag
-                });
-                tag.parentElement.removeChild(tag);
-            }
-        });
-
-        tags = Array.prototype.slice.call( parsed.querySelectorAll("*"), 0 );
-        tags.forEach((tag) => {
-            var s = tag.getAttribute("style");
-            if( s ) tag.setAttribute("style", patchCSS(s));
-        });
-
-        tags = Array.prototype.slice.call( parsed.querySelectorAll("script"), 0 );
-        if( minimize ){
-            var accSrc = "(function(){\n";
-            tags.forEach((tag) => {
-                if( tag == dataScript ) return;
-
-                var src = tag.getAttribute("src");
-                if( src in m ){
-                    accSrc += m[src] + "\n";
-                }
-
-                accSrc += tag.textContent;
-                DOC.remove(tag);
+        if( embed ){
+            tags = Array.prototype.slice.call( parsed.querySelectorAll("img"), 0 );
+            tags.forEach((img) => {
+                var src = img.getAttribute("src");
+                if( src in m ) img.setAttribute( "src", m[src]  );
             });
 
-            accSrc += "\n})();\n";
+            tags = Array.prototype.slice.call( parsed.querySelectorAll("a"), 0 );
+            tags.forEach((img) => {
+                var src = img.getAttribute("href");
+                if( src in m ) img.setAttribute( "href", m[src]  );
+            });
 
-            console.log("Pre-Closure size:", accSrc.length);
+            tags = Array.prototype.slice.call( parsed.querySelectorAll("link"), 0 );
+            tags.forEach((tag) => {
+                var src = tag.getAttribute("href");
+                if( src in m ){
+                    DOC.create("style", {
+                        text: patchCSS(m[src]),
+                        before: tag
+                    });
+                    tag.parentElement.removeChild(tag);
+                }
+            });
 
-            DOC.postURL('https://closure-compiler.appspot.com/compile', {
-                js_code: accSrc,
-                compilation_level: minimize==1?'SIMPLE_OPTIMIZATIONS':'ADVANCED_OPTIMIZATIONS',
-                output_format: 'text',
-                output_info: 'compiled_code'
-            }, (src) => {
-                console.log("Pre-PNC size:", src.length);
+            tags = Array.prototype.slice.call( parsed.querySelectorAll("*"), 0 );
+            tags.forEach((tag) => {
+                var s = tag.getAttribute("style");
+                if( s ) tag.setAttribute("style", patchCSS(s));
+            });
+        }else{
+            this.project.files.forEach((file)=>{
+                files.push({name:file.name, data:m[file.name]});
+            });
+        }
+
+        tags = Array.prototype.slice.call( parsed.querySelectorAll("script"), 0 );
+        var accSrc = "(function(){\n";
+        tags.forEach((tag) => {
+            if( tag == dataScript ) return;
+
+            var src = tag.getAttribute("src");
+            if( src in m ){
+                accSrc += m[src] + "\n";
+            }
+
+            accSrc += tag.textContent;
+            DOC.remove(tag);
+        });
+        accSrc += "\n})();\n";
+        console.log("Pre-Closure size:", accSrc.length);
+
+        this.minimizeCode(accSrc, minimize, (src)=>{
+            console.log("Final JS size:", src.length);
+            dataScript.textContent += "\n" + src;
+            src = this.htmlToString(parsed);
+            if( embed ) cb(src);
+            else{
+                files.push({name:"index.html", data:strToBuffer(src)});
+                cb(files);
+            }
+        });
+    },
+
+    minimizeCode:function(code, mode, cb){
+        if( !mode ){
+            cb(code);
+            return;
+        }
+        DOC.postURL('https://closure-compiler.appspot.com/compile', {
+            js_code: code,
+            compilation_level: mode==1?'SIMPLE_OPTIMIZATIONS':'ADVANCED_OPTIMIZATIONS',
+            output_format: 'text',
+            output_info: 'compiled_code'
+        }, (src) => {
+            console.log("Pre-PNC size:", src.length);
+            if( mode == 3 ){
                 this.compressor.clear();
                 this.compressor.addFile("s.js", strToBuffer(src) );
                 this.compressor.compress("__URL__", (files) => {
                     src = "var SOURCE_URL = URL.createObjectURL(new Blob([decbin(" + encbin(files[0].data) + ")], {type:'image/png'}));\n";
                     src += files[1].data.split('"__URL__"').join("SOURCE_URL");
-                    dataScript.textContent += "\n" + src;
-                    cb( this.htmlToString(parsed) );
+                    cb(src);
                 });
-            });
-        }else{
-            tags.forEach((tag) => {
-                var src = tag.getAttribute("src");
-                if( src in m ){
-                    tag.removeAttribute("src");
-                    tag.textContent = m[src]+"\n";
-                }
-            });
-            cb( this.htmlToString(parsed) );
-        }
+            }else{
+                cb(src);
+            }
+        });
     },
 
     refresh:function(){
@@ -479,4 +518,6 @@ CLAZZ("projects.projman.ProjManProject", {
             this.DOM.docSet[0].update({ filter:(e) => e.name.toLowerCase().indexOf( value ) != -1 });
         }
     }
+});
+
 });
