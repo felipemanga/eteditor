@@ -348,7 +348,7 @@ CLAZZ("projects.projman.ProjManProject", {
                 var a;
                 if( file.cacheURL ) a = file.raw();
                 else a = file.data;
-                files.push({name:file.name, data:a});
+                files.push({name:file.name, data:strToBuffer(a)});
             });
         }
 
