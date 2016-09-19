@@ -9,10 +9,17 @@ CLAZZ("io.compressors.ZIPCompressor", {
 
     zip:null,
     CONSTRUCTOR:function(){
+        this.clear();
+    },
+
+    clear:function(){
         this.zip = new JSZip();
     },
 
     addFile:function(name, contents){
+        if( typeof contents == "string" ) contents = strToBuffer(contents).buffer;
+        if( contents.buffer ) contents = contents.buffer;
+        if( !(contents instanceof Blob) ) contents = new Blob( [contents] );        
         this.zip.file(name, contents, {binary:true});
     },
 
