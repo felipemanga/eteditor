@@ -63,12 +63,15 @@ CLAZZ("ETSign", {
     
     manifest:null,
 
-    hash:function(d){
-        var hex = sha1(d);
+    hex2bin:function(hex){
         var buff = "";
         for( var i=0; i<hex.length; i+=2 )
             buff += String.fromCharCode( parseInt(hex.substr(i, 2), 16) );
-        return btoa(buff);
+        return buff;
+    },
+
+    hash:function(d){
+        return btoa( this.hex2bin(sha1(d)) );
     },
 
     sign:function( files ){
@@ -81,7 +84,8 @@ CLAZZ("ETSign", {
     writeManifest:function( files ){
         var main = this.manifest.getMainAttributes();
         main.put("Manifest-Version", "1.0");
-        main.put("Created-By", "ETSign");
+        main.put("Built-By", "2.1.0");
+        main.put("Created-By", "ETSign 2.1.0");
 
         this.digestFiles( files, this.manifest );
         var buffer = strToBuffer(this.manifest.toString());
@@ -111,11 +115,11 @@ CLAZZ("ETSign", {
         out += sf.write(true);
         signature.updateString(out);
         files.push({name:"META-INF/CERT.SF", data:strToBuffer(out)});
-        return signature.sign();
+        return this.hex2bin( signature.sign() );
     },
 
     writeRSA:function( files, sign ){
-        var binsign = strToBuffer(atob(sign));
+        var binsign = strToBuffer( sign );
         var buffer = new Uint8Array( this.sigPrefix.length + binsign.length );
         buffer.set(strToBuffer(this.sigPrefix));
         buffer.set(binsign, this.sigPrefix.length);
