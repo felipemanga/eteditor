@@ -36,6 +36,16 @@ CLAZZ("projects.projman.FileListItem", {
     },
 
     setupData:function(){
+        if( this.data.data instanceof ArrayBuffer ){
+            CLAZZ.get("onlineStorage").upload( this.data, (url) => {
+                this.data.cacheURL = arrayToBlobURL( this.data.data, url );
+                this.data.data = url;
+                this.setupData();
+                this.controller.dirty = true;
+            });
+            return;
+        }
+
         if( !this.data.raw ){
             var raw = null;
             this.cacheURL = null;
@@ -108,12 +118,7 @@ CLAZZ("projects.projman.FileListItem", {
                     if( editor == "codeComponent" ) this.data.data = bufferToStr(data);
                     else{
                         this.data.data = data;
-                        CLAZZ.get("onlineStorage").upload( this.data, (url) => {
-                            this.data.cacheURL = arrayToBlobURL( this.data.data, url );
-                            this.data.data = url;
-                            this.setupData();
-                            this.controller.dirty = true;
-                        });
+                        this.setupData();
                     }
                 });
             }

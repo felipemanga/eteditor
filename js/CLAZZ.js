@@ -360,7 +360,7 @@
     	var bind, ctxId = dibindings.length-1;
     	do{
     		bind = dibindings[ctxId][name];
-    	}while( !bind && --ctxId>-1 );
+    	}while( bind===undefined && --ctxId>-1 );
 
     	if( !bind ){
     		if( def === undefined )
