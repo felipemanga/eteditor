@@ -345,7 +345,10 @@ CLAZZ("projects.projman.ProjManProject", {
         }else{
             this.project.files.forEach((file)=>{
                 if( file.name == "index.html" ) return;
-                files.push({name:file.name, data:m[file.name]});
+                var a;
+                if( file.cacheURL ) a = file.raw();
+                else a = file.data;
+                files.push({name:file.name, data:a});
             });
         }
 
