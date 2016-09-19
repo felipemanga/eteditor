@@ -115,7 +115,7 @@ CLAZZ("projects.projman.ProjManProject", {
 
             function getTemplate(){
                 if( !THIS.apkTemplate ){
-                    DOC.getURL("projects/projman/template.apk", onGotTemplate, {binary:true});
+                    DOC.getURL("projects/projman/templateapk", onGotTemplate, {binary:true});
                 }else{
                     onGotTemplate(THIS.apkTemplate);
                 }
