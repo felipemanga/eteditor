@@ -108,17 +108,63 @@ CLAZZ("projects.projman.ProjManProject", {
         },
 
         AndroidAPK:function(){
-            this.createHTML(false, 1, (files) => {
-                files.name = this.DOM.pageSelector.value.replace(/\.[a-zA-Z]*$/, ".apk");
+            var THIS=this;
+            getTemplate();
+            return;
 
+            function getTemplate(){
+                if( !THIS.apkTemplate ){
+                    DOC.getURL("projects/projman/template.apk", onGotTemplate, {binary:true});
+                }else{
+                    onGotTemplate(THIS.apkTemplate);
+                }
+            }
+
+            function onGotTemplate(template){
+                if( !THIS.apkTemplate ){
+                    THIS.apkTemplate = new JSZip();
+                    THIS.apkTemplate.loadAsync(template).then(createHTML);
+                }else createHTML();
+            }
+
+            function createHTML(){
+                THIS.createHTML(false, 1, onGotHTML);
+            }
+
+            function onGotHTML(files){
+                files.name = THIS.DOM.pageSelector.value.replace(/\.[a-zA-Z]*$/, ".apk");
+
+                addTemplateFiles(files, THIS.apkTemplate);
+            }
+
+            function addTemplateFiles(files, template){
+                files.forEach( file => file.name = "assets/www/" + file.name.replace(/\\/g, "/") );
+
+                var count=0;
+                for( var name in template.files ){
+                    var file = template.files[name];
+                    if( file.dir ) continue;
+                    count++;
+                    file.async("uint8array").then((function(file, data){
+                        files.push({name:file.name, data:data});
+                        count--;
+                        if( !count ) signAndSave(files);
+                    }).bind(THIS, file));
+                };
+            }
+
+            function signAndSave(files){
                 (new ETSign()).sign(files);
 
-                files.forEach( file => this.zipCompressor.addFile(file.name, file.data) );
+                files.forEach( file => THIS.zipCompressor.addFile(file.name, file.data) );
 
-                this.zipCompressor.compress( files.name, file => this.fileSaver.saveFile(file) );
-            });
+                THIS.zipCompressor.compress( files.name, file => THIS.fileSaver.saveFile(file) );
+            }
+            
         }
     },
+
+    apkTemplate:null,
 
 	$checkboxProperty:{
 		change:function(evt){
