@@ -13,6 +13,7 @@ CLAZZ("projects.projman.ProjManProject", {
         settings:"settings",
         compressor:"io.compressors.IPNCCompressor",
         zipCompressor:"io.compressors.IZIPCompressor",
+        fileReader:"io.FileReader",
         fileSaver:"io.FileSaver",
         data:"data",
         app:"app"
@@ -198,6 +199,8 @@ CLAZZ("projects.projman.ProjManProject", {
             return "imageComponent";
 
         case "html":
+        case "xml":
+        case "mf":
         case "css":
         case "js":
         case "json":
@@ -463,6 +466,31 @@ CLAZZ("projects.projman.ProjManProject", {
             this.DOM.docSet[0].update({ filter:(e) => e.name == "upload.me" });
         }
     },
+
+    $BODY:{
+        dragover:function( evt ){
+            console.log("over");
+            if( evt.stopPropagation ) evt.stopPropagation();
+            evt.preventDefault();
+            evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
+        },
+
+        drop:function( evt ){
+            console.log("drop");
+            if( evt.stopPropagation ) evt.stopPropagation();
+            evt.preventDefault();
+
+            this.fileReader.onDropForEach(evt, (path, file, isDirectory) => {
+                if( isDirectory ) return;
+                this.fileReader.readAsArrayBuffer( file, (arr) => {
+                    var file = { name:path, data:arr };
+                    if( this.chooseEditor(file) == "codeComponent" ) file.data = bufferToStr(arr);
+                    this.project.files.push(file);
+                    this.DOM.docSet[0].update();
+                });
+            });
+        }
+    },    
 
     $btnRefresh:{
         click:function(){

@@ -34,7 +34,7 @@ CLAZZ("io.OnlineStorage", {
 
     upload:function(file, cb){
         if(!user){
-            CLAZZ.get("popups.signin.SignIn", { callback:(success) => success && this.upload(file, cb) });
+            CLAZZ.get("popups.signin.SignIn", { parent:null, callback:(success) => success && this.upload(file, cb) });
             return;
         }
         
@@ -44,7 +44,7 @@ CLAZZ("io.OnlineStorage", {
 
     save:function( file, cb){
         if(!user){
-            CLAZZ.get("popups.signin.SignIn", { callback:(success) => success && this.save(file, cb) });
+            CLAZZ.get("popups.signin.SignIn", { parent:null, callback:(success) => success && this.save(file, cb) });
             return;
         }
 
