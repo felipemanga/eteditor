@@ -35,6 +35,7 @@ CLAZZ("dialogues.HTMLDialogue", {
         var sizestyle = this.DOM.windowframecontents[0].style;
         var posstyle = this.DOM.__ROOT__.style;
         if( this.maximized ){
+            DOC.toggleFullScreen(document.body);
             this.x = parseInt(posstyle.left);
             this.y = parseInt(posstyle.top);
             this.prevHeight = this.height;
@@ -49,6 +50,7 @@ CLAZZ("dialogues.HTMLDialogue", {
             if( this.DOM.windowframeheader )
             	this.DOM.windowframeheader[0].className = "windowframeheader maximized";
         }else{
+            DOC.toggleFullScreen(false);
             this.width = this.prevWidth;
             this.height = this.prevHeight;
             sizestyle.width = this.prevWidth+"px";
@@ -137,8 +139,8 @@ CLAZZ("dialogues.HTMLDialogue", {
 
 		touchstart:function(evt){
 			this.isMoving = true;
-			this.moveRefX = evt.screenX;
-			this.moveRefY = evt.screenY;
+			this.moveRefX = evt.touches[0].screenX;
+			this.moveRefY = evt.touches[0].screenY;
 		}
 	},
 

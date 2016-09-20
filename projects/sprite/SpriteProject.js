@@ -585,7 +585,10 @@ CLAZZ("projects.sprite.SpriteProject", {
 
     pointerup:function(evt, type){
         if( this.prepareEvent(evt, type) ) return false;
-        if( !this.disableTool ) this.runTool("up");
+        if( !this.disableTool ){
+            this.runTool("up");
+            this.runTool("out");
+        }
         this.disableTool = true;
         this.dragging = null;
         this.dragOffsetX = this.coord.x;
