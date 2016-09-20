@@ -139,8 +139,8 @@ CLAZZ("dialogues.HTMLDialogue", {
 
 		touchstart:function(evt){
 			this.isMoving = true;
-			this.moveRefX = evt.screenX;
-			this.moveRefY = evt.screenY;
+			this.moveRefX = evt.touches[0].screenX;
+			this.moveRefY = evt.touches[0].screenY;
 		}
 	},
 

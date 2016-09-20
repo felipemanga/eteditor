@@ -21,14 +21,6 @@ CLAZZ("mainmenu.MainMenu", {
         settings:"settings"
     },
 
-    // CONSTRUCTOR:function(){
-    //     if( devicePixelRatio != 1 ){
-    //         var ir = (1/devicePixelRatio);
-    //         var off = Math.round((1-ir)*100);
-    //         document.body.style.transform = "scale(" + ir + ") translate(-" + off + "%,-" + off + "%)";
-    //     }
-    // },
-
     $DIALOGUE:{
     	load:function(){
             this.persist.read(this.settings);
