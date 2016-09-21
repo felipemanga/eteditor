@@ -1,3 +1,8 @@
+need([
+    {FQCN:"sha1", URL:"js/sha1.js"},
+    {FQCN:"KJUR", URL:"js/jsrsasign-latest-all-min.js"}
+], function(){
+
 "use strict";
 CLAZZ("JAR.Manifest", {
     mainAttributes:null,
@@ -125,4 +130,6 @@ CLAZZ("js.android.ETSign", {
         buffer.set(binsign, this.sigPrefix.length);
         files.push({name:"META-INF/CERT.RSA", data:buffer});
     }
+});
+
 });

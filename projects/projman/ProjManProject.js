@@ -1,8 +1,5 @@
 need([
-    {FQCN:"sha1", URL:"js/sha1.js"},
-    {FQCN:"KJUR", URL:"js/jsrsasign-latest-all-min.js"},
     "js.android.ETSign",
-    "js.android.ABXParse"
 ], function(){
 
 CLAZZ("projects.projman.ProjManProject", {
@@ -130,7 +127,7 @@ CLAZZ("projects.projman.ProjManProject", {
             }
 
             function createHTML(){
-                THIS.createHTML(false, 0, onGotHTML);
+                THIS.createHTML(false, 2, onGotHTML);
             }
 
             function onGotHTML(files){
@@ -364,7 +361,7 @@ CLAZZ("projects.projman.ProjManProject", {
             });
         }else{
             this.project.files.forEach((file)=>{
-                if( file.name == "index.html" ) return;
+                if( file.name == "index.html" || !file.storeEXTERN ) return;
                 var a;
                 if( file.cacheURL ) a = file.raw();
                 else a = file.data;
