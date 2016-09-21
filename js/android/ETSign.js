@@ -1,3 +1,8 @@
+need([
+    {FQCN:"sha1", URL:"js/sha1.js"},
+    {FQCN:"KJUR", URL:"js/jsrsasign-latest-all-min.js"}
+], function(){
+
 "use strict";
 CLAZZ("JAR.Manifest", {
     mainAttributes:null,
@@ -51,7 +56,7 @@ JAR.Manifest.prototype.toString = function(){
     return this.write();
 };
 
-CLAZZ("ETSign", {
+CLAZZ("js.android.ETSign", {
 
     privateKey: (
         "MIIBVgIBADANBgkqhkiG9w0BAQEFAASCAUAwggE8AgEAAkEAoiZSqWnFDHA5sXKoDiUUO9JuL7cm/2dCck5MKumVvv+WfSg0jsovnywsFN0pifmdRSLmOdUkh0d0J+tOnSgtsQIDAQABAkEAihag5u3Qhds9BsViIUmqhZebhr8vUuqZR8cuTo1GnbSoOHIPbAgD3J8TDbC/CVqae8NrgwLp325Pem1Tuof/0QIhAN1hqft1K307bsljgw3iYKopGVZBHRXsjRnNL4edV9QrAiEAu4F+XtS1wohGLz5QtfuMFsQNo4l31mCjt6WpBDmSi5MCIQCB++YijxmJ3mueM5+vd0vqnVcTHghF5y6yB5fwuKHpIQIgInnS1Hjj2prX3MPmby+LOHxfzZvvDtnCAHhTNVWonkUCIQCvV8l+SpL6Vh1nQ/2EKFJo2dbZB3wKG/BEYsFkPFbn9w=="
@@ -125,4 +130,6 @@ CLAZZ("ETSign", {
         buffer.set(binsign, this.sigPrefix.length);
         files.push({name:"META-INF/CERT.RSA", data:buffer});
     }
+});
+
 });

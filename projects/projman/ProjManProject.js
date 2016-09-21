@@ -1,7 +1,5 @@
 need([
-    {FQCN:"sha1", URL:"js/sha1.js"},
-    {FQCN:"KJUR", URL:"js/jsrsasign-latest-all-min.js"},
-    {FQCN:"ETSign", URL:"js/ETSign.js"},
+    "js.android.ETSign",
 ], function(){
 
 CLAZZ("projects.projman.ProjManProject", {
@@ -129,12 +127,11 @@ CLAZZ("projects.projman.ProjManProject", {
             }
 
             function createHTML(){
-                THIS.createHTML(false, 1, onGotHTML);
+                THIS.createHTML(false, 2, onGotHTML);
             }
 
             function onGotHTML(files){
                 files.name = THIS.DOM.pageSelector.value.replace(/\.[a-zA-Z]*$/, ".apk");
-
                 addTemplateFiles(files, THIS.apkTemplate);
             }
 
@@ -142,20 +139,40 @@ CLAZZ("projects.projman.ProjManProject", {
                 files.forEach( file => file.name = "assets/www/" + file.name.replace(/\\/g, "/") );
 
                 var count=0;
+                var templateIndex = {};
                 for( var name in template.files ){
                     var file = template.files[name];
                     if( file.dir ) continue;
                     count++;
+
                     file.async("uint8array").then((function(file, data){
-                        files.push({name:file.name, data:data});
+                        templateIndex[file.name] = data;
                         count--;
-                        if( !count ) signAndSave(files);
+                        if( !count ) processTemplate(files, templateIndex);
                     }).bind(THIS, file));
                 };
             }
 
+            function processTemplate(files, template){
+                // var AMX = template["AndroidManifest.xml"];
+                // var RES = template["resources.arsc"];
+                // if( AMX ){
+                //     try{
+                //     var acc = (new js.android.ABXParse(AMX,RES)).toXMLString();
+                //     console.log(acc);
+                // debugger;
+                //     }catch(e){ console.log(e.stack); }
+                //     // template["AndroidManifest.xml"] = strToBuffer(acc);
+                // }
+                
+                for( var k in template )
+                    files.push({name:k, data:template[k]});
+
+                signAndSave(files);
+            }
+
             function signAndSave(files){
-                (new ETSign()).sign(files);
+                (new js.android.ETSign()).sign(files);
 
                 files.forEach( file => THIS.zipCompressor.addFile(file.name, file.data) );
 
@@ -344,7 +361,7 @@ CLAZZ("projects.projman.ProjManProject", {
             });
         }else{
             this.project.files.forEach((file)=>{
-                if( file.name == "index.html" ) return;
+                if( file.name == "index.html" || !file.storeEXTERN ) return;
                 var a;
                 if( file.cacheURL ) a = file.raw();
                 else a = file.data;
