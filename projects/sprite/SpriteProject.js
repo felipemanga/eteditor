@@ -53,6 +53,10 @@ CLAZZ("projects.sprite.SpriteProject", {
     },
 
     $DIALOGUE:{
+        maximized:function(){
+            this.zoom = 1;
+            this.zoomFit();
+        },
         load:function(){
             this.toolStack = [];
             this.DOM = this.dialogue.DOM;

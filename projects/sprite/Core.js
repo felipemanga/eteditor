@@ -123,7 +123,7 @@ CLAZZ("projects.sprite.Core", {
 		});
 
         this.push();
-		this.pool.call("onUpdateLayers", this.layers, layer, layer );
+		this.pool.call("onUpdateLayers", this.layers, this.activeLayer, layer );
 		this.pool.call("onUpdateFrames", this.frames, this.layers );
 	},
 
@@ -435,7 +435,7 @@ CLAZZ("projects.sprite.Core", {
     toggleLayer:function( layer ){
         layer.enabled = !layer.enabled;
         this.push({"activeLayer.enabled":layer.enabled});
-		this.pool.call("onUpdateLayers", this.layers, layer);
+		this.pool.call("onUpdateLayers", this.layers, this.activeLayer);
     },
 
     applySnapshot:function(id){
