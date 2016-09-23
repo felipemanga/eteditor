@@ -36,31 +36,38 @@ CLAZZ("dialogues.HTMLDialogue", {
         var posstyle = this.DOM.__ROOT__.style;
         if( this.maximized ){
             DOC.toggleFullScreen(document.body);
-            this.x = parseInt(posstyle.left);
-            this.y = parseInt(posstyle.top);
-            this.prevHeight = this.height;
-            this.prevWidth = this.width;
-            var area = this.getAvailArea();
-            this.width = area.width;
-            this.height = area.height;
-            sizestyle.width = this.width+"px";
-            sizestyle.height = this.height+"px";
-            posstyle.left = "-1px";
-            posstyle.top = "-1px";
-            if( this.DOM.windowframeheader )
-            	this.DOM.windowframeheader[0].className = "windowframeheader maximized";
+            setTimeout(() => {
+                this.x = parseInt(posstyle.left);
+                this.y = parseInt(posstyle.top);
+                this.prevHeight = this.height;
+                this.prevWidth = this.width;
+                var area = this.getAvailArea();
+                this.width = area.width;
+                this.height = area.height;
+                sizestyle.width = this.width+"px";
+                sizestyle.height = this.height+"px";
+                posstyle.left = "-1px";
+                posstyle.top = "-1px";
+                if( this.DOM.windowframeheader )
+                    this.DOM.windowframeheader[0].className = "windowframeheader maximized";
+                this.raise("DIALOGUE", "resize");
+                this.raise("DIALOGUE", "maximized", true);
+            }, 100);
         }else{
-            DOC.toggleFullScreen(false);
-            this.width = this.prevWidth;
-            this.height = this.prevHeight;
-            sizestyle.width = this.prevWidth+"px";
-            sizestyle.height = this.prevHeight+"px";
-            posstyle.left = this.x + "px";
-            posstyle.top = this.y + "px";
-            if( this.DOM.windowframeheader )
-            	this.DOM.windowframeheader[0].className = "windowframeheader";
+            setTimeout(()=>{
+                DOC.toggleFullScreen(false);
+                this.width = this.prevWidth;
+                this.height = this.prevHeight;
+                sizestyle.width = this.prevWidth+"px";
+                sizestyle.height = this.prevHeight+"px";
+                posstyle.left = this.x + "px";
+                posstyle.top = this.y + "px";
+                if( this.DOM.windowframeheader )
+                    this.DOM.windowframeheader[0].className = "windowframeheader";
+                this.raise("DIALOGUE", "resize");
+                this.raise("DIALOGUE", "maximized", false);
+            },20);
         }
-        this.raise("DIALOGUE", "resize");
     },
 
     $SYSTEM:{
@@ -76,19 +83,21 @@ CLAZZ("dialogues.HTMLDialogue", {
     $windowframeheader_btnMaxWindow:{
         click:function(){
             this.toggleMaximized();
-        },
-        touchstart:function(){
-            this.toggleMaximized();
         }
+        // ,
+        // touchstart:function(){
+        //     this.toggleMaximized();
+        // }
     },
 
     $windowframeheader_btnCloseWindow:{
         click:function(){
             this.onClose();
-        },
-        touchstart:function(){
-            this.onClose();
         }
+        // ,
+        // touchstart:function(){
+        //     this.onClose();
+        // }
     },
 
     bringToTop:function(){
