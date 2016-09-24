@@ -370,7 +370,7 @@ CLAZZ("projects.projman.ProjManProject", {
         }
 
         tags = Array.prototype.slice.call( parsed.querySelectorAll("script"), 0 );
-        var accSrc = "(function(){\n";
+        var accSrc = ""; // "(function(){\n";
         tags.forEach((tag) => {
             if( tag == dataScript ) return;
 
@@ -382,7 +382,7 @@ CLAZZ("projects.projman.ProjManProject", {
             accSrc += tag.textContent;
             DOC.remove(tag);
         });
-        accSrc += "\n})();\n";
+        accSrc += "\n"; // "})();\n";
         console.log("Pre-Closure size:", accSrc.length);
 
         this.minimizeCode(accSrc, minimize, (src)=>{
