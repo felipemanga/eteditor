@@ -37,9 +37,12 @@ CLAZZ("projects.sprite.Filters", {
 
 			this.filterList.forEach(( file ) => {
 				if( typeof file != "string" )
-					this.addFilter( file.url, file.src )
-				else
-					DOC.getURL(file, (src) => this.addFilter( file, src, undefined, true ) );
+					this.addFilter( file.src )
+				else if( file.match(/^(https?:\/\/)?[a-zA-Z0-9_./?&=+%]+$/) )
+					DOC.getURL(file, (src) => this.addFilter( src, undefined, true ) );
+				else{
+					this.addFilter( file )
+				}
 			});
 		},
 
@@ -48,11 +51,11 @@ CLAZZ("projects.sprite.Filters", {
 		}
 	},
 
-	addFilter:function( file, src, clazz, remote ){
+	addFilter:function( src, clazz, remote ){
 		// clazz = clazz || this.compile( src );
-		if( !clazz ) return this.compile( src, (clazz) => this.addFilter( file, src, clazz, remote ) );
+		if( !clazz ) return this.compile( src, (clazz) => this.addFilter( src, clazz, remote ) );
 
-		var filter;
+		var filter, file = this.getPath(clazz);
 
 		if( !this.filters[file] ){
 			var el = this.DOM.create("div", this.DOM.filters, {
@@ -81,7 +84,6 @@ CLAZZ("projects.sprite.Filters", {
 			filter.getEl().click();
 
 		if( remote ) filter = filter.url;
-
 		if( pos != -1 ) this.filterList[pos] = filter;
 		else this.filterList.push(filter);
 	},
@@ -166,6 +168,10 @@ CLAZZ("projects.sprite.Filters", {
 		});
 	},
 
+	getPath:function(clazz){
+		return (clazz.fullName || clazz.name).replace(/\./g, "/") + ".js";
+	},
+
 	onSave:function(){
 		this.compile(null, (clazz) => {
 			try{
@@ -173,17 +179,14 @@ CLAZZ("projects.sprite.Filters", {
 
 				this.buildMenu( instance );
 
-				var path = (clazz.fullName || clazz.name).replace(/\./g, "/") + ".js";
-
 				this.addFilter(
-					path,
 					this.ace.getValue(),
 					clazz
 				);
 
 				this.app.call("saveSettings");
 
-				this.DOM.path.textContent = path;
+				this.DOM.path.textContent = this.getPath(clazz);
 			}catch(err){
 				this.error(err);
 				return;

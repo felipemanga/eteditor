@@ -3,11 +3,21 @@
     <head>
         <meta charset="utf-8">
         <meta content='user-scalable=0' name='viewport' />
-        <script>if( location.origin != "http://localhost" ) window.CACHE_KILL = Math.random();</script>
+        <script>if( !location.origin.startsWith("http://localhost") ) window.CACHE_KILL = Math.random();</script>
         <script src="js/CLAZZ.js"></script>
         <script src="js/doc.js"></script>
         <script src="js/util.js"></script>
-        <script>DOC.app("main", {wire:true});</script>
+        <script>
+            if( DOC.GET.app ){
+                DOC.getURL(DOC.GET.app, function(src){
+                    DOC.create("iframe", {
+                        parent:document.body,
+                        style:{ border:"none", width:"100%", height:"100%", position:"absolute" }, 
+                        src:arrayToBlobURL(src, "src", {type:"text/html"}) 
+                    });                    
+                });
+            }else DOC.app("main", {wire:true});
+        </script>
         <link rel="stylesheet" href="index.css">
         <title>ETEditor</title>
     </head>
