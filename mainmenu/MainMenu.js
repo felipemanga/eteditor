@@ -36,7 +36,7 @@ CLAZZ("mainmenu.MainMenu", {
                         // proxy:"http://www.whateverorigin.org/get?url="
                     } );
                 else if( DOC.GET.gs )
-                    CLAZZ.get("onlineStorage").download( DOC.GET.gs, (d) => this.openFile.autoOpen( DOC.GET.p, DOC.GET.gs, d ) )
+                    CLAZZ.get("onlineStorage").download( DOC.GET.gs, (d) => this.openFile.autoOpen( DOC.GET.p, DOC.GET.gs, d ), true )
                 else if( DOC.GET.os )
                     CLAZZ.get("onlineStorage").readShare( DOC.GET.p, DOC.GET.os, (d) => this.openFile.autoOpen( DOC.GET.p, null, d ) )
                 else
