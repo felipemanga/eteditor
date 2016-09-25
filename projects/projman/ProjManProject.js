@@ -18,6 +18,7 @@ CLAZZ("projects.projman.ProjManProject", {
     },
 
     data:null,
+    buildMeta:null,
 
     proportion:0.5,
     DOM:null,
@@ -176,7 +177,13 @@ CLAZZ("projects.projman.ProjManProject", {
                 // debugger;
                 //     }catch(e){ console.log(e.stack); }
                 //     // template["AndroidManifest.xml"] = strToBuffer(acc);
-                // }
+                // }\
+
+                var defTitle = "ET Debug App";
+                var title = THIS.buildMeta.title || defTitle;
+                title = title.substr(0, defTitle.length);
+                if(title.length<defTitle.length) title += " ".repeat(defTitle.length - title.length);
+                template["resources.arsc"].set( strToBuffer(title), 216 );
                 
                 for( var k in template )
                     files.push({name:k, data:template[k]});
@@ -271,6 +278,7 @@ CLAZZ("projects.projman.ProjManProject", {
         // embed: everything in html
         
         this.commit();
+        this.buildMeta = {};
         var fileName = this.DOM.pageSelector.value;
         var obj = this.project.files.find( (f) => f.name == fileName );
         if( !obj ){
@@ -494,6 +502,9 @@ CLAZZ("projects.projman.ProjManProject", {
     htmlToString:function(e){
     	var close = false, a = "";
     	if( e.nodeType != e.DOCUMENT_NODE ){
+            if( e.tagName == "TITLE" ){
+                this.buildMeta.title = e.textContent.trim();
+            }
         	a = "<" + e.tagName;
 			forEach(e.attributes, (at) => {
                 a += " " + at.name;
