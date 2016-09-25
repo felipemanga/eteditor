@@ -1437,7 +1437,8 @@ var DOC = {
 					if( !(outk instanceof Array) ) outk = null;
 					if( !outk ) out[k] = outk = [];
 					for( var i=0; i<v.length; ++i )
-						outk.push(v[i]);
+						if( outk.indexOf(v[i])==-1 )
+							outk.push(v[i]);
 					continue;
 				}
 			}

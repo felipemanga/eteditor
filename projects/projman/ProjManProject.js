@@ -82,7 +82,7 @@ CLAZZ("projects.projman.ProjManProject", {
 
     $MENU:{
         SimpleHTML:function(){
-            this.createHTML(true, 1, (src) =>
+            this.createHTML("embed", 1, (src) =>
                 this.fileSaver.saveFile({
                     name: this.DOM.pageSelector.value,
                     data: src
@@ -91,7 +91,7 @@ CLAZZ("projects.projman.ProjManProject", {
         },
 
         AdvancedHTML:function(){
-            this.createHTML(true, 3, (src) =>
+            this.createHTML("embed", 3, (src) =>
                 this.fileSaver.saveFile({
                     name: this.DOM.pageSelector.value,
                     data: src
@@ -100,9 +100,22 @@ CLAZZ("projects.projman.ProjManProject", {
         },
 
         ZIP:function(){
-            this.createHTML(false, 1, (files) => {
+            this.createHTML("extern", 1, (files) => {
                 files.name = this.DOM.pageSelector.value.replace(/\.[a-zA-Z]*$/, ".zip");
                 this.fileSaver.saveFile(files);
+            });
+        },
+
+        Web:function(){
+            var name = this.DOM.pageSelector.value.replace(/\.[a-zA-Z]*$/, "");
+            this.createHTML("embed", 2, (src) => {
+                var file = { name:name, data:new Blob([strToBuffer(src)]) };
+                CLAZZ.get("onlineStorage").upload( file, (url)=>{
+                    url = location.origin + location.pathname + "?app=" + encodeURIComponent(url);
+                    DOC.removeChildren(this.DOM.shareVal);
+                    DOC.create("span", this.DOM.shareVal, {text:"URL: "} );
+                    DOC.create("a", this.DOM.shareVal, {text:url, href:url} );
+                });
             });
         },
 
@@ -127,7 +140,7 @@ CLAZZ("projects.projman.ProjManProject", {
             }
 
             function createHTML(){
-                THIS.createHTML(false, 2, onGotHTML);
+                THIS.createHTML("extern", 2, onGotHTML);
             }
 
             function onGotHTML(files){
@@ -252,6 +265,11 @@ CLAZZ("projects.projman.ProjManProject", {
     },
 
     createHTML:function( embed, minimize, cb ){
+        // embeds:
+        // blob: files go in blob urls
+        // extern: files go as side-cars
+        // embed: everything in html
+        
         this.commit();
         var fileName = this.DOM.pageSelector.value;
         var obj = this.project.files.find( (f) => f.name == fileName );
@@ -271,7 +289,11 @@ CLAZZ("projects.projman.ProjManProject", {
         var m = {}, needsConverter = false;
         this.project.files.forEach(
             (f) => {
-                m[f.name] = (f.cacheURL !== true && f.cacheURL) || f.data;
+                if( embed == "blob" ){
+                    m[f.name] = (f.cacheURL !== true && f.cacheURL) || f.data;
+                }else{
+                    m[f.name] = f.data;
+                }
                 if( f.storeFILE ){
 					var a, jname = JSON.stringify(f.name);
 					if( f.cacheURL ) a = f.raw();
@@ -307,11 +329,14 @@ CLAZZ("projects.projman.ProjManProject", {
 		var strdata = "var FS = {\nFILE:{\n" + BASE64 + "}\n };\n"
                 + "FS.JSON = " + JSON.stringify(data.JSON) + ";\n"
                 + "FS.URL = {\n" + FSURL + "\n};\n";
-		if( needsConverter ) {
-			strdata += decbin.toString() + "\n";
-		}
+		
+		strdata += decbin.toString() + "\n";
+        strdata += (function patchImages(){
+            var imgs = document.images;
+            for( var i=0, l=imgs.length; i<l; ++i )
+                if( imgs[i].dataset.src ) imgs[i].src = FS.URL[imgs[i].dataset.src];
+        }).toString();
 
-        strdata += "document.head.removeChild( document.scripts[0] );";
         data = strdata;
 
         function patchCSS(src){
@@ -326,14 +351,21 @@ CLAZZ("projects.projman.ProjManProject", {
         }
 
         var dataScript = parsed.createElement("script"), files = [];
+        var endScript = parsed.createElement("script");
         dataScript.textContent = data;
         parsed.head.insertBefore(dataScript, parsed.head.children[0]);
 
-        if( embed ){
+        if( embed != "extern" ){
+            endScript.textContent = "patchImages()";
+            parsed.body.appendChild(endScript);
+
             tags = Array.prototype.slice.call( parsed.querySelectorAll("img"), 0 );
             tags.forEach((img) => {
                 var src = img.getAttribute("src");
-                if( src in m ) img.setAttribute( "src", m[src]  );
+                if( src in m ){
+                    img.setAttribute( "data-src", src );
+                    img.removeAttribute( "src" );
+                } 
             });
 
             tags = Array.prototype.slice.call( parsed.querySelectorAll("a"), 0 );
@@ -359,9 +391,29 @@ CLAZZ("projects.projman.ProjManProject", {
                 var s = tag.getAttribute("style");
                 if( s ) tag.setAttribute("style", patchCSS(s));
             });
+            
         }else{
+            var extdep = {};
+            tags = Array.prototype.slice.call( parsed.querySelectorAll("img"), 0 );
+            tags.forEach((img) => {
+                var src = img.getAttribute("src");
+                if( src in m ) extdep[src]=true;
+            });
+
+            tags = Array.prototype.slice.call( parsed.querySelectorAll("a"), 0 );
+            tags.forEach((img) => {
+                var src = img.getAttribute("href");
+                if( src in m ) extdep[src]=true;
+            });
+
+            tags = Array.prototype.slice.call( parsed.querySelectorAll("link"), 0 );
+            tags.forEach((tag) => {
+                var src = tag.getAttribute("href");
+                if( src in m ) extdep[src]=true;
+            });
+
             this.project.files.forEach((file)=>{
-                if( file.name == "index.html" || !file.storeEXTERN ) return;
+                if( file.name == "index.html" || (!file.storeEXTERN && !extdep[file.name]) ) return;
                 var a;
                 if( file.cacheURL ) a = file.raw();
                 else a = file.data;
@@ -372,7 +424,7 @@ CLAZZ("projects.projman.ProjManProject", {
         tags = Array.prototype.slice.call( parsed.querySelectorAll("script"), 0 );
         var accSrc = ""; // "(function(){\n";
         tags.forEach((tag) => {
-            if( tag == dataScript ) return;
+            if( tag == dataScript || tag == endScript ) return;
 
             var src = tag.getAttribute("src");
             if( src in m ){
@@ -389,7 +441,7 @@ CLAZZ("projects.projman.ProjManProject", {
             console.log("Final JS size:", src.length);
             dataScript.textContent += "\n" + src;
             src = this.htmlToString(parsed);
-            if( embed ) cb(src);
+            if( embed == "blob" || embed == "embed" ) cb(src);
             else{
                 files.push({name:"index.html", data:strToBuffer(src)});
                 cb(files);
@@ -424,7 +476,7 @@ CLAZZ("projects.projman.ProjManProject", {
     },
 
     refresh:function(){
-        this.createHTML(true, false, (src) => {
+        this.createHTML("blob", false, (src) => {
             var iframe = DOC.create("iframe", this.DOM.preview, {
                 src:arrayToBlobURL(src, "preview", {type:"text/html"}),
                 width:"100%",
@@ -466,6 +518,7 @@ CLAZZ("projects.projman.ProjManProject", {
             var src = JSON.stringify(this.project);
             var url = CLAZZ.get("onlineStorage").share("projman", src);
             url = location.origin + location.pathname + "?p=projman&os=" + url;
+            DOC.removeChildren(this.DOM.shareVal);
             DOC.create("span", this.DOM.shareVal, {text:"URL: "} );
             DOC.create("a", this.DOM.shareVal, {text:url, href:url} );
         }

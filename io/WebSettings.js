@@ -8,7 +8,7 @@ CLAZZ("io.WebSettings", {
         if( !settings ) return defaults;
         try{
             settings = JSON.parse(settings);
-            DOC.mergeTo(defaults, settings);
+            DOC.mergeToDeep(defaults, settings);
         }catch(e){
             console.warn(e);
             return defaults;

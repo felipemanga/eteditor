@@ -5,7 +5,7 @@ need([
 var storage = null,
     database = null,
     auth = null,
-    user = null;
+    user = "init";
 
 CLAZZ("io.OnlineStorage", {
     CONSTRUCTOR:function(){
@@ -17,7 +17,6 @@ CLAZZ("io.OnlineStorage", {
             databaseURL: "https://eteditor-8b8b7.firebaseio.com",
             storageBucket: "eteditor-8b8b7.appspot.com",
         });
-
 
         storage = firebase.storage();
         database = firebase.database();
@@ -33,6 +32,9 @@ CLAZZ("io.OnlineStorage", {
     },
 
     upload:function(file, cb){
+        if( user == "init" )
+            return setTimeout(()=>this.upload(file,cb), 500);
+
         if(!user){
             CLAZZ.get("popups.signin.SignIn", { parent:null, callback:(success) => success && this.upload(file, cb) });
             return;
@@ -43,6 +45,9 @@ CLAZZ("io.OnlineStorage", {
     },
 
     save:function( file, cb){
+        if( user == "init" )
+            return setTimeout(()=>this.save(file,cb), 500);
+
         if(!user){
             CLAZZ.get("popups.signin.SignIn", { parent:null, callback:(success) => success && this.save(file, cb) });
             return;
@@ -81,7 +86,7 @@ CLAZZ("io.OnlineStorage", {
         firebase.auth().signInWithPopup(provider).then(function(result) {
             var token = result.credential.accessToken;
             user = result.user;
-            if(cb) cb(true);
+            if(cb) setTimeout(()=> cb(true), 20);
         }).catch(function(error) {
             if(cb) cb(false);
             var errorCode = error.code;
