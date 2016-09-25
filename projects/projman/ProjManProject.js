@@ -82,6 +82,8 @@ CLAZZ("projects.projman.ProjManProject", {
     },
 
     $MENU:{
+        clearPreview:function(){ this.clearPreview(); },
+
         SimpleHTML:function(){
             this.createHTML("embed", 1, (src) =>
                 this.fileSaver.saveFile({
@@ -184,7 +186,7 @@ CLAZZ("projects.projman.ProjManProject", {
                 title = title.substr(0, defTitle.length);
                 if(title.length<defTitle.length) title += " ".repeat(defTitle.length - title.length);
                 template["resources.arsc"].set( strToBuffer(title), 216 );
-                
+
                 for( var k in template )
                     files.push({name:k, data:template[k]});
 
@@ -198,7 +200,7 @@ CLAZZ("projects.projman.ProjManProject", {
 
                 THIS.zipCompressor.compress( files.name, file => THIS.fileSaver.saveFile(file) );
             }
-            
+
         }
     },
 
@@ -276,7 +278,7 @@ CLAZZ("projects.projman.ProjManProject", {
         // blob: files go in blob urls
         // extern: files go as side-cars
         // embed: everything in html
-        
+
         this.commit();
         this.buildMeta = {};
         var fileName = this.DOM.pageSelector.value;
@@ -337,7 +339,7 @@ CLAZZ("projects.projman.ProjManProject", {
 		var strdata = "var FS = {\nFILE:{\n" + BASE64 + "}\n };\n"
                 + "FS.JSON = " + JSON.stringify(data.JSON) + ";\n"
                 + "FS.URL = {\n" + FSURL + "\n};\n";
-		
+
 		strdata += decbin.toString() + "\n";
         strdata += (function patchImages(){
             var imgs = document.images;
@@ -373,7 +375,7 @@ CLAZZ("projects.projman.ProjManProject", {
                 if( src in m ){
                     img.setAttribute( "data-src", src );
                     img.removeAttribute( "src" );
-                } 
+                }
             });
 
             tags = Array.prototype.slice.call( parsed.querySelectorAll("a"), 0 );
@@ -399,7 +401,7 @@ CLAZZ("projects.projman.ProjManProject", {
                 var s = tag.getAttribute("style");
                 if( s ) tag.setAttribute("style", patchCSS(s));
             });
-            
+
         }else{
             var extdep = {};
             tags = Array.prototype.slice.call( parsed.querySelectorAll("img"), 0 );
@@ -481,6 +483,10 @@ CLAZZ("projects.projman.ProjManProject", {
                 cb(src);
             }
         });
+    },
+
+    clearPreview:function(){
+        DOC.removeChildren( this.DOM.preview );
     },
 
     refresh:function(){
@@ -574,7 +580,7 @@ CLAZZ("projects.projman.ProjManProject", {
                 });
             });
         }
-    },    
+    },
 
     $btnRefresh:{
         click:function(){
@@ -647,6 +653,11 @@ CLAZZ("projects.projman.ProjManProject", {
                 name: "replace",
                 bindKey: {win: "Ctrl-Enter", mac: "Command-Option-Enter"},
                 exec: () => this.refresh()
+            });
+            this.ace.commands.addCommand({
+                name: "clearPreview",
+                bindKey: {win: "Escape", mac: "Escape"},
+                exec: () => this.clearPreview()
             });
             this.autoSaveIH = setInterval( this.autoSave.bind(this), 10000 );
         },

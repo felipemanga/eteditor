@@ -39,7 +39,7 @@ CLAZZ("io.OnlineStorage", {
             CLAZZ.get("popups.signin.SignIn", { parent:null, callback:(success) => success && this.upload(file, cb) });
             return;
         }
-        
+
         var folder = "user/" + user.uid + "/";
         this.save(  {name:folder + this.ID() + file.name.replace(/[^a-z0-9_.]/gi, "_"), data:file.data}, cb );
     },
@@ -57,9 +57,13 @@ CLAZZ("io.OnlineStorage", {
         ref.put( file.data ).then( (ss) => cb && cb( ss.downloadURL.replace(/&token=[^&]+/, "") ) );
     },
 
-    download:function(url, cb){
+    download:function(url, cb, anystate){
         storage.ref(url).getDownloadURL().then((ss) => {
             DOC.getURL( ss, cb, {binary:true} );
+        }).catch((ex)=>{
+            debugger;
+            if(anystate)
+                cb(null);
         });
     },
 
