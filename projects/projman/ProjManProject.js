@@ -432,14 +432,15 @@ CLAZZ("projects.projman.ProjManProject", {
         }
 
         tags = Array.prototype.slice.call( parsed.querySelectorAll("script"), 0 );
+        var libs = [];
         var accSrc = ""; // "(function(){\n";
         tags.forEach((tag) => {
             if( tag == dataScript || tag == endScript ) return;
 
             var src = tag.getAttribute("src");
-            if( src in m ){
-                accSrc += m[src] + "\n";
-            }
+
+            if( src in m ) accSrc += m[src] + "\n";
+            else if(src) libs.push(src);
 
             accSrc += tag.textContent;
             DOC.remove(tag);
@@ -449,12 +450,42 @@ CLAZZ("projects.projman.ProjManProject", {
 
         this.minimizeCode(accSrc, minimize, (src)=>{
             console.log("Final JS size:", src.length);
-            dataScript.textContent += "\n" + src;
-            src = this.htmlToString(parsed);
-            if( embed == "blob" || embed == "embed" ) cb(src);
-            else{
-                files.push({name:"index.html", data:strToBuffer(src)});
-                cb(files);
+            var write = _write.bind(this);
+
+            if( embed == "embed" ){
+                var libcontainer = parsed.createElement("script");
+                var libsLeft = libs.length;
+                var acc = [];
+                if( !libs.length ){
+					dataScript.textContent += "\n" + src;
+					write();
+                }else libs.forEach((path, i) => DOC.getURL(path, (libsrc)=>{
+                    acc[i] = libsrc;
+                    libsLeft--;
+                    if( !libsLeft ){
+                        acc.push( dataScript.textContent, src );
+                        dataScript.textContent = acc.join("\n;\n");
+                        write();
+                    }
+                }));
+            }else if( embed == "blob" || embed == "extern" ){
+                libs.forEach((path) => {
+                    var libcontainer = parsed.createElement("script");
+                    libcontainer.src = path;
+                    parsed.head.insertBefore(libcontainer, dataScript);
+                });
+
+                dataScript.textContent += "\n" + src;
+                write();
+            }
+
+            function _write(){
+                src = this.htmlToString(parsed);
+                if( embed == "blob" || embed == "embed" ) cb(src);
+                else{
+                    files.push({name:"index.html", data:strToBuffer(src)});
+                    cb(files);
+                }
             }
         });
     },
@@ -596,10 +627,22 @@ CLAZZ("projects.projman.ProjManProject", {
 
     $btnEditImage:{
         click:function(){
-            var url = this.currentFile.data;
-            var match = url.match(/^https:\/\/firebasestorage\.googleapis\.com\/(?:.*\/)*([^?]+)/i);
-            if(match) url = decodeURIComponent(match[1]);
-            window.open( location.origin + location.pathname + "?p=sprite&gs=" + url );
+            var url = this.currentFile.data.trim();
+
+            if( url == "" ){
+                CLAZZ.get("onlineStorage").upload({name:this.currentFile.name, data:new Blob([""])}, (url)=>{
+                    this.currentFile.data = url;
+                    this.dirty = true;
+                    openURL(url);
+                })
+            }else openURL(url);
+            return;
+
+            function openURL(url){
+                var match = url.match(/^https:\/\/firebasestorage\.googleapis\.com\/(?:.*\/)*([^?]+)/i);
+                if(match) url = decodeURIComponent(match[1]);
+                window.open( location.origin + location.pathname + "?p=sprite&gs=" + url );
+            }
         }
     },
 
