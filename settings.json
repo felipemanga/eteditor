@@ -59,6 +59,13 @@
                         },
                         "Web":{
                             "toggle":true
+                        },
+                        "HTML":{
+                            "hidden":true
+                        },
+                        "clearPreview":{
+                            "hidden":true,
+                            "shortcut":[27]
                         }
                     }
                 }
