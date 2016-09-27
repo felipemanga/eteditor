@@ -55,7 +55,7 @@ CLAZZ("projects.projman.FileListItem", {
             };
 
             this.data.reload = function(cb){
-                if( !this.data.match(/^https?:\/\/[a-z0-9]+.*$/i) ){
+                if( !this.data || !this.data.match(/^https?:\/\/[a-z0-9]+.*$/i) ){
                     raw = this.data;
                     if(cb) cb(this);
                     return;
@@ -120,9 +120,14 @@ CLAZZ("projects.projman.FileListItem", {
                         this.data.data = data;
                         this.setupData();
                     }
+                    this.controller.dirty = true;
                 });
             }
-            else this.data.name = this.DOM.INPUT.value.trim();
+            else{
+                this.data.name = this.DOM.INPUT.value.trim();
+                this.controller.dirty = true;
+            }
+
             this.controller.updateFileList();
         },
         blur:function(evt){

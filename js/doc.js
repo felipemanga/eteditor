@@ -1171,6 +1171,13 @@ var DOC = {
 		return e;
 	},
 
+	parentByTagName:function(e, c){
+		c = c.toUpperCase();
+		e = e.parentNode;
+		while(e && e.tagName != c ) e = e.parentNode;
+		return e;
+	},
+
 	byId : function(id){
 		var doc = (this.__ROOT__ && this.__ROOT__.ownerDocument) || document;
 		return doc.getElementById(id);
@@ -1379,6 +1386,10 @@ var DOC = {
 		if( obj instanceof Array ) return "array";
 		if( inst && obj instanceof inst ) return inst.NAME || inst.name;
 		return ret;
+	},
+
+	toArray:function(alike){
+		return Array.prototype.slice.call(alike, 0);
 	},
 
 	appendFunction: function(object, name, func, pool){
