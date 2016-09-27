@@ -215,6 +215,18 @@ CLAZZ("projects.projman.ProjManProject", {
 		}
 	},
 
+    $btnSectionExpand:{
+        click:function(evt){
+            var section = DOC.parentByTagName(evt.target, "section");
+            DOC.toArray(this.DOM.MAIN.children).forEach((s) => {
+                if( s == this.DOM.fileSection[0] || s == section ) return;
+                s.className = s.className.replace(/Section( contracted)?/, "Section contracted");
+            });
+            
+            this.resize();
+        }
+    },
+
     commit:function(){
         if( !this.currentFile || !this.currentEditor )
             return;
@@ -706,23 +718,32 @@ CLAZZ("projects.projman.ProjManProject", {
         },
 
         resize:function(){
-            var fixed = Math.min(this.DOM.fileSection[0].getBoundingClientRect().right, 173);
-
-            var width = this.dialogue.width - fixed;
-            var height = this.dialogue.height;
-            var prop = this.proportion * width;
-            this.DOM.codeSection.forEach((cs) => {
-                cs.style.width = prop + "px";
-            });
-
-            prop = (width - prop) + "px";
-            this.DOM.previewSection.forEach((ps) => {
-                ps.style.width = prop;
-            });
-
-            if( this.ace )
-                this.ace.resize(true);
+            this.resize();
         }
+    },
+
+    resize:function(){
+        var fixed = Math.min(this.DOM.fileSection[0].getBoundingClientRect().right, 173);
+        var sectionCount = 0;
+        var proportion;
+
+        DOC.toArray(this.DOM.MAIN.children).forEach((section) => {
+            if( section == this.DOM.fileSection[0] || section.className.indexOf("contracted") != -1 ) return;
+            sectionCount++;
+        });
+
+        var width = this.dialogue.width - fixed;
+        var height = this.dialogue.height;
+        var prop = Math.floor(width / sectionCount);
+
+        DOC.toArray(this.DOM.MAIN.children).forEach((section) => {
+            if( section == this.DOM.fileSection[0] ) return;
+            if( section.className.indexOf("contracted") != -1 ) return;
+            section.style.width = prop + "px";
+        }); 
+
+        if( this.ace )
+            this.ace.resize(true);
     },
 
     $filter:{
