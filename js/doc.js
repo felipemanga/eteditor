@@ -1215,6 +1215,9 @@ var DOC = {
 			if( !name ) return;
 			name = name.trim();
 
+			if( attach )
+				DOC.attach( c, attach[DOC.attachPrefix+name], attach );
+
 			if( type == "class" ){
 				a = obj[name];
 				if( a && a.push ){
@@ -1261,23 +1264,11 @@ var DOC = {
 				c.className.trim().split(/\s+/).forEach(function(n){
 					process(c, n, obj, "class");
 				});
-				DOC.index( c, obj, null, autoCfg );
+				DOC.index( c, obj, c.controller || attach, autoCfg );
 			}
 		}
 
 		delete obj.__ROOT__;
-
-		if( attach ){
-			Object.getOwnPropertyNames(obj).forEach(k =>
-				DOC.attach( obj[k], attach[this.attachPrefix+k], attach )
-			);
-		}
-
-		if( root.controller ){
-			Object.getOwnPropertyNames(obj).forEach(k =>
-				DOC.attach( obj[k], root.controller[this.attachPrefix+k], root.controller )
-			);
-		}
 
 		for( var k in obj ){
 			var pobjk = pobj[k], objk = obj[k];
