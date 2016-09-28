@@ -1208,6 +1208,7 @@ var DOC = {
 				}else{
 					c.controller = CLAZZ.get(a, {
 						element:c,
+						DOM:obj,
 						context:autoCfg
 					});
 					attach = c.controller;
@@ -1217,8 +1218,11 @@ var DOC = {
 			if( !name ) return;
 			name = name.trim();
 
-			if( attach )
-				DOC.attach( c, attach[DOC.attachPrefix+name], attach );
+			if( attach ){
+				var handler = DOC.attachPrefix;
+				if( typeof attach.attachPrefix == "string" ) handler = attach.attachPrefix; 
+				DOC.attach( c, attach[handler+name], attach );
+			}
 
 			if( type == "class" ){
 				a = obj[name];
@@ -1503,6 +1507,7 @@ var DOC = {
 	GET:{},
 
 	app:function(path, cfg){
+		path=path || "";
 		cfg = cfg || {};
 		var ext = ".js";
 		if( cfg.zip ) ext = ".jz";
@@ -1518,7 +1523,17 @@ var DOC = {
 
 		var file = path.replace(/\./g, '/') + ext;
 		document.addEventListener("DOMContentLoaded", function(){
-			(new DOC.Loader()).load(file).start(function(){
+			var ldr = new DOC.Loader();
+			if(path == ""){
+				var files = {}; 
+				DOC.iterate((e)=>{
+					if( e.clazz && !files[e.clazz] && !resolve(e.clazz) )
+						ldr.load(e.clazz.replace(/\./g, '/') + ".js");
+				});
+				ldr.start(function(){
+					self.DOM = DOC.index(document.body);
+				});
+			}else ldr.load(file).start(function(){
 				var clazz = DOC.resolve(path);
 
 				if( ext == ".js" ) return clazz.NEW();
