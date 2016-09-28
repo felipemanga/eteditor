@@ -160,3 +160,7 @@ section header button {
 .btnSectionContract {
     display: none;
 }
+
+section.contracted {
+    display: none;
+}

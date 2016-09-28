@@ -1190,9 +1190,10 @@ var DOC = {
 
 	attachPrefix:"$",
 
-	index: function( root, obj, attach, autoCfg )
+	index: function( root, pobj, attach, autoCfg )
 	{
-		obj = obj || Object.create(DOC, {});
+		var obj = {};
+		pobj = pobj || Object.create(DOC, {});
 		root = root || document.body;
 		autoCfg = autoCfg || {ctx:attach};
 
@@ -1238,16 +1239,17 @@ var DOC = {
 			}
 		}
 
-		if(!obj.__ROOT__){
-			obj.__ROOT__ = root;
-			process( root, root.id, obj );
-			process( root, root.name, obj );
-			process( root, root.className, obj, "class" );
-			process( root, root.tagName, obj, "tag" );
+		if(!pobj.__ROOT__){
+			pobj.__ROOT__ = root;
+			process( root, root.id, pobj );
+			process( root, root.name, pobj );
+			process( root, root.className, pobj, "class" );
+			process( root, root.tagName, pobj, "tag" );
 			root.className.trim().split(/\s+/).forEach(function(name){
-				process( root, name, obj, "class" );
+				process( root, name, pobj, "class" );
 			});
 		}
+		obj.__ROOT__ = pobj.__ROOT__;
 
 		if( root.children ){
 			for( var i=0, c; c=root.children[i]; ++i )
@@ -1263,12 +1265,31 @@ var DOC = {
 			}
 		}
 
+		delete obj.__ROOT__;
+
 		if( attach ){
 			Object.getOwnPropertyNames(obj).forEach(k =>
 				DOC.attach( obj[k], attach[this.attachPrefix+k], attach )
 			);
 		}
-		return obj;
+
+		if( root.controller ){
+			Object.getOwnPropertyNames(obj).forEach(k =>
+				DOC.attach( obj[k], root.controller[this.attachPrefix+k], root.controller )
+			);
+		}
+
+		for( var k in obj ){
+			var pobjk = pobj[k], objk = obj[k];
+			if( pobjk ){
+				if(pobjk.concat) pobj[k] = pobjk.concat(objk);
+				else if(objk.concat) (pobj[k] = objk).splice(0, 0, pobjk);
+				else if(k == objk.id || k == objk.tagName ) pobj[k] = objk;
+				else pobj[k] = [pobjk, objk]; 
+			}else pobj[k] = objk;
+		}
+
+		return pobj;
 	},
 
 	attach:function( objk, listener, ctx ){
