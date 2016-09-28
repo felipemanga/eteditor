@@ -1533,7 +1533,7 @@ var DOC = {
 			var ldr = new DOC.Loader();
 			if(path == ""){
 				var files = {}; 
-				DOC.iterate((e)=>{
+				DOC.iterate(document.body, (e)=>{
 					if( e.clazz && !files[e.clazz] && !resolve(e.clazz) )
 						ldr.load(e.clazz.replace(/\./g, '/') + ".js");
 				});
