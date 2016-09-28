@@ -63,13 +63,29 @@ CLAZZ("projects.sprite.SpriteProject", {
         });
     },
 
+    pasteLink:function(cb, url){
+        this.core.loadImage(url, (layer)=>{
+            if(cb) cb();
+        });
+    },
+
     $DIALOGUE:{
+        copy:function(evt){
+            var data = this.core.activeLayer.canvas.toDataURL("image/png");
+            data = data.replace(/[^,]+,/, "");
+            data = arrayToBlobURL(atob(data), 'clipboard', {type:"image/png"});
+            evt.clipboardData.setData('text/plain', data);
+            evt.preventDefault();
+        },
+
         paste:function(evt){
             var items = evt.clipboardData.items, i=0, next = ()=>{
                 if(i>=items.length) return;
                 var item = items[i++];
                 if( item.kind == "file" && item.type.startsWith("image/") )
                     this.pasteFile( item.getAsFile(), next );
+                if( item.kind == "string" && item.type.startsWith("text/") )
+                    item.getAsString( this.pasteLink.bind(this, next) );
             };
             next();
         },
