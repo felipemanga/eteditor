@@ -1195,6 +1195,7 @@ var DOC = {
 		var obj = {};
 		pobj = pobj || Object.create(DOC, {});
 		root = root || document.body;
+		attach = attach || root.controller;
 		autoCfg = autoCfg || {ctx:attach};
 
 		function process(c, name, obj, type){
@@ -1264,7 +1265,7 @@ var DOC = {
 				c.className.trim().split(/\s+/).forEach(function(n){
 					process(c, n, obj, "class");
 				});
-				DOC.index( c, obj, root.controller || attach, autoCfg );
+				DOC.index( c, obj, attach, autoCfg );
 			}
 		}
 
