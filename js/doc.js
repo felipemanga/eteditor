@@ -1264,7 +1264,7 @@ var DOC = {
 				c.className.trim().split(/\s+/).forEach(function(n){
 					process(c, n, obj, "class");
 				});
-				DOC.index( c, obj, c.controller || attach, autoCfg );
+				DOC.index( c, obj, root.controller || attach, autoCfg );
 			}
 		}
 
