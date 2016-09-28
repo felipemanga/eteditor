@@ -1210,6 +1210,7 @@ var DOC = {
 						element:c,
 						context:autoCfg
 					});
+					attach = c.controller;
 				}
 			}
 
