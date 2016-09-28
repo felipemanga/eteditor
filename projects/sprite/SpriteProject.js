@@ -12,7 +12,10 @@ CLAZZ("projects.sprite.SpriteProject", {
             controller:INJECT("this"),
             cfg:RESOLVE("settings.projects.sprite.SpriteProject.dialogue")
         }),
+        
         fileSaver:"io.FileSaver",
+        fileReader:"io.FileReader",
+
         colorpicker:"popups.colorpicker.IColorPicker",
         app:"app",
         pool:"Pool",
@@ -52,7 +55,25 @@ CLAZZ("projects.sprite.SpriteProject", {
         this.filtersview = CLAZZ.get("projects.sprite.Filters", ctx);
     },
 
+    pasteFile:function(file, cb){
+        var url = URL.createObjectURL(file, {});
+        this.core.loadImage(url, (layer)=>{
+            URL.revokeObjectURL(url);
+            if(cb) cb();
+        });
+    },
+
     $DIALOGUE:{
+        paste:function(evt){
+            var items = evt.clipboardData.items, i=0, next = ()=>{
+                if(i>=items.length) return;
+                var item = items[i++];
+                if( item.kind == "file" && item.type.startsWith("image/") )
+                    this.pasteFile( item.getAsFile(), next );
+            };
+            next();
+        },
+
         maximized:function(){
             this.zoom = 1;
             this.zoomFit();
