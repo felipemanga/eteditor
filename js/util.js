@@ -35,7 +35,7 @@ function btoURL(str, mime){
 	return URL.createObjectURL(new Blob([arr], obj));
 }
 
-function decbin(a){var d={65533:0},b;for(b=0;128>b;)d[b]=b++;[10,13,39,92].forEach((c,e)=>{b=a.charCodeAt(e);d[b]=c;d[c]=b});a=a.substr(4);for(var f=new Uint8ClampedArray(a.length/8*7),c=0,g=d[a.charCodeAt(7)],h=0,e=0,k=a.length;e<k;++h,++c)bm=d[a.charCodeAt(e++)],f[h]=bm|(g>>c&1)<<7,6==c&&(e++,g=d[a.charCodeAt(e+7)],c=-1);return f};
+function decbin(a){var d={65533:0},b,bm;for(b=0;128>b;)d[b]=b++;[10,13,39,92].forEach((c,e)=>{b=a.charCodeAt(e);d[b]=c;d[c]=b});a=a.substr(4);for(var f=new Uint8ClampedArray(a.length/8*7),c=0,g=d[a.charCodeAt(7)],h=0,e=0,k=a.length;e<k;++h,++c)bm=d[a.charCodeAt(e++)],f[h]=bm|(g>>c&1)<<7,6==c&&(e++,g=d[a.charCodeAt(e+7)],c=-1);return f};
 
 function __decbin(str){
 	var start = performance.now();

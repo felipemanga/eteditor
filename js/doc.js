@@ -1171,6 +1171,13 @@ var DOC = {
 		return e;
 	},
 
+	parentByTagName:function(e, c){
+		c = c.toUpperCase();
+		e = e.parentNode;
+		while(e && e.tagName != c ) e = e.parentNode;
+		return e;
+	},
+
 	byId : function(id){
 		var doc = (this.__ROOT__ && this.__ROOT__.ownerDocument) || document;
 		return doc.getElementById(id);
@@ -1183,9 +1190,10 @@ var DOC = {
 
 	attachPrefix:"$",
 
-	index: function( root, obj, attach, autoCfg )
+	index: function( root, pobj, attach, autoCfg )
 	{
-		obj = obj || Object.create(DOC, {});
+		var obj = {};
+		pobj = pobj || Object.create(DOC, {});
 		root = root || document.body;
 		autoCfg = autoCfg || {ctx:attach};
 
@@ -1206,6 +1214,9 @@ var DOC = {
 
 			if( !name ) return;
 			name = name.trim();
+
+			if( attach )
+				DOC.attach( c, attach[DOC.attachPrefix+name], attach );
 
 			if( type == "class" ){
 				a = obj[name];
@@ -1231,16 +1242,17 @@ var DOC = {
 			}
 		}
 
-		if(!obj.__ROOT__){
-			obj.__ROOT__ = root;
-			process( root, root.id, obj );
-			process( root, root.name, obj );
-			process( root, root.className, obj, "class" );
-			process( root, root.tagName, obj, "tag" );
+		if(!pobj.__ROOT__){
+			pobj.__ROOT__ = root;
+			process( root, root.id, pobj );
+			process( root, root.name, pobj );
+			process( root, root.className, pobj, "class" );
+			process( root, root.tagName, pobj, "tag" );
 			root.className.trim().split(/\s+/).forEach(function(name){
-				process( root, name, obj, "class" );
+				process( root, name, pobj, "class" );
 			});
 		}
+		obj.__ROOT__ = pobj.__ROOT__;
 
 		if( root.children ){
 			for( var i=0, c; c=root.children[i]; ++i )
@@ -1252,16 +1264,23 @@ var DOC = {
 				c.className.trim().split(/\s+/).forEach(function(n){
 					process(c, n, obj, "class");
 				});
-				DOC.index( c, obj, null, autoCfg );
+				DOC.index( c, obj, c.controller || attach, autoCfg );
 			}
 		}
 
-		if( attach ){
-			Object.getOwnPropertyNames(obj).forEach(k =>
-				DOC.attach( obj[k], attach[this.attachPrefix+k], attach )
-			);
+		delete obj.__ROOT__;
+
+		for( var k in obj ){
+			var pobjk = pobj[k], objk = obj[k];
+			if( pobjk ){
+				if(pobjk.concat) pobj[k] = pobjk.concat(objk);
+				else if(objk.concat) (pobj[k] = objk).splice(0, 0, pobjk);
+				else if(k == objk.id || k == objk.tagName ) pobj[k] = objk;
+				else pobj[k] = [pobjk, objk]; 
+			}else pobj[k] = objk;
 		}
-		return obj;
+
+		return pobj;
 	},
 
 	attach:function( objk, listener, ctx ){
@@ -1379,6 +1398,10 @@ var DOC = {
 		if( obj instanceof Array ) return "array";
 		if( inst && obj instanceof inst ) return inst.NAME || inst.name;
 		return ret;
+	},
+
+	toArray:function(alike){
+		return Array.prototype.slice.call(alike, 0);
 	},
 
 	appendFunction: function(object, name, func, pool){

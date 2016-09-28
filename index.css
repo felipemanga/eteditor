@@ -220,29 +220,6 @@ embed-body#SignIn {
     font-weight: bold;
 }
 
-#imageComponent header {
-    padding: 5px 0;
-}
-
-#imageComponent {
-    flex-grow: 1;
-    background-size: contain;
-    image-rendering: pixelated;
-    background-repeat: no-repeat;
-}
-
-.codeSection header {
-    display: flex;
-    position: relative;
-    flex-direction: row;
-}
-
-.codeSection header * {
-    flex-grow: 1;
-    margin: 5px;
-}
-
-
 #windowframeheader_title {
     pointer-events: none;
 }

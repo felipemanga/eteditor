@@ -29,7 +29,7 @@ main .fileSection {
     width: calc(50% - 4px);
     margin-top: 10px;
     box-sizing: border-box;
-    background: #679;
+    background: #789;
     color: white;
     border: none;
 }
@@ -107,7 +107,7 @@ section.previewSection {
     height: 60px;
     width: 60px;
     border: none;
-    background-color: #679;
+    background-color: #789;
     color: white;
 }
 
@@ -118,4 +118,49 @@ span#shareVal {
 .previewSection #shareVal a {
     text-decoration: none;
     color: #59F;
+}
+
+#imageComponent header {
+    padding: 5px 0;
+}
+
+#imageComponent {
+    flex-grow: 1;
+    background-size: contain;
+    image-rendering: pixelated;
+    background-repeat: no-repeat;
+}
+
+.codeSection header {
+    position: relative;
+}
+
+.codeSection header * {
+    margin: 5px;
+}
+
+section header button {
+    padding: 1px 5px;
+    border:0;
+    background-color: #789;
+    box-sizing: border-box;
+    color: white;
+}
+
+.expcon {
+    width:20px;
+    height:20px;
+    overflow: hidden;
+} 
+
+.codeProperty, .allProperty, .imageProperty {
+    white-space: nowrap;
+}
+
+.btnSectionContract {
+    display: none;
+}
+
+section.contracted {
+    display: none;
 }

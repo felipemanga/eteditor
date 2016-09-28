@@ -215,6 +215,40 @@ CLAZZ("projects.projman.ProjManProject", {
 		}
 	},
 
+    expandedSection:null,
+
+    $btnSectionExpand:{
+        click:function(evt){
+            var section = DOC.parentByTagName(evt.target, "section");
+            this.expandedSection = section;
+
+            DOC.toArray(this.DOM.MAIN.children).forEach((s) => {
+                if( s == this.DOM.fileSection[0] ) return;
+                s.className = s.className.replace(/Section( contracted)?/, s == section ? "Section" : "Section contracted");
+            });
+            section.querySelector(".btnSectionExpand").style.display = "none";
+            section.querySelector(".btnSectionContract").style.display = "inline";
+            this.resize();
+        }
+    },
+
+    $btnSectionContract:{
+        click:function(evt){ this.contract(); }
+    },
+
+    contract:function(){
+        var section = this.expandedSection;
+        if( !section ) return;
+        DOC.toArray(this.DOM.MAIN.children).forEach((s) => {
+            if( s == this.DOM.fileSection[0] ) return;
+            s.className = s.className.replace(/Section( contracted)?/, "Section");
+        });
+        section.querySelector(".btnSectionExpand").style.display = "inline";
+        section.querySelector(".btnSectionContract").style.display = "none";
+        this.resize();
+    },
+
+
     commit:function(){
         if( !this.currentFile || !this.currentEditor )
             return;
@@ -341,11 +375,6 @@ CLAZZ("projects.projman.ProjManProject", {
                 + "FS.URL = {\n" + FSURL + "\n};\n";
 
 		strdata += decbin.toString() + "\n";
-        strdata += (function patchImages(){
-            var imgs = document.images;
-            for( var i=0, l=imgs.length; i<l; ++i )
-                if( imgs[i].dataset.src ) imgs[i].src = FS.URL[imgs[i].dataset.src];
-        }).toString();
 
         data = strdata;
 
@@ -366,17 +395,27 @@ CLAZZ("projects.projman.ProjManProject", {
         parsed.head.insertBefore(dataScript, parsed.head.children[0]);
 
         if( embed != "extern" ){
-            endScript.textContent = "patchImages()";
-            parsed.body.appendChild(endScript);
+            var needPatch = false;
 
             tags = Array.prototype.slice.call( parsed.querySelectorAll("img"), 0 );
             tags.forEach((img) => {
                 var src = img.getAttribute("src");
                 if( src in m ){
+                    needPatch = true;
                     img.setAttribute( "data-src", src );
                     img.removeAttribute( "src" );
                 }
             });
+
+            if( needPatch ){
+                dataScript.textContent += (function patchImages(){
+                    var imgs = document.images;
+                    for( var i=0, l=imgs.length; i<l; ++i )
+                        if( imgs[i].dataset.src ) imgs[i].src = FS.URL[imgs[i].dataset.src];
+                }).toString();                
+                endScript.textContent = "patchImages()";
+                parsed.body.appendChild(endScript);
+            }
 
             tags = Array.prototype.slice.call( parsed.querySelectorAll("a"), 0 );
             tags.forEach((img) => {
@@ -432,14 +471,15 @@ CLAZZ("projects.projman.ProjManProject", {
         }
 
         tags = Array.prototype.slice.call( parsed.querySelectorAll("script"), 0 );
+        var libs = [];
         var accSrc = ""; // "(function(){\n";
         tags.forEach((tag) => {
             if( tag == dataScript || tag == endScript ) return;
 
             var src = tag.getAttribute("src");
-            if( src in m ){
-                accSrc += m[src] + "\n";
-            }
+
+            if( src in m ) accSrc += m[src] + "\n";
+            else if(src) libs.push(src);
 
             accSrc += tag.textContent;
             DOC.remove(tag);
@@ -449,12 +489,42 @@ CLAZZ("projects.projman.ProjManProject", {
 
         this.minimizeCode(accSrc, minimize, (src)=>{
             console.log("Final JS size:", src.length);
-            dataScript.textContent += "\n" + src;
-            src = this.htmlToString(parsed);
-            if( embed == "blob" || embed == "embed" ) cb(src);
-            else{
-                files.push({name:"index.html", data:strToBuffer(src)});
-                cb(files);
+            var write = _write.bind(this);
+
+            if( embed == "embed" ){
+                var libcontainer = parsed.createElement("script");
+                var libsLeft = libs.length;
+                var acc = [];
+                if( !libs.length ){
+					dataScript.textContent += "\n" + src;
+					write();
+                }else libs.forEach((path, i) => DOC.getURL(path, (libsrc)=>{
+                    acc[i] = libsrc;
+                    libsLeft--;
+                    if( !libsLeft ){
+                        acc.push( dataScript.textContent, src );
+                        dataScript.textContent = acc.join("\n;\n");
+                        write();
+                    }
+                }));
+            }else if( embed == "blob" || embed == "extern" ){
+                libs.forEach((path) => {
+                    var libcontainer = parsed.createElement("script");
+                    libcontainer.src = path;
+                    parsed.head.insertBefore(libcontainer, dataScript);
+                });
+
+                dataScript.textContent += "\n" + src;
+                write();
+            }
+
+            function _write(){
+                src = this.htmlToString(parsed);
+                if( embed == "blob" || embed == "embed" ) cb(src);
+                else{
+                    files.push({name:"index.html", data:strToBuffer(src)});
+                    cb(files);
+                }
             }
         });
     },
@@ -491,7 +561,10 @@ CLAZZ("projects.projman.ProjManProject", {
 
     refresh:function(){
         this.createHTML("blob", false, (src) => {
-            var iframe = DOC.create("iframe", this.DOM.preview, {
+            if( this.expandedSection && this.expandedSection != this.DOM.previewSection )
+                this.contract();
+
+            DOC.create("iframe", this.DOM.preview, {
                 src:arrayToBlobURL(src, "preview", {type:"text/html"}),
                 width:"100%",
                 height:"100%",
@@ -596,10 +669,22 @@ CLAZZ("projects.projman.ProjManProject", {
 
     $btnEditImage:{
         click:function(){
-            var url = this.currentFile.data;
-            var match = url.match(/^https:\/\/firebasestorage\.googleapis\.com\/(?:.*\/)*([^?]+)/i);
-            if(match) url = decodeURIComponent(match[1]);
-            window.open( location.origin + location.pathname + "?p=sprite&gs=" + url );
+            var url = this.currentFile.data.trim();
+
+            if( url == "" ){
+                CLAZZ.get("onlineStorage").upload({name:this.currentFile.name, data:new Blob([""])}, (url)=>{
+                    this.currentFile.data = url;
+                    this.dirty = true;
+                    openURL(url);
+                })
+            }else openURL(url);
+            return;
+
+            function openURL(url){
+                var match = url.match(/^https:\/\/firebasestorage\.googleapis\.com\/(?:.*\/)*([^?]+)/i);
+                if(match) url = decodeURIComponent(match[1]);
+                window.open( location.origin + location.pathname + "?p=sprite&gs=" + url );
+            }
         }
     },
 
@@ -663,23 +748,32 @@ CLAZZ("projects.projman.ProjManProject", {
         },
 
         resize:function(){
-            var fixed = Math.min(this.DOM.fileSection[0].getBoundingClientRect().right, 173);
-
-            var width = this.dialogue.width - fixed;
-            var height = this.dialogue.height;
-            var prop = this.proportion * width;
-            this.DOM.codeSection.forEach((cs) => {
-                cs.style.width = prop + "px";
-            });
-
-            prop = (width - prop) + "px";
-            this.DOM.previewSection.forEach((ps) => {
-                ps.style.width = prop;
-            });
-
-            if( this.ace )
-                this.ace.resize(true);
+            this.resize();
         }
+    },
+
+    resize:function(){
+        var fixed = Math.min(this.DOM.fileSection[0].getBoundingClientRect().right, 173);
+        var sectionCount = 0;
+        var proportion;
+
+        DOC.toArray(this.DOM.MAIN.children).forEach((section) => {
+            if( section == this.DOM.fileSection[0] || section.className.indexOf("contracted") != -1 ) return;
+            sectionCount++;
+        });
+
+        var width = this.dialogue.width - fixed;
+        var height = this.dialogue.height;
+        var prop = Math.floor(width / sectionCount);
+
+        DOC.toArray(this.DOM.MAIN.children).forEach((section) => {
+            if( section == this.DOM.fileSection[0] ) return;
+            if( section.className.indexOf("contracted") != -1 ) section.style.width = "0";
+            else section.style.width = prop + "px";
+        }); 
+
+        if( this.ace )
+            this.ace.resize(true);
     },
 
     $filter:{
