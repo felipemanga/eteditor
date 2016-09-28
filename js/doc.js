@@ -1318,8 +1318,11 @@ var DOC = {
 	},
 
 	iterate:function(e, cb){
-		if(!e) return;
-		cb(e);
+		if(!cb){
+			cb=e;
+			e=this.__ROOT__ || document.body;
+		}
+		if(!e || cb(e) === false ) return;
 		for(var i=0, c; c=e.children[i]; ++i )
 			DOC.iterate(c, cb);
 	},
@@ -1534,8 +1537,10 @@ var DOC = {
 			if(path == ""){
 				var files = {}; 
 				DOC.iterate(document.body, (e)=>{
-					if( e.clazz && !files[e.clazz] && !resolve(e.clazz) )
+					if( e.clazz && !files[e.clazz] && !resolve(e.clazz) ){
 						ldr.load(e.clazz.replace(/\./g, '/') + ".js");
+						files[e.clazz]=true;
+					}
 				});
 				ldr.start(function(){
 					self.DOM = DOC.index(document.body);
