@@ -1317,6 +1317,13 @@ var DOC = {
 		}
 	},
 
+	iterate:function(e, cb){
+		if(!e) return;
+		cb(e);
+		for(var i=0, c; c=e.children[i]; ++i )
+			DOC.iterate(c, cb);
+	},
+
 	remove:function(e){
 		if( !e ) return;
 
