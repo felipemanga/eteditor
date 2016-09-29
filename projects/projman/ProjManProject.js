@@ -84,6 +84,8 @@ CLAZZ("projects.projman.ProjManProject", {
     $MENU:{
         clearPreview:function(){ this.clearPreview(); },
 
+        focusFilter:function(){ this.DOM.filter.focus(); },
+
         SimpleHTML:function(){
             this.createHTML("embed", 1, (src) =>
                 this.fileSaver.saveFile({
@@ -740,6 +742,11 @@ CLAZZ("projects.projman.ProjManProject", {
                 exec: () => this.refresh()
             });
             this.ace.commands.addCommand({
+                name: "focusFilter",
+                bindKey: {win: "Ctrl-p", mac: "Command-Option-p"},
+                exec: () => this.DOM.filter.focus()
+            });
+            this.ace.commands.addCommand({
                 name: "clearPreview",
                 bindKey: {win: "Escape", mac: "Escape"},
                 exec: () => this.clearPreview()
@@ -777,9 +784,16 @@ CLAZZ("projects.projman.ProjManProject", {
     },
 
     $filter:{
-        change:function(e){
-            var value = e.target.value.toLowerCase().trim();
-            this.DOM.docSet[0].update({ filter:(e) => e.name.toLowerCase().indexOf( value ) != -1 });
+        keyup:function(e){
+            var value = e.target.value.toLowerCase().trim(), list = this.DOM.docSet[0];
+            list.update({ filter:(e) => e.name.toLowerCase().indexOf( value ) != -1 });
+            if(e.keyCode==13||e.key=="Enter"){
+                list.update({ filter:(e) => e.name.toLowerCase().indexOf( value ) != -1 });
+                var value = list.values()[0];
+                if(value) this.openFile(value);
+                list.update({ filter:null });
+                e.target.value = "";
+            }
         }
     }
 });
