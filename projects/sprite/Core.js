@@ -128,6 +128,7 @@ CLAZZ("projects.sprite.Core", {
 	},
 
 	removeLayer:function(layer){
+		if( layer === undefined ) layer = this.activeLayer;
 		if( !this.frames.length || !layer ) return;
 		var pos = this.layers.indexOf(layer);
 		if( pos == -1 ) return;
@@ -242,6 +243,47 @@ CLAZZ("projects.sprite.Core", {
 		return composite;
     },
 
+	clearLayer:function(layer){
+		layer = layer||this.activeLayer;
+		if( !layer ) return;
+		var i, d=layer.data.data, l=d.length, a;
+		if( this.selection.enabled ){
+			for( i=3; i<l; i+=4 )
+				d[i] = (d[i]/255)*(1-this.selection.data.data[i]/255)*255;
+		}else{
+			for( i=0; i<l; ){
+				d[i++] = 0;
+				d[i++] = 0;
+				d[i++] = 0;
+				d[i++] = 0;
+			}
+		}
+	},
+
+	extract:function(layer, out){
+		layer = layer||this.activeLayer;
+		if( !layer ) return;
+		if( !out && !this.selection.enabled ) return layer;
+
+		out = out || this.getComposite();
+		var i, IL=layer.data.data, OL=out.data.data, l=IL.length, a;
+
+		if( this.selection.enabled ){
+			var sa = this.selection.data.data;
+			for( i=0; i<l; ){
+				a = sa[i+3]/255;
+				OL[i] = IL[i++]*a;
+				OL[i] = IL[i++]*a;
+				OL[i] = IL[i++]*a;
+				OL[i] = IL[i++]*a;
+			}
+		}else{
+			OL.set(IL);
+		}
+		out.redraw();
+		return out;
+	},
+
 	setTool:function( tool ){
 		var oldTool = this.activeTool;
 		if( tool == oldTool ) return;
@@ -321,7 +363,7 @@ CLAZZ("projects.sprite.Core", {
 		this.pool.call("onResizeCanvas");
     },
 
-    loadImage:function( path, cb ){
+    loadImage:function( path, cb, nopush ){
         DOC.create("img", {
             src:path,
             onerror: evt => {
@@ -330,10 +372,11 @@ CLAZZ("projects.sprite.Core", {
             },
             onload: evt => {
 				var img = evt.target;
-				this.setCanvasSize( img.width, img.height );
+				if( this.width != img.width || this.height != img.height )
+					this.setCanvasSize( img.width, img.height );
 				this.activeLayer.context.drawImage(img,0,0);
 				this.activeLayer.read();
-				this.push();
+				if(!nopush) this.push();
 				if(cb) cb(this.activeLayer);
 			}
         });
