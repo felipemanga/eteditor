@@ -76,6 +76,9 @@ CLAZZ("projects.sprite.Core", {
 	},
 
     setLayer:function(layer, noUndo){
+		if( layer && this.layers.indexOf(layer) == -1 )
+			debugger;
+
         this.activeLayer = layer;
 
         if( noUndo !== true )
@@ -145,22 +148,27 @@ CLAZZ("projects.sprite.Core", {
 	addLayer:function(duplicate, noUndo){
 		var layer = null;
 		var dup = this.layers.indexOf(this.activeLayer);
+		var currentFrame = this.layers;
 
 		for( var i=0; i<this.frames.length; ++i ){
-			var layers = this.frames[i];
+			var layers = this.layers = this.frames[i];
+			var newlayer = this.createLayer();
 
-			layer = this.createLayer();
-
-			layers.push( layer );
+			layers.push( newlayer );
 
 			if( duplicate ){
-				layer.context.drawImage( layers[dup].canvas,0,0 );
-				layer.read();
+				newlayer.context.drawImage( layers[dup].canvas,0,0 );
+				newlayer.read();
 			}
 
-			if( this.frames[i] == this.layers )
-				layer = this.frames[i][ this.frames[i].length-1 ];
+			if( this.frames[i] == currentFrame )
+				layer = newlayer;
 		}
+
+		this.layers = currentFrame;
+
+		if( layer == null )
+			debugger;
 
 		this.setLayer(layer, noUndo);
 

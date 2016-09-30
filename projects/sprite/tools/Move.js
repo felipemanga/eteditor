@@ -10,7 +10,7 @@ CLAZZ("projects.sprite.tools.Move", {
     down:function(layer, x, y, z){
 			if( this.core.selection && this.core.selection.enabled ){
 				srcLayer = this.core.activeLayer;
-				this.core.addLayer(true, true);
+				this.core.addLayer(false, true);
 				this.core.extract(srcLayer, this.core.activeLayer);
 				this.core.clearLayer(srcLayer);
 				srcLayer.redraw();
