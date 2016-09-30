@@ -129,6 +129,25 @@ CLAZZ("projects.sprite.ToolBox", {
 		}
 	},
 
+	toggleTile:function(){
+
+	},
+
+	toggleMirror:function(mirror){
+		this.core.mirror = mirror == undefined ? !this.core.mirror : !!mirror;
+	},
+
+	$tileMode:{
+		change:function(){
+			this.toggleTile( this.DOM.tileMode.checked );
+		}
+	},
+
+	$mirrorMode:{
+		change:function(){
+			this.toggleMirror( this.DOM.mirrorMode.checked );
+		}
+	},
 
     $btnResample:{
         click:function(){

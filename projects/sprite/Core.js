@@ -12,6 +12,7 @@ CLAZZ("projects.sprite.Core", {
     activeLayer:null,
     activeTool:null,
     color:null,
+	mirror:false,
 
     layers:null,
 	frames:null,
