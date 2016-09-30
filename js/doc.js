@@ -948,6 +948,12 @@ var DOC = {
 		if( !Array.isArray(set.__internal) ){
 			set.__external = Array.prototype.slice.call(set.children, 0);
 			set.__internal = [];
+			set.controllers = function(){
+				return this.__internal.map((o)=>o.controller)
+			};
+			set.values = function(){
+				return this.__internal.map((o)=>o.value)
+			};
 		}
 
 		var data = set.__internal;
@@ -1190,10 +1196,12 @@ var DOC = {
 
 	attachPrefix:"$",
 
-	index: function( root, obj, attach, autoCfg )
+	index: function( root, pobj, attach, autoCfg )
 	{
-		obj = obj || Object.create(DOC, {});
+		var obj = {};
+		pobj = pobj || Object.create(DOC, {});
 		root = root || document.body;
+		attach = attach || root.controller;
 		autoCfg = autoCfg || {ctx:attach};
 
 		function process(c, name, obj, type){
@@ -1206,13 +1214,21 @@ var DOC = {
 				}else{
 					c.controller = CLAZZ.get(a, {
 						element:c,
+						DOM:obj,
 						context:autoCfg
 					});
+					attach = c.controller;
 				}
 			}
 
 			if( !name ) return;
 			name = name.trim();
+
+			if( attach ){
+				var handler = DOC.attachPrefix;
+				if( typeof attach.attachPrefix == "string" ) handler = attach.attachPrefix; 
+				DOC.attach( c, attach[handler+name], attach );
+			}
 
 			if( type == "class" ){
 				a = obj[name];
@@ -1238,16 +1254,17 @@ var DOC = {
 			}
 		}
 
-		if(!obj.__ROOT__){
-			obj.__ROOT__ = root;
-			process( root, root.id, obj );
-			process( root, root.name, obj );
-			process( root, root.className, obj, "class" );
-			process( root, root.tagName, obj, "tag" );
+		if(!pobj.__ROOT__){
+			pobj.__ROOT__ = root;
+			process( root, root.id, pobj );
+			process( root, root.name, pobj );
+			process( root, root.className, pobj, "class" );
+			process( root, root.tagName, pobj, "tag" );
 			root.className.trim().split(/\s+/).forEach(function(name){
-				process( root, name, obj, "class" );
+				process( root, name, pobj, "class" );
 			});
 		}
+		obj.__ROOT__ = pobj.__ROOT__;
 
 		if( root.children ){
 			for( var i=0, c; c=root.children[i]; ++i )
@@ -1259,16 +1276,23 @@ var DOC = {
 				c.className.trim().split(/\s+/).forEach(function(n){
 					process(c, n, obj, "class");
 				});
-				DOC.index( c, obj, null, autoCfg );
+				DOC.index( c, obj, attach, autoCfg );
 			}
 		}
 
-		if( attach ){
-			Object.getOwnPropertyNames(obj).forEach(k =>
-				DOC.attach( obj[k], attach[this.attachPrefix+k], attach )
-			);
+		delete obj.__ROOT__;
+
+		for( var k in obj ){
+			var pobjk = pobj[k], objk = obj[k];
+			if( pobjk ){
+				if(pobjk.concat) pobj[k] = pobjk.concat(objk);
+				else if(objk.concat) (pobj[k] = objk).splice(0, 0, pobjk);
+				else if(k == objk.id || k == objk.tagName ) pobj[k] = objk;
+				else pobj[k] = [pobjk, objk]; 
+			}else pobj[k] = objk;
 		}
-		return obj;
+
+		return pobj;
 	},
 
 	attach:function( objk, listener, ctx ){
@@ -1297,6 +1321,16 @@ var DOC = {
 				}
 			}
 		}
+	},
+
+	iterate:function(e, cb){
+		if(!cb){
+			cb=e;
+			e=this.__ROOT__ || document.body;
+		}
+		if(!e || cb(e) === false ) return;
+		for(var i=0, c; c=e.children[i]; ++i )
+			DOC.iterate(c, cb);
 	},
 
 	remove:function(e){
@@ -1489,6 +1523,7 @@ var DOC = {
 	GET:{},
 
 	app:function(path, cfg){
+		path=path || "";
 		cfg = cfg || {};
 		var ext = ".js";
 		if( cfg.zip ) ext = ".jz";
@@ -1504,7 +1539,19 @@ var DOC = {
 
 		var file = path.replace(/\./g, '/') + ext;
 		document.addEventListener("DOMContentLoaded", function(){
-			(new DOC.Loader()).load(file).start(function(){
+			var ldr = new DOC.Loader();
+			if(path == ""){
+				var files = {}; 
+				DOC.iterate(document.body, (e)=>{
+					if( e.clazz && !files[e.clazz] && !resolve(e.clazz) ){
+						ldr.load(e.clazz.replace(/\./g, '/') + ".js");
+						files[e.clazz]=true;
+					}
+				});
+				ldr.start(function(){
+					self.DOM = DOC.index(document.body);
+				});
+			}else ldr.load(file).start(function(){
 				var clazz = DOC.resolve(path);
 
 				if( ext == ".js" ) return clazz.NEW();

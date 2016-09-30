@@ -321,11 +321,12 @@ CLAZZ("projects.sprite.Core", {
 		this.pool.call("onResizeCanvas");
     },
 
-    loadImage:function( path ){
+    loadImage:function( path, cb ){
         DOC.create("img", {
             src:path,
             onerror: evt => {
             	console.warn(evt);
+				if(cb) cb(false);
             },
             onload: evt => {
 				var img = evt.target;
@@ -333,6 +334,7 @@ CLAZZ("projects.sprite.Core", {
 				this.activeLayer.context.drawImage(img,0,0);
 				this.activeLayer.read();
 				this.push();
+				if(cb) cb(this.activeLayer);
 			}
         });
     },

@@ -216,6 +216,21 @@ CLAZZ("dialogues.HTMLDialogue", {
 	},
 
 	$__BODY:{
+        copy:function(evt){
+            if( dialogues.IDialogue.focusTarget == this )
+                this.raise("DIALOGUE", "copy", evt);
+        },
+
+        cut: function(evt){
+            if( dialogues.IDialogue.focusTarget == this )
+                this.raise("DIALOGUE", "cut", evt);
+        },
+
+        paste:function(evt){
+            if( dialogues.IDialogue.focusTarget == this )
+                this.raise("DIALOGUE", "paste", evt);
+        },
+
 		mousemove:function( evt ){
 			if( evt.buttons != 1 ) this.isMoving = this.isResizing = false;
 			else{

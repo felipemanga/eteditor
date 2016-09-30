@@ -84,6 +84,8 @@ CLAZZ("projects.projman.ProjManProject", {
     $MENU:{
         clearPreview:function(){ this.clearPreview(); },
 
+        focusFilter:function(){ this.DOM.filter.focus(); },
+
         SimpleHTML:function(){
             this.createHTML("embed", 1, (src) =>
                 this.fileSaver.saveFile({
@@ -215,17 +217,39 @@ CLAZZ("projects.projman.ProjManProject", {
 		}
 	},
 
+    expandedSection:null,
+
     $btnSectionExpand:{
         click:function(evt){
             var section = DOC.parentByTagName(evt.target, "section");
+            this.expandedSection = section;
+
             DOC.toArray(this.DOM.MAIN.children).forEach((s) => {
-                if( s == this.DOM.fileSection[0] || s == section ) return;
-                s.className = s.className.replace(/Section( contracted)?/, "Section contracted");
+                if( s == this.DOM.fileSection[0] ) return;
+                s.className = s.className.replace(/Section( contracted)?/, s == section ? "Section" : "Section contracted");
             });
-            
+            section.querySelector(".btnSectionExpand").style.display = "none";
+            section.querySelector(".btnSectionContract").style.display = "inline";
             this.resize();
         }
     },
+
+    $btnSectionContract:{
+        click:function(evt){ this.contract(); }
+    },
+
+    contract:function(){
+        var section = this.expandedSection;
+        if( !section ) return;
+        DOC.toArray(this.DOM.MAIN.children).forEach((s) => {
+            if( s == this.DOM.fileSection[0] ) return;
+            s.className = s.className.replace(/Section( contracted)?/, "Section");
+        });
+        section.querySelector(".btnSectionExpand").style.display = "inline";
+        section.querySelector(".btnSectionContract").style.display = "none";
+        this.resize();
+    },
+
 
     commit:function(){
         if( !this.currentFile || !this.currentEditor )
@@ -353,11 +377,6 @@ CLAZZ("projects.projman.ProjManProject", {
                 + "FS.URL = {\n" + FSURL + "\n};\n";
 
 		strdata += decbin.toString() + "\n";
-        strdata += (function patchImages(){
-            var imgs = document.images;
-            for( var i=0, l=imgs.length; i<l; ++i )
-                if( imgs[i].dataset.src ) imgs[i].src = FS.URL[imgs[i].dataset.src];
-        }).toString();
 
         data = strdata;
 
@@ -378,17 +397,27 @@ CLAZZ("projects.projman.ProjManProject", {
         parsed.head.insertBefore(dataScript, parsed.head.children[0]);
 
         if( embed != "extern" ){
-            endScript.textContent = "patchImages()";
-            parsed.body.appendChild(endScript);
+            var needPatch = false;
 
             tags = Array.prototype.slice.call( parsed.querySelectorAll("img"), 0 );
             tags.forEach((img) => {
                 var src = img.getAttribute("src");
                 if( src in m ){
+                    needPatch = true;
                     img.setAttribute( "data-src", src );
                     img.removeAttribute( "src" );
                 }
             });
+
+            if( needPatch ){
+                dataScript.textContent += (function patchImages(){
+                    var imgs = document.images;
+                    for( var i=0, l=imgs.length; i<l; ++i )
+                        if( imgs[i].dataset.src ) imgs[i].src = FS.URL[imgs[i].dataset.src];
+                }).toString();                
+                endScript.textContent = "patchImages()";
+                parsed.body.appendChild(endScript);
+            }
 
             tags = Array.prototype.slice.call( parsed.querySelectorAll("a"), 0 );
             tags.forEach((img) => {
@@ -534,7 +563,10 @@ CLAZZ("projects.projman.ProjManProject", {
 
     refresh:function(){
         this.createHTML("blob", false, (src) => {
-            var iframe = DOC.create("iframe", this.DOM.preview, {
+            if( this.expandedSection && this.expandedSection != this.DOM.previewSection )
+                this.contract();
+
+            DOC.create("iframe", this.DOM.preview, {
                 src:arrayToBlobURL(src, "preview", {type:"text/html"}),
                 width:"100%",
                 height:"100%",
@@ -710,6 +742,11 @@ CLAZZ("projects.projman.ProjManProject", {
                 exec: () => this.refresh()
             });
             this.ace.commands.addCommand({
+                name: "focusFilter",
+                bindKey: {win: "Ctrl-p", mac: "Command-Option-p"},
+                exec: () => this.DOM.filter.focus()
+            });
+            this.ace.commands.addCommand({
                 name: "clearPreview",
                 bindKey: {win: "Escape", mac: "Escape"},
                 exec: () => this.clearPreview()
@@ -738,8 +775,8 @@ CLAZZ("projects.projman.ProjManProject", {
 
         DOC.toArray(this.DOM.MAIN.children).forEach((section) => {
             if( section == this.DOM.fileSection[0] ) return;
-            if( section.className.indexOf("contracted") != -1 ) return;
-            section.style.width = prop + "px";
+            if( section.className.indexOf("contracted") != -1 ) section.style.width = "0";
+            else section.style.width = prop + "px";
         }); 
 
         if( this.ace )
@@ -747,9 +784,16 @@ CLAZZ("projects.projman.ProjManProject", {
     },
 
     $filter:{
-        change:function(e){
-            var value = e.target.value.toLowerCase().trim();
-            this.DOM.docSet[0].update({ filter:(e) => e.name.toLowerCase().indexOf( value ) != -1 });
+        keyup:function(e){
+            var value = e.target.value.toLowerCase().trim(), list = this.DOM.docSet[0];
+            list.update({ filter:(e) => e.name.toLowerCase().indexOf( value ) != -1 });
+            if(e.keyCode==13||e.key=="Enter"){
+                list.update({ filter:(e) => e.name.toLowerCase().indexOf( value ) != -1 });
+                var value = list.values()[0];
+                if(value) this.openFile(value);
+                list.update({ filter:null });
+                e.target.value = "";
+            }
         }
     }
 });

@@ -66,6 +66,10 @@
                         "clearPreview":{
                             "hidden":true,
                             "shortcut":[27]
+                        },
+                        "focusFilter":{
+                            "hidden":true,
+                            "shortcut":[17,"P"]
                         }
                     }
                 }
