@@ -234,6 +234,15 @@ CLAZZ("projects.sprite.SpriteProject", {
     		this.core.redo();
     	},
 
+        endMove:function(){
+            if( this.core.activeTool != this.core.tools.Move ) return;
+            if(this.core.activeTool.deactivate) this.core.activeTool.deactivate();
+            this.toolStack.pop();
+            this.core.activeTool = null;
+            this.core.setTool( this.toolStack.pop() );
+            this.dragging = null;
+        },
+
         endHand:function(){
             if( this.core.activeTool != this.core.tools.Hand ) return;
             if(this.core.activeTool.deactivate) this.core.activeTool.deactivate();

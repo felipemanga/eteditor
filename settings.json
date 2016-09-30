@@ -108,6 +108,14 @@
                             "hidden":true,
                             "shortcut":[17, "W"]
                         },
+                        "startMove":{
+                            "hidden":true,
+                            "shortcut":[17]
+                        },
+                        "endMove":{
+                            "hidden":true,
+                            "shortcut":[-17]
+                        },
                         "startHand":{
                             "hidden":true,
                             "shortcut":[32]

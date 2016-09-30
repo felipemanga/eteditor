@@ -68,9 +68,9 @@ CLAZZ("projects.sprite.tools.Pencil", {
         	if( redraw )
 				this.core.color.write( layer, x, y, z*redraw*255 );
     	}else{
-    		var brush = this.brush, hh = Math.round(brush.height/2), hw = Math.round(brush.width/2);
+    		var brush = this.brush, hh = Math.floor(brush.height/2), hw = Math.floor(brush.width/2);
     		var bw = brush.width, bd = brush.data, lw = layer.width, ld = layer.data;
-    		var bx=0, by=0, tx=x+(brush.width-hw), ty=y+(brush.height-hh);
+    		var bx=0, by=0, tx=Math.round(x+(brush.width-hw)), ty=Math.round(y+(brush.height-hh));
     		x=x-hw;
     		y=y-hh;
     		if( x<0 ){
@@ -92,7 +92,7 @@ CLAZZ("projects.sprite.tools.Pencil", {
 			var color = this.core.color;
 			var r=color.r, g=color.g, b=color.b, a=color.a, blueIt = this.blueIt&0xFF;
 
-			redraw = wy<wty && x<tx;
+			redraw = wy < wty && x < tx;
 
     		for( ; wy<wty; y++, wy += lw, wby += bw ){
     			for( var ix=x, ibx=bx; ix<tx; ++ix, ++ibx ){
@@ -100,10 +100,14 @@ CLAZZ("projects.sprite.tools.Pencil", {
     				var blue = bd[bi+2];
     				if( blue && blue != blueIt ) continue;
 					var fa = a/255 * bd[bi+3]/255*z*mask(ix,y), i = (wy+ix)*4;
-					ld[ i   ] = r *fa + ld[ i   ] * (1-fa);
-					ld[ i+1 ] = g *fa + ld[ i+1 ] * (1-fa);
-					ld[ i+2 ] = b *fa + ld[ i+2 ] * (1-fa);
-					ld[ i+3 ] = a *fa + ld[ i+3 ] * (1-fa);
+					var oa = 1-(1-fa)*(1-ld[i+3]/255);
+					fa = fa/oa;
+					var fb = 1-fa;
+
+					ld[ i   ] = r * fa + ld[ i   ] * fb;
+					ld[ i+1 ] = g * fa + ld[ i+1 ] * fb;
+					ld[ i+2 ] = b * fa + ld[ i+2 ] * fb;
+					ld[ i+3 ] = a * fa + ld[ i+3 ] * fb;
    					// this.core.color.write( layer, ix, y, L );
     			}
     		}
@@ -199,7 +203,7 @@ CLAZZ("projects.sprite.tools.Pencil", {
 
         var to = this.core.toolOverlay;
         to.context.clearRect(0,0,to.canvas.width,to.canvas.height);
-        to.context.putImageData(this.brush, Math.floor(x-this.brush.width/2), Math.floor(y-this.brush.height/2));
+        to.context.putImageData(this.brush, Math.ceil(x-this.brush.width/2), Math.ceil(y-this.brush.height/2));
     },
 
     out:function(layer, x, y, z){
