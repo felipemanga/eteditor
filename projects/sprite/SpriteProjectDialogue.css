@@ -221,6 +221,11 @@ input#inpLayerAlpha {
     box-sizing: border-box;
 }
 
+.layerSetting input[type="checkbox"] {
+    width: initial;
+    margin: 20px 5px 10px 20px;
+}
+
 #layerList #layerOps button {
     width: 70px;
     color: white;

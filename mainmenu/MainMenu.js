@@ -99,7 +99,7 @@ CLAZZ("mainmenu.MainMenu", {
         if( !this.menuElements ) this.menuElements = [];
         DOC.remove(this.menuElements);
 
-        var menu = obj.getMenu();
+        var menu = obj.getMenu(true);
 		if( menu ){
             Object.sort(menu).forEach((label) => {
                 var item = menu[label];

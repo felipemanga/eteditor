@@ -29,6 +29,7 @@ Implemented features:
 - animation
  - onionskinning
  - preview
+- mirrored drawing for pencil and eraser
 - filters. Easily customize or code your own!
 - lots of keyboard shortcuts (see below)
 - resize image using Nearest-Neighbor for PixelArt.

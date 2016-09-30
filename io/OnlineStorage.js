@@ -1,5 +1,9 @@
 need([
-    {FQCN:"firebase", URL:"https://www.gstatic.com/firebasejs/3.3.0/firebase.js"}
+    {
+        FQCN:"firebase", 
+        URL:"js/firebase.js"
+        // URL:"https://www.gstatic.com/firebasejs/3.3.0/firebase.js"
+    }
 ], function(){
 
 var storage = null,
@@ -10,6 +14,7 @@ var storage = null,
 CLAZZ("io.OnlineStorage", {
     CONSTRUCTOR:function(){
         if(storage) throw "Already Initialized";
+        if(!self.firebase) throw "Firebase not available";
 
         firebase.initializeApp({
             apiKey: "AIzaSyDIRJa2HJWW29aiqqCTxkelC90Y963hPJ4",
