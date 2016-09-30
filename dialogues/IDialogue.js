@@ -124,18 +124,24 @@ CLAZZ("dialogues.IDialogue", {
 
 		dialogues.IDialogue.focusTarget = this;
 
-		var menuTarget = this;
-		while( menuTarget && !(menuTarget.cfg && menuTarget.cfg.menu) )
-			menuTarget = menuTarget.parent;
-
 		if( this.app ){
-			if( menuTarget && menuTarget.cfg.menu )
-				this.app.call("renderMenu", menuTarget.cfg.menu, this );
-			else
-				this.app.call( "renderMenu", null, this );
+			this.app.call("renderMenu", this );
+			// if( menuTarget && menuTarget.cfg.menu )
+			// 	this.app.call("renderMenu", menuTarget.cfg.menu, this );
+			// else
+			// 	this.app.call( "renderMenu", null, this );
 		}
 
 		this.raise( "DIALOGUE", "focus" );
+	},
+
+	getMenu:function(inherit){
+		var menuTarget = this;
+		if(inherit){
+			while( menuTarget && !(menuTarget.cfg && menuTarget.cfg.menu) )
+				menuTarget = menuTarget.parent;
+		}
+		return menuTarget && menuTarget.cfg.menu;
 	},
 
 	raise:function(scope, event){

@@ -30,18 +30,19 @@ Implemented features:
  - onionskinning
  - preview
 - filters. Easily customize or code your own!
-- lots of keyboard shortcuts
+- lots of keyboard shortcuts (see below)
 - resize image using Nearest-Neighbor for PixelArt.
 - toggle between the last two tools used (Shortcut: X)
 - menu button hides clutter (Shortcut: Tab)
+- clipboard support (Control + C, Control + X, Control + V)
 - tools:
  - Pencil/Line/Brush/Spraycan (Shortcut: B)
  - Eraser (Shortcut: E)
- - Dropper (Shortcut: D)
+ - Dropper (Shortcut: hold D)
  - Fill bucket (Shortcut: F)
- - Select
- - Hand (Shortcuts: Spacebar to pan, Mousewheel to zoom, Pinch to pan and zoom )
- - Move
+ - Select (Shortcut: S)
+ - Hand (Shortcuts: hold Spacebar to pan, Mousewheel to zoom, Pinch to pan and zoom )
+ - Move (Shortcut: hold Control)
 - file importing:
  - JPG
  - PNG
@@ -50,6 +51,31 @@ Implemented features:
  - PNG
  - JPG+JSON / PNG+JSON texture atlas for animation
  - GIF (with animation support)
+
+Other Keyboard Shortcuts:
+ - Layer shortcuts:
+  - Toggle current layer visibility: Shift + Spacebar
+  - Move up one layer: Shift + up arrow
+  - Move down one layer: Shift + down arrow
+  - Move current layer up: Shift + alt + up arrow
+  - Move current layer down: Shift + alt + down arrow
+  - Merge current layer with the one above: Shift + Control + up arrow
+  - Merge current layer with the one below: Shift + Control + down arrow
+  - Add new layer: Shift + N
+  - Delete current layer: Shift + Delete
+  - Duplicate current layer: Shift + D
+ - Animation shortcuts:
+  - Next frame: right arrow
+  - Previous frame: left arrow
+  - Duplicate current frame: Alt + N
+ - Selection shortcuts:
+  - Select All: Control + A
+  - Select None: Control + D
+  - Activate rectangle selection tool: S
+ - Zoom shortcuts:
+  - Zoom In: Control + Plus (not on the keypad)
+  - Zoom Out: Control + Minus (not on the keypad)
+  - Zoom Toggle Fit and 1:1: Control + 0 (not on the keypad)
 
 To-do, in no particular order:
  - blur tool
@@ -65,9 +91,7 @@ To-do, in no particular order:
  - reference image - tile mode
  - reference image - use webcam
  - Resize image dialogue
- - clipboard support
  - filter preview
- - app icon and logo
  - left-hand mode
 
 Known issues:

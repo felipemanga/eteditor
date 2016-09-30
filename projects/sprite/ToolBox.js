@@ -241,13 +241,13 @@ CLAZZ("projects.sprite.ToolBox", {
 
     $btnAddLayer:{
         click:function(){
-            this.main.addLayer();
+            this.core.addLayer();
         }
     },
 
     $btnDuplicateLayer:{
 		click:function(){
-			this.main.addLayer(true);
+			this.core.addLayer(true);
 		}
     },
 

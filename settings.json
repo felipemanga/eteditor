@@ -132,6 +132,10 @@
                             "hidden":true,
                             "shortcut":["E"]
                         },
+                        "startSelect":{
+                            "hidden":true,
+                            "shortcut":["S"]
+                        },
                         "startDropper":{
                             "hidden":true,
                             "shortcut":["D"]
@@ -156,6 +160,10 @@
                             "hidden":true,
                             "shortcut":[16, "N"]
                         },
+                        "dupLayer":{
+                            "hidden":true,
+                            "shortcut":[16, "D"]
+                        },
         				"dupFrame":{
                             "hidden":true,
                             "shortcut":[18, "N"]
@@ -171,6 +179,10 @@
         				"layerBelow":{
                             "hidden":true,
                             "shortcut":[40]
+                        },
+                        "toggleActiveLayer":{
+                            "hidden":true,
+                            "shortcut":[16, 32]
                         },
         				"nextFrame":{
                             "hidden":true,
@@ -188,7 +200,15 @@
                             "hidden":true,
                             "shortcut":[16, 40]
                         },
-        				"X":{
+                        "mergeActiveLayerUp":{
+                            "hidden":true,
+                            "shortcut":[16,17,38]
+                        },
+        				"mergeActiveLayerDown":{
+                            "hidden":true,
+                            "shortcut":[16,17,40]
+                        },
+                        "X":{
                             "shortcut":["X"]
                         },
                         "zoomIn":{

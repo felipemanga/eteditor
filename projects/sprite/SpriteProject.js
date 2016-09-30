@@ -60,18 +60,32 @@ CLAZZ("projects.sprite.SpriteProject", {
         this.core.loadImage(url, (layer)=>{
             URL.revokeObjectURL(url);
             if(cb) cb();
-        });
+        }, true);
     },
 
     pasteLink:function(cb, url){
         this.core.loadImage(url, (layer)=>{
             if(cb) cb();
-        });
+        }, true);
     },
 
     $DIALOGUE:{
+        cut:function(evt){
+            var out = this.core.extract();
+            var data = out.canvas.toDataURL("image/png");
+            data = data.replace(/[^,]+,/, "");
+            data = arrayToBlobURL(atob(data), 'clipboard', {type:"image/png"});
+            evt.clipboardData.setData('text/plain', data);
+            evt.preventDefault();
+            this.core.clearLayer();
+            this.core.activeLayer.redraw();
+            this.core.push();
+            this.pool.call("selectNone");
+        },
+
         copy:function(evt){
-            var data = this.core.activeLayer.canvas.toDataURL("image/png");
+            var out = this.core.extract();
+            var data = out.canvas.toDataURL("image/png");
             data = data.replace(/[^,]+,/, "");
             data = arrayToBlobURL(atob(data), 'clipboard', {type:"image/png"});
             evt.clipboardData.setData('text/plain', data);
@@ -88,6 +102,7 @@ CLAZZ("projects.sprite.SpriteProject", {
                     item.getAsString( this.pasteLink.bind(this, next) );
             };
             next();
+            this.core.push();
         },
 
         maximized:function(){
@@ -186,6 +201,14 @@ CLAZZ("projects.sprite.SpriteProject", {
             this.core.setLayer( this.core.layers[pos] );
         },
 
+        dupLayer:function(){
+            this.core.addLayer(true);
+        },
+
+        toggleActiveLayer:function(){
+            this.core.toggleLayer(this.core.activeLayer);
+        },
+
         nextFrame:function(){
             var pos = this.core.frames.indexOf( this.core.layers );
             pos = (pos+1) % this.core.frames.length;
@@ -205,6 +228,18 @@ CLAZZ("projects.sprite.SpriteProject", {
 
         moveActiveLayerDown:function(){
             this.moveLayer( this.core.activeLayer, -1 );
+        },
+
+        mergeActiveLayerUp:function(){
+            var pos = this.core.layers.indexOf( this.core.activeLayer );
+            if( pos == this.core.layers.length-1 ) return;
+            pos = (pos+1) % this.core.layers.length;
+            this.core.setLayer( this.core.layers[pos] );
+            this.core.mergeLayer();
+        },
+
+        mergeActiveLayerDown:function(){
+            this.core.mergeLayer();
         },
 
         zoomIn:function(){
@@ -422,14 +457,6 @@ CLAZZ("projects.sprite.SpriteProject", {
         if( tpos < 0 || tpos >= this.core.layers.length ) return;
 		this.core.setLayerIndex( layer, tpos );
     },
-
-    addLayer:function( duplicate, noUndo ){
-    	var current = this.core.activeLayer;
-    	if( duplicate && !current ) return;
-
-		this.core.addLayer( duplicate, noUndo );
-    },
-
 
     dragging:null,
     dragOffsetX:0,
