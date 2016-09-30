@@ -41,6 +41,11 @@ CLAZZ("projects.projman.ProjManProject", {
             );
         }
 
+        if( this.currentFile && this.file != this.currentFile && this.currentEditor == "codeComponent" ){
+            this.currentFile.selection = this.ace.getSelectionRange();
+            this.currentFile.cursor = this.ace.getCursorPosition();
+        }
+
         this.currentFile = file;
 
         if( name == "imageComponent" )
@@ -58,6 +63,11 @@ CLAZZ("projects.projman.ProjManProject", {
 
             this.ace.getSession().setMode("ace/mode/" + mode);
             this.ace.setValue( file.data||"" );
+            if( this.currentFile.cursor )
+            	this.ace.moveCursorToPosition( this.currentFile.cursor );
+            if( this.currentFile.selection )
+                this.ace.selection.setRange( this.currentFile.selection );
+            this.ace.focus();
         }
 
 		var DOM = this.DOM;
