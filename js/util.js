@@ -255,3 +255,10 @@ function distance( x1, y1, x2, y2 ){
 	y1 -= y2;
 	return Math.sqrt( x1*x1+y1*y1 );
 }
+
+function UUID(){
+	var id = [];
+	for( var i=0; i<5; ++i )
+		id[i] = Math.floor( Math.random() * 0x7FFFFFFF ).toString(36);
+	return id.join("_");
+};
