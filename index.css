@@ -1,13 +1,18 @@
 html, body {
     position: relative;
-    padding: 0; margin: 0;
+    padding: 0;
+    margin: 0;
     background-color: #234;
+    background-image: url(img/logo.png);
     font-family: sans-serif;
     font-weight: bold;
     color: white;
     min-width: 100%;
     min-height: 100%;
     touch-action: none;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-blend-mode: luminosity;
 }
 
 embed-html {

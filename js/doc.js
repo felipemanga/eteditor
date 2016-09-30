@@ -948,6 +948,12 @@ var DOC = {
 		if( !Array.isArray(set.__internal) ){
 			set.__external = Array.prototype.slice.call(set.children, 0);
 			set.__internal = [];
+			set.controllers = function(){
+				return this.__internal.map((o)=>o.controller)
+			};
+			set.values = function(){
+				return this.__internal.map((o)=>o.value)
+			};
 		}
 
 		var data = set.__internal;
