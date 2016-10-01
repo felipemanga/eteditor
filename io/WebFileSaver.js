@@ -25,7 +25,16 @@ CLAZZ("io.WebFileSaver", {
     saveFile:function( file ){
         if( !file ) return;
         if( Array.isArray(file) ){
-            file.forEach( (file) => this.zip.addFile(file.name, file.data) );
+            file.forEach( (file) =>{ 
+            	var data = file.data; 
+				if( typeof data == "string" ){
+					if( data.match(/^data:[a-zA-Z0-9\/]+;base64,/) )
+						data = atob( data.replace(/^data:[a-zA-Z0-9\/]+;base64,/, "") );
+					data = strToBuffer(data).buffer;
+				}
+            	this.zip.addFile(file.name, data);
+            });
+            
             this.zip.compress( file.name || "files.zip",
                 (file) => this.saveFile(file)
             );

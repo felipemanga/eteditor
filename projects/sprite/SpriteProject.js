@@ -358,13 +358,9 @@ CLAZZ("projects.sprite.SpriteProject", {
 		});
 
 		gif.on('finished', function(blob, data){
-			var acc = "";
-			for( var i=0; i<data.length; ++i )
-				acc += String.fromCharCode( data[i] );
-
 			THIS.fileSaver.saveFile({
 				name:THIS.path,
-				data:acc
+				data:new Blob([data.buffer])
 			});
 		});
 
