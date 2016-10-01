@@ -1,4 +1,222 @@
+var CLAZZ, SUPER, slice = Array.prototype.slice;
 (function(){
+    var nextUID=1;
+    CLAZZ = function( name, clazz ){
+    	"use strict";
+    	if( typeof name == "object" )
+    	{
+    		clazz = name;
+    		name = null;
+    	}
+
+    	if( !clazz ) return null;
+    	var ctor = clazz["CONSTRUCTOR"], desc = {
+    	    __uid : {
+				value:0,
+				enumerable: false,
+				writable: false
+			}
+    	};
+    	var injects = {}, provides = {};
+    	var metas = {};
+    	var methods = {};
+    	var props = {};
+
+        var ret = function(){
+/* INJECTION */
+            if( this == self )
+                return new (ret.bind.apply(ret, [null].concat( slice.call(arguments) )));
+
+            if( nextInstanceName && nextInstanceClazz === ret ){
+                ret.singletons[nextInstanceName] = this;
+                nextInstanceName = null;
+                nextInstanceClazz = null;
+            }
+/* */
+    		var isLast = !this.__uid;
+    		if( isLast )
+    		{
+    		    desc.__uid.value = nextUID++;
+    			Object.defineProperties(this, desc);
+/* INJECTION */
+    			doInjections(this, injects, name);
+/* */
+    		}
+
+    		if( ctor )
+    		{
+    			var superBackup = SUPER;
+    			SUPER = (ctor.SUPER && ctor.SUPER.bind(this));
+    			ctor.apply( this, slice.call(arguments, 0) );
+    			SUPER = superBackup;
+    		}
+
+    		/* */
+    		if( isLast && !clazz.DYNAMIC )
+    			Object.seal(this);
+    		/* */
+    	};
+
+    	ret.properties = props;
+    	ret.methods = methods;
+    	ret.descriptor = desc;
+
+    	/* FUNCTION SUPER */
+
+    	function getWrapper( func ){
+    		return function(){
+    			var superBackup = (self||{}).SUPER;
+    			var s = func.SUPER;
+    			if( s.SUPER ) s = getWrapper(s);
+    			SUPER = s.bind(this);
+    			var ret = func.apply( this, slice.call(arguments, 0) );
+    			SUPER = superBackup;
+    			return ret;
+    		};
+    	}
+    	/* */
+
+    	function addMerge(dest, src){
+    	    for( var sk in src )
+    	        if( !(sk in dest) )
+    	            dest[sk] = src[sk];
+    	}
+
+    	var cclazz = clazz, sk;
+    	while( cclazz ){
+    		var base = cclazz["EXTENDS"];
+    		if( typeof base == "string" ) base = resolve(base);
+
+    		for( var k in cclazz )
+    		{
+    			if(
+    				k == "EXTENDS" ||
+    				k == "ENUMERABLE" ||
+    				k in desc
+    			) continue;
+
+    			var v = cclazz[k];
+			    /* INJECTION */
+    			if( k == "INJECT" ){
+    			    if( Array.isArray(v) ){
+        			    for( sk=0; sk<v.length; ++sk ){
+        					if( !(v[sk] in injects) )
+            			        injects[v[sk]] = v[sk]
+        			    }
+    			    }else addMerge(injects, v);
+    				continue;
+    			}
+    			if( k == "PROVIDES" ){
+    			    addMerge(provides, v);
+    				continue;
+    			}
+			    /* */
+    			if( k == "MIXIN" ){
+    			    for( sk=0; sk<v.length; ++sk ){
+    			        var mix = v[sk];
+    			        if( typeof mix == "string" ) mix = resolve(v[sk]);
+    			        if(mix.descriptor)
+    			            addMerge(desc, mix.descriptor);
+    			    }
+    			    continue;
+    			}
+    			if( k == "STATIC" ){
+    			    addMerge(ret, v);
+    				continue;
+    			}
+
+    			var obj = {};
+    			if( typeof v == "function" )
+    			{
+					if( k == "CONSTRUCTOR" )
+					{
+						v.SUPER = cclazz["EXTENDS"];
+						if( typeof v.SUPER == "string" )
+							v.SUPER = resolve( v.SUPER );
+						continue;
+				    }
+				    /* FUNCTION SUPER */
+    				if( cclazz["EXTENDS"] )
+    				{
+						var cbase = base;
+						while( cbase && cbase.CLAZZ && !cbase.CLAZZ[k] )
+						{
+							cbase = cbase.CLAZZ["EXTENDS"];
+							if( typeof cbase == "string" )
+								cbase = resolve(cbase);
+						}
+
+						if( cbase && cbase.CLAZZ && cbase.CLAZZ[k] ){
+							v.SUPER = cbase.CLAZZ[k];
+							v = getWrapper(v);
+						}
+    				}
+    				/* */
+
+    				obj.writable = clazz["DYNAMIC"] == true;
+    				methods[k] = v;
+    			}
+    			/* META * /else if( k.charAt(0) == "@" )
+    			{
+    				metas[k.substr(1, k.length)] = v;
+    				continue;
+    			} /* */
+    			else
+    			{
+					obj.writable = true;
+    			}
+				obj.value = v;
+    			desc[k] = obj;
+    		}
+
+    		/* ENUMERABLE */
+    		if( cclazz["ENUMERABLE"] ){
+    			for( var i=0, k; k=cclazz["ENUMERABLE"][i]; ++i )
+    				desc[k].enumerable = true;
+    		}
+    		/* */
+
+    		cclazz = base && base.CLAZZ;
+    	}
+
+        /* META, INJECTION, NON-CLOSURE */
+    	ret.meta = metas;
+    	Object.seal(metas);
+
+        ret.instance = null;
+    	ret.fullName = name;
+    	if( !name ) name = "$Anon" + (nextUID++);
+        ret.toString = function(){ return "[CLAZZ " + name + "]"; };
+    	ret.NAME = name.split(".").pop();
+    	/* */
+    	ret.CLAZZ = clazz;
+
+    	if( clazz["EXTENDS"] )
+    	{
+    		base = clazz["EXTENDS"];
+    		if( typeof base == "string" ) base = resolve(base);
+    		if( !base ){
+    			console.warn(name, " could not inherit from ", clazz["EXTENDS"] );
+    		}
+    		ret.prototype = Object.create(base.prototype);
+    		ctor = clazz["CONSTRUCTOR"] || base;
+    		Object.defineProperty(ret.prototype, "constructor", {
+    			value: ret
+    		});
+    	}
+
+    	setupProvides(ret, provides);
+
+
+    	return ret;
+    }
+
+    /* NO INJECTION * /
+
+    function setupProvides(ret, provides){}
+
+    /*/ // INJECTION
+    var dibindings = [{}], nextInstanceName, nextInstanceClazz;
 
     function resolve( strpath, write, ctx ){
         var path = strpath.split(".");
@@ -17,238 +235,25 @@
         }
     }
 
-    var dibindings = [{}], nextUID=1, nextInstanceName, nextInstanceClazz;
+    function doInjections(obj, injects, name){
+    	try{
+            for( var k in injects )
+                obj[k] = CLAZZ.get( injects[k], null, obj, obj[k] );
+    	}catch(ex){
+    	    if( ex instanceof BindingError )
+    	        throw new BindingError(ex.message + " instancing clazz " + name);
+    	    throw(ex);
+		}
+    }
 
-    var CLAZZ = self.CLAZZ = function CLAZZ( name, clazz ){
-    	"use strict";
-    	if( typeof name == "object" )
-    	{
-    		clazz = name;
-    		name = null;
-    	}
+    function setupProvides(ret, provides){
+    	var bindctx = dibindings[dibindings.length-1], name = ret.fullName;
 
-    	if( !clazz ) return null;
-    	var desc = {};
-    	var injects = {}, provides = {};
-    	var metas = {};
-    	var methods = {};
-    	var props = {};
-
-        var ret = function(){
-            if( this == self )
-                return new (ret.bind.apply(ret, [null].concat( Array.prototype.slice.call(arguments) )));
-
-            if( nextInstanceName && nextInstanceClazz === ret ){
-                ret.singletons[nextInstanceName] = this;
-                nextInstanceName = null;
-                nextInstanceClazz = null;
-            }
-
-    		var isLast = !this.hasOwnProperty('__uid');
-    		if( isLast )
-    		{
-    			Object.defineProperties(this, {
-    			'__uid':{
-    				value:nextUID++,
-    				enumerable: false,
-    				writable: false
-    			}});
-    			Object.defineProperties(this, desc);
-
-    			try{
-                    for( var k in injects )
-                        this[k] = CLAZZ.get( injects[k], null, this, this[k] );
-    			}catch(ex){
-    			    if( ex instanceof BindingError )
-    			        throw new BindingError(ex.message + " instancing clazz " + name);
-    			    throw(ex);
-    			}
-    		}
-
-    		if( clazz.CONSTRUCTOR )
-    		{
-    			var superBackup = self.SUPER;
-    			if( clazz.CONSTRUCTOR.SUPER ) self.SUPER = clazz.CONSTRUCTOR.SUPER.bind(this);
-                else self.SUPER = null;
-    			clazz.CONSTRUCTOR.apply( this, Array.prototype.slice.call(arguments, 0) );
-    			window.SUPER = superBackup;
-    		}
-
-    		if( isLast && !clazz.DYNAMIC )
-    			Object.seal(this);
-    	};
-
-        var statics = ret;
-    	statics.properties = props;
-    	statics.methods = methods;
-
-    	function getWrapper( func ){
-    		return function(){
-    			var superBackup = (self||{}).SUPER;
-    			var s = func.SUPER;
-    			if( s.SUPER ) s = getWrapper(s);
-    			SUPER = s.bind(this);
-    			var ret = func.apply( this, Array.prototype.slice.call(arguments, 0) );
-    			SUPER = superBackup;
-    			return ret;
-    		};
-    	}
-
-    	var cclazz = clazz, sk;
-    	while( cclazz ){
-    		var base = cclazz.EXTENDS;
-    		if( typeof base == "string" ) base = resolve(base);
-
-    		for( var k in cclazz )
-    		{
-    			if(
-    				k == "ABSTRACT" ||
-    				k == "EXTENDS" ||
-    				k == "ENUMERABLE" ||
-    				k in desc
-    			) continue;
-
-    			var v = cclazz[k];
-    			if( k == "INJECT" ){
-    				for( sk in v )
-    				{
-    					if( !(sk in injects) )
-    						injects[sk] = v[sk];
-    				}
-    				continue;
-    			}
-    			if( k == "PROVIDES" ){
-    				for( sk in v )
-    				{
-    					if( !(sk in provides) )
-    						provides[sk] = v[sk];
-    				}
-    				continue;
-    			}
-    			if( k == "STATIC" ){
-    				for( sk in v )
-    				{
-    					if( !(sk in statics) )
-    						statics[sk] = v[sk];
-    				}
-    				continue;
-    			}
-    			var obj = {configurable:false};
-    			if( typeof v == "function" )
-    			{
-    				if( cclazz.EXTENDS )
-    				{
-    					if( k == "CONSTRUCTOR" )
-    					{
-    						v.SUPER = cclazz.EXTENDS;
-    						if( typeof v.SUPER == "string" )
-    							v.SUPER = resolve( v.SUPER );
-    						continue;
-    					}
-    					else
-    					{
-    						var cbase = base;
-    						while( cbase && cbase.CLAZZ && !cbase.CLAZZ[k] )
-    						{
-    							cbase = cbase.CLAZZ.EXTENDS;
-    							if( typeof cbase == "string" )
-    								cbase = resolve(cbase);
-    						}
-
-    						if( cbase && cbase.CLAZZ && cbase.CLAZZ[k] )
-    							v.SUPER = cbase.CLAZZ[k];
-    					}
-    				}else if( k == "CONSTRUCTOR" ) continue;
-
-    				if( v.SUPER )
-    					v = getWrapper(v);
-    				obj.value = v;
-    				obj.enumerable = false;
-    				obj.writable = clazz.DYNAMIC == true;
-    				methods[k] = v;
-    			}
-    			else if( k.charAt(0) == "@" )
-    			{
-    				metas[k.substr(1, k.length)] = v;
-    				continue;
-    			}
-    			else
-    			{
-    				var setter = cclazz["set_" + k];
-    				var getter = cclazz["get_" + k];
-
-    				(function(k){
-    					props[k] = v;
-    					if( typeof setter == "function" )
-    					{
-    						if( !getter )
-    							obj.get = function(){ return props[k]; };
-
-    						obj.set = function(val){
-    							val = setter.call(this, val);
-    							props[k] = val;
-    							return val;
-    						};
-    					}
-    					if( typeof getter == "function" )
-    					{
-    						obj.get = function(){
-    							return getter.call(this, props[k]);
-    						};
-    					}
-    				})(k);
-
-    				if( !getter && !setter ){
-    					obj.value = v;
-    					obj.enumerable = false;
-    					obj.configurable = false;
-    					obj.writable = true;
-    				}
-    			}
-    			desc[k] = obj;
-    		}
-
-    		if( cclazz.ENUMERABLE ){
-    			for( var i=0, k; k=cclazz.ENUMERABLE[i]; ++i )
-    				desc[k].enumerable = true;
-    		}
-
-    		cclazz = base && base.CLAZZ;
-    	}
-
-    	ret.meta = metas;
-    	Object.seal(metas);
-
-        ret.instance = null;
-    	ret.fullName = name;
-    	if( !name ) name = "$Anon" + (nextUID++);
-    	var shortName = name.split(".").pop();
-        ret.toString = function(){ return "[CLAZZ " + name + "]"; };
-    	ret.NAME = shortName;
-    	ret.CLAZZ = clazz;
     	ret.NEW = function(){
-    		var args = Array.prototype.slice.call(arguments);
+    		var args = slice.call(arguments);
     		args.unshift(null);
     		return new (ret.bind.apply(ret, args));
     	};
-
-    	if( clazz.EXTENDS )
-    	{
-    		var base = clazz.EXTENDS;
-    		if( typeof base == "string" ) base = resolve(base);
-    		if( !base ){
-    			console.warn(name, " could not inherit from ", clazz.EXTENDS );
-    		}
-    		ret.prototype = Object.create(base.prototype);
-    		clazz.CONSTRUCTOR = clazz.CONSTRUCTOR || base;
-    		Object.defineProperty(ret.prototype, "constructor", {
-    			value: ret,
-    			enumerable: false,
-    			writable: false
-    		});
-    	}
-
-    	var bindctx = dibindings[dibindings.length-1];
 
     	for( var k in provides ){
     		if( !bindctx[k] )
@@ -259,8 +264,6 @@
     		resolve(name, ret);
     		if( !bindctx[name] ) CLAZZ.implements( name, ret );
     	}
-
-    	return ret;
     }
 
     function Injection(resolve, name, context){
@@ -360,7 +363,7 @@
     	var bind, ctxId = dibindings.length-1;
     	do{
     		bind = dibindings[ctxId][name];
-    	}while( bind===undefined && --ctxId>-1 );
+    	}while( !bind && --ctxId>-1 );
 
     	if( !bind ){
     		if( def === undefined )
@@ -370,6 +373,8 @@
 
     	return CLAZZ.withContext(context, bind, THIS);
     };
+
+    /* */
 
     CLAZZ.getUID = function(){ return nextUID++; };
 
