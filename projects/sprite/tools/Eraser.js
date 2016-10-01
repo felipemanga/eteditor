@@ -46,7 +46,7 @@ CLAZZ("projects.sprite.tools.Eraser", {
         	if( redraw ){
 				layer.data[ (y*lw+x)*4+3 ] = 0;
 				if( this.core.mirror )
-					layer.data[ (y*lw+(lw-x))*4+3 ] = 0;				 
+					layer.data[ (y*lw+(lw-x-1))*4+3 ] = 0;				 
 			}
     	}else{
     		var brush = this.brush, hh = Math.round(brush.height/2), hw = Math.round(brush.width/2);
@@ -75,7 +75,7 @@ CLAZZ("projects.sprite.tools.Eraser", {
 				for( ; wy<wty; wy += lw, wby += bw ){
 					for( var ix=x, ibx=bx; ix<tx; ++ix, ++ibx ){
 						var bi = (wby+ibx)*4;
-						var fa = bd[bi+3]/255*z, i = (wy+ix)*4, mi = (wy+lw-ix)*4;
+						var fa = bd[bi+3]/255*z, i = (wy+ix)*4, mi = (wy+lw-ix-1)*4;
 						ld[ i+3 ] = ld[ i+3 ] * (1-fa);
 						ld[ mi+3 ] = ld[ mi+3 ] * (1-fa);
 						if( fa==1 ){

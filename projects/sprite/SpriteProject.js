@@ -148,8 +148,7 @@ CLAZZ("projects.sprite.SpriteProject", {
 			l.canvas.style.mixBlendMode = l.blend;
 		});
 
-        this.DOM.stack.appendChild( this.core.toolOverlay.canvas );
-
+        this.core.overlays.forEach((o) => this.DOM.stack.appendChild( o.canvas ));
 		this.updateOnionSkins( this.core.frames );
 	},
 
@@ -500,13 +499,17 @@ CLAZZ("projects.sprite.SpriteProject", {
 
     applyZoom:function(){
         var zoom = this.zoom, transform = "scale(" + this.zoom + ")";
-        Array.prototype.slice.call(this.DOM.stack.children).forEach( layer =>
-            layer.style.transform = transform
+        this.core.redrawGridOverlay(this.zoom);
+        
+        this.core.layers.forEach( layer =>
+            layer.canvas.style.transform = transform
         );
 
-        this.core.selection.canvas.style.transform = transform;
-        this.core.toolOverlay.canvas.style.transform = transform;
-
+        var grid = this.core.gridOverlay;
+        this.core.overlays.forEach((o)=>
+            o.canvas.style.transform = o==grid? "scale(1)" : transform
+        );
+        
         this.DOM.stack.style.width = this.core.width * zoom + "px";
         this.DOM.stack.style.height = this.core.height * zoom + "px";
 

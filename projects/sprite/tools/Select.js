@@ -16,13 +16,14 @@ CLAZZ("projects.sprite.tools.Select", {
 	},
 
     onLoadTools:function(){
-        this.selection = CLAZZ.get("projects.sprite.selectionLayer", {
+        this.selection = CLAZZ.get("projects.sprite.Layer", {
 			core:this.core
 		});
         this.selection.hide();
         this.selection.enabled = false;
         this.selection.canvas.style.opacity = 0.5;
         this.core.selection = this.selection;
+		this.core.overlays.push( this.selection );
     },
 
 	selectAll:function(){

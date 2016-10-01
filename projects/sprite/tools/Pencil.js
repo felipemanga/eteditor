@@ -68,7 +68,7 @@ CLAZZ("projects.sprite.tools.Pencil", {
         	if( redraw ){
 				this.core.color.write( layer, x, y, z*redraw*255 );
 				if( this.core.mirror )
-					this.core.color.write( layer, lw-x, y, z*redraw*255 );				 
+					this.core.color.write( layer, lw-x-1, y, z*redraw*255 );				 
 			}
     	}else{
     		var brush = this.brush, hh = Math.floor(brush.height/2), hw = Math.floor(brush.width/2);
@@ -103,7 +103,7 @@ CLAZZ("projects.sprite.tools.Pencil", {
 						var bi = (wby+ibx)*4;
 						var blue = bd[bi+2];
 						if( blue && blue != blueIt ) continue;
-						var fa = a/255 * bd[bi+3]/255*z*mask(ix,y), i = (wy+ix)*4, mi = (wy+lw-ix)*4, mfa;
+						var fa = a/255 * bd[bi+3]/255*z*mask(ix,y), i = (wy+ix)*4, mi = (wy+lw-ix-1)*4, mfa;
 						var oa = 1-(1-fa)*(1-ld[i+3]/255), moa = 1-(1-fa)*(1-ld[mi+3]/255);
 						fa = fa/oa;
 						mfa = fa/moa;

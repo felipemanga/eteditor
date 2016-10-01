@@ -137,6 +137,11 @@ CLAZZ("projects.sprite.ToolBox", {
 		this.core.mirror = mirror == undefined ? !this.core.mirror : !!mirror;
 	},
 
+	toggleGrid:function(enabled){
+		this.core.gridOverlay.enabled = enabled == undefined ? !this.core.gridOverlay.enabled : !!enabled;
+		this.main.applyZoom();
+	},
+
 	$tileMode:{
 		change:function(){
 			this.toggleTile( this.DOM.tileMode.checked );
@@ -146,6 +151,12 @@ CLAZZ("projects.sprite.ToolBox", {
 	$mirrorMode:{
 		change:function(){
 			this.toggleMirror( this.DOM.mirrorMode.checked );
+		}
+	},
+
+	$gridMode:{
+		change:function(){
+			this.toggleGrid( this.DOM.gridMode.checked );
 		}
 	},
 
