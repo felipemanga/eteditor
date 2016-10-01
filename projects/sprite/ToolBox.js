@@ -129,6 +129,36 @@ CLAZZ("projects.sprite.ToolBox", {
 		}
 	},
 
+	toggleTile:function(){
+
+	},
+
+	toggleMirror:function(mirror){
+		this.core.mirror = mirror == undefined ? !this.core.mirror : !!mirror;
+	},
+
+	toggleGrid:function(enabled){
+		this.core.gridOverlay.enabled = enabled == undefined ? !this.core.gridOverlay.enabled : !!enabled;
+		this.main.applyZoom();
+	},
+
+	$tileMode:{
+		change:function(){
+			this.toggleTile( this.DOM.tileMode.checked );
+		}
+	},
+
+	$mirrorMode:{
+		change:function(){
+			this.toggleMirror( this.DOM.mirrorMode.checked );
+		}
+	},
+
+	$gridMode:{
+		change:function(){
+			this.toggleGrid( this.DOM.gridMode.checked );
+		}
+	},
 
     $btnResample:{
         click:function(){
@@ -241,13 +271,13 @@ CLAZZ("projects.sprite.ToolBox", {
 
     $btnAddLayer:{
         click:function(){
-            this.main.addLayer();
+            this.core.addLayer();
         }
     },
 
     $btnDuplicateLayer:{
 		click:function(){
-			this.main.addLayer(true);
+			this.core.addLayer(true);
 		}
     },
 

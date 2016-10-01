@@ -1,5 +1,9 @@
 need([
-    {FQCN:"firebase", URL:"https://www.gstatic.com/firebasejs/3.3.0/firebase.js"}
+    {
+        FQCN:"firebase", 
+        URL:"js/firebase.js"
+        // URL:"https://www.gstatic.com/firebasejs/3.3.0/firebase.js"
+    }
 ], function(){
 
 var storage = null,
@@ -8,9 +12,12 @@ var storage = null,
     user = "init";
 
 CLAZZ("io.OnlineStorage", {
+    INJECT:{
+        local:"io.WebStore"
+    },
+
     CONSTRUCTOR:function(){
         if(storage) throw "Already Initialized";
-
         firebase.initializeApp({
             apiKey: "AIzaSyDIRJa2HJWW29aiqqCTxkelC90Y963hPJ4",
             authDomain: "eteditor-8b8b7.firebaseapp.com",
@@ -24,13 +31,6 @@ CLAZZ("io.OnlineStorage", {
         auth.onAuthStateChanged((newUser) => user = newUser);
     },
 
-    ID:function(){
-        var id = "";
-        for( var i=0; i<5; ++i )
-            id += Math.floor( Math.random() * 0x7FFFFFFF ).toString(36);
-        return id;
-    },
-
     upload:function(file, cb){
         if( user == "init" )
             return setTimeout(()=>this.upload(file,cb), 500);
@@ -41,7 +41,7 @@ CLAZZ("io.OnlineStorage", {
         }
 
         var folder = "user/" + user.uid + "/";
-        this.save(  {name:folder + this.ID() + file.name.replace(/[^a-z0-9_.]/gi, "_"), data:file.data}, cb );
+        this.save(  {name:folder + UUID() + file.name.replace(/[^a-z0-9_.]/gi, "_"), data:file.data}, cb );
     },
 
     save:function( file, cb){
@@ -53,11 +53,33 @@ CLAZZ("io.OnlineStorage", {
             return;
         }
 
+        this.local.write(file.name, file.data, (r)=>{
+            console.log("local write:", arguments);
+        });
+
         var ref = storage.ref( file.name );
         ref.put( file.data ).then( (ss) => cb && cb( ss.downloadURL.replace(/&token=[^&]+/, "") ) );
     },
 
-    download:function(url, cb, anystate){
+    download:function(url, cb, flags){
+        flags = flags || {};
+        var anystate = flags.anystate || false;
+        var nocache  = flags.nocache || false;
+
+        if( !nocache ){
+            this.local.read(url, (data) => {
+                debugger;
+                if( data ) return cb(data);
+                this.download(url, (data)=>{
+                    this.local.write(url, data, ()=>{ 
+                        console.log("cached"); 
+                    });
+                    cb(data);
+                }, {nocache:true});
+            });
+            return;
+        }
+
         storage.ref(url).getDownloadURL().then((ss) => {
             DOC.getURL( ss, cb, {binary:true} );
         }).catch((ex)=>{
@@ -76,7 +98,7 @@ CLAZZ("io.OnlineStorage", {
     },
 
     share:function( project, data ){
-        var id = this.ID();
+        var id = UUID();
         var url = "share/" + project + "/" + id;
         var ref = database.ref( url );
         ref.set(data);

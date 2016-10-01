@@ -45,6 +45,7 @@ main .fileSection {
     border-width: 0;
     margin: 0;
     resize: none;
+    margin-bottom: 10px;
 }
 
 
@@ -129,6 +130,7 @@ span#shareVal {
     background-size: contain;
     image-rendering: pixelated;
     background-repeat: no-repeat;
+    margin-bottom: 10px;
 }
 
 .codeSection header {
@@ -158,5 +160,9 @@ section header button {
 }
 
 .btnSectionContract {
+    display: none;
+}
+
+section.contracted {
     display: none;
 }

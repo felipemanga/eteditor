@@ -6,12 +6,16 @@ CLAZZ("projects.sprite.Core", {
 		color:"PrimaryColor"
 	},
 
+	overlays:null,
+
+	gridOverlay:null,
 	toolOverlay:null,
 	selection:null,
     tools:null,
     activeLayer:null,
     activeTool:null,
     color:null,
+	mirror:false,
 
     layers:null,
 	frames:null,
@@ -38,6 +42,7 @@ CLAZZ("projects.sprite.Core", {
 		this.frames  = [];
         this.history = [];
         this.layers  = [];
+		this.overlays = [];
 	},
 
 	mask:function( x, y ){
@@ -54,7 +59,15 @@ CLAZZ("projects.sprite.Core", {
 	loadTools:function( toolset ){
         this.tools = {};
 		
-		this.toolOverlay = CLAZZ.get("projects.sprite.toolOverlayLayer", {core:this});
+		this.gridOverlay = CLAZZ.get("projects.sprite.Layer", {core:this});
+		this.gridOverlay.canvas.className += "grid";
+		this.gridOverlay.enabled = false;
+		this.overlays.push(this.gridOverlay);
+
+		this.toolOverlay = CLAZZ.get("projects.sprite.Layer", {core:this});
+		this.toolOverlay.canvas.className += "tool";
+		this.overlays.push(this.toolOverlay);
+
 		Object.keys(toolset).forEach(k => {
 			this.tools[ k ] = CLAZZ.get(toolset[k].fullName, {
 				Pool:this.pool,
@@ -75,6 +88,9 @@ CLAZZ("projects.sprite.Core", {
 	},
 
     setLayer:function(layer, noUndo){
+		if( layer && this.layers.indexOf(layer) == -1 )
+			debugger;
+
         this.activeLayer = layer;
 
         if( noUndo !== true )
@@ -128,6 +144,7 @@ CLAZZ("projects.sprite.Core", {
 	},
 
 	removeLayer:function(layer){
+		if( layer === undefined ) layer = this.activeLayer;
 		if( !this.frames.length || !layer ) return;
 		var pos = this.layers.indexOf(layer);
 		if( pos == -1 ) return;
@@ -143,22 +160,27 @@ CLAZZ("projects.sprite.Core", {
 	addLayer:function(duplicate, noUndo){
 		var layer = null;
 		var dup = this.layers.indexOf(this.activeLayer);
+		var currentFrame = this.layers;
 
 		for( var i=0; i<this.frames.length; ++i ){
-			var layers = this.frames[i];
+			var layers = this.layers = this.frames[i];
+			var newlayer = this.createLayer();
 
-			layer = this.createLayer();
-
-			layers.push( layer );
+			layers.push( newlayer );
 
 			if( duplicate ){
-				layer.context.drawImage( layers[dup].canvas,0,0 );
-				layer.read();
+				newlayer.context.drawImage( layers[dup].canvas,0,0 );
+				newlayer.read();
 			}
 
-			if( this.frames[i] == this.layers )
-				layer = this.frames[i][ this.frames[i].length-1 ];
+			if( this.frames[i] == currentFrame )
+				layer = newlayer;
 		}
+
+		this.layers = currentFrame;
+
+		if( layer == null )
+			debugger;
 
 		this.setLayer(layer, noUndo);
 
@@ -219,16 +241,27 @@ CLAZZ("projects.sprite.Core", {
 	getComposite:function(){
 		if( !this.composite )
 			this.composite = this.createLayer(true);
+		
+		var composite = this.composite;
+		if( composite.canvas.width != this.width || composite.canvas.height != this.height ){
+			composite.canvas.width = this.width;
+			composite.canvas.height = this.height;
+			composite.invalidate();
+		}
+
 		return this.composite;
 	},
 
     renderComposite:function( composite, layers ){
 		composite = composite || this.getComposite();
 		layers = layers || this.layers;
+		if( composite.canvas.width != this.width || composite.canvas.height != this.height ){
+			composite.canvas.width = this.width;
+			composite.canvas.height = this.height;
+			composite.invalidate();
+		}
 
 		var opMap = this.opMap;
-        composite.canvas.width = this.width;
-        composite.canvas.height = this.height;
         layers.forEach(function(layer, i){
             if( layer.enabled ){
                 var a = layer.alpha;
@@ -241,6 +274,47 @@ CLAZZ("projects.sprite.Core", {
 
 		return composite;
     },
+
+	clearLayer:function(layer){
+		layer = layer||this.activeLayer;
+		if( !layer ) return;
+		var i, d=layer.data.data, l=d.length, a;
+		if( this.selection.enabled ){
+			for( i=3; i<l; i+=4 )
+				d[i] = (d[i]/255)*(1-this.selection.data.data[i]/255)*255;
+		}else{
+			for( i=0; i<l; ){
+				d[i++] = 0;
+				d[i++] = 0;
+				d[i++] = 0;
+				d[i++] = 0;
+			}
+		}
+	},
+
+	extract:function(layer, out){
+		layer = layer||this.activeLayer;
+		if( !layer ) return;
+		if( !out && !this.selection.enabled ) return layer;
+
+		out = out || this.getComposite();
+		var i, IL=layer.data.data, OL=out.data.data, l=IL.length, a;
+
+		if( this.selection.enabled ){
+			var sa = this.selection.data.data;
+			for( i=0; i<l; ){
+				a = sa[i+3]/255;
+				OL[i] = IL[i++]*a;
+				OL[i] = IL[i++]*a;
+				OL[i] = IL[i++]*a;
+				OL[i] = IL[i++]*a;
+			}
+		}else{
+			OL.set(IL);
+		}
+		out.redraw();
+		return out;
+	},
 
 	setTool:function( tool ){
 		var oldTool = this.activeTool;
@@ -266,15 +340,17 @@ CLAZZ("projects.sprite.Core", {
 	},
 
     setCanvasSize:function(width, height, stretch){
-		if(this.selection){
+		if(this.selection)
 			this.selection.enabled = false;
-			this.selection.canvas.width = width;
-			this.selection.canvas.height = height;
-			this.selection.invalidate();
-		}
 
-		this.toolOverlay.canvas.width = width;
-		this.toolOverlay.canvas.height = height;
+		var gridOverlay = this.gridOverlay;
+		this.overlays.forEach((o)=>{
+			if( o != gridOverlay ){
+				o.canvas.width = width;
+				o.canvas.height = height;
+				o.invalidate();
+			}
+		});
 
         var composite = this.getComposite();
         composite.canvas.width = this.width;
@@ -321,18 +397,52 @@ CLAZZ("projects.sprite.Core", {
 		this.pool.call("onResizeCanvas");
     },
 
-    loadImage:function( path ){
+	redrawGridOverlay:function(zoom){
+		var gridOverlay = this.gridOverlay, width=this.width, height=this.height;
+		if( zoom <= 4 || gridOverlay.enabled == false ){
+			gridOverlay.canvas.style.display = "none";
+			return;
+		}
+
+		gridOverlay.canvas.style.display = "initial";
+		var gw = Math.floor(width * zoom), gh = Math.floor(height * zoom);
+
+
+		if( gridOverlay.width != gw || gridOverlay.height != gh ){
+			gridOverlay.canvas.width = gw;
+			gridOverlay.canvas.height = gh;
+			gridOverlay.invalidate();
+		}
+
+		var d=gridOverlay.data.data;
+		d.fill(0);
+		for( var y=0; y<height; ++y ){
+			var yw = Math.floor(y*zoom*gw);
+			for( var x=0; x<gw; ++x ){
+				d[(yw+x)*4+3] = 255;
+			}
+		}
+		for( var y=0; y<gh*gw; y+=zoom ){
+			d[Math.floor(y)*4+3] = 255;
+		}
+		gridOverlay.redraw();
+	},
+
+    loadImage:function( path, cb, nopush ){
         DOC.create("img", {
             src:path,
             onerror: evt => {
             	console.warn(evt);
+				if(cb) cb(false);
             },
             onload: evt => {
 				var img = evt.target;
-				this.setCanvasSize( img.width, img.height );
+				if( this.width != img.width || this.height != img.height )
+					this.setCanvasSize( img.width, img.height );
 				this.activeLayer.context.drawImage(img,0,0);
 				this.activeLayer.read();
-				this.push();
+				if(!nopush) this.push();
+				if(cb) cb(this.activeLayer);
 			}
         });
     },

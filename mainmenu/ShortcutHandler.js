@@ -10,7 +10,6 @@ CLAZZ("mainmenu.ShortcutHandler", {
 
     settings:null,
     main:null,
-    menu:null,
     menuTarget:null,
 
     CONSTRUCTOR:function(){
@@ -23,13 +22,8 @@ CLAZZ("mainmenu.ShortcutHandler", {
         window.onkeyup = this.__onKey.bind(this);
     },
 
-    renderMenu:function( menu, obj ){
-		this.menu = {};
+    renderMenu:function( obj ){
 		this.menuTarget = obj;
-		for( var k in menu ){
-			if( menu[k] && menu[k].shortcut )
-				this.menu[k] = menu[k].shortcut;
-		}
     },
 
     keys:null,
@@ -61,7 +55,7 @@ CLAZZ("mainmenu.ShortcutHandler", {
 		this.clearKeysHandle = setTimeout(function(){
 			THIS.keys = [];
 			THIS.clearKeysHandle = 0;
-		}, 3000);
+		}, 5000);
 
 		if( !evt.repeat ) console.log( keyCode );
 		var keys = this.keys, keyCount = this.keys.reduce( (a, b) => a+b )|0;
@@ -98,7 +92,18 @@ CLAZZ("mainmenu.ShortcutHandler", {
 		}
 
 		checkShortcuts(this.main.dialogue, this.settings);
-		checkShortcuts(this.menuTarget, this.menu);
+		var t = this.menuTarget;
+		while( !prevent && t ){
+			var cuts = {}, menu = t.getMenu(false);
+			if( menu ){
+				for( var k in menu ){
+					if( menu[k] && menu[k].shortcut )
+						cuts[k] = menu[k].shortcut;
+				}
+				checkShortcuts( t, cuts );
+			}
+			t = t.parent;
+		}
 		if( prevent ) evt.preventDefault();
 	},
 

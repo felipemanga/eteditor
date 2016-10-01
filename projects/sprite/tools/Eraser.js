@@ -40,14 +40,17 @@ CLAZZ("projects.sprite.tools.Eraser", {
     },
 
     pixel:function( layer, x, y, z ){
-		var redraw;
+		var redraw, lw = layer.width;
     	if( !this.brush ){
 			redraw = y>=0 && y<layer.height && x>=0 && x<layer.width;
-        	if( redraw )
-				layer.data[ (y*layer.width+x)*4+3 ] = 0;
+        	if( redraw ){
+				layer.data[ (y*lw+x)*4+3 ] = 0;
+				if( this.core.mirror )
+					layer.data[ (y*lw+(lw-x-1))*4+3 ] = 0;				 
+			}
     	}else{
     		var brush = this.brush, hh = Math.round(brush.height/2), hw = Math.round(brush.width/2);
-    		var bw = brush.width, bd = brush.data, lw = layer.width, ld = layer.data;
+    		var bw = brush.width, bd = brush.data, ld = layer.data;
     		var bx=0, by=0, tx=x+(brush.width-hw), ty=y+(brush.height-hh);
     		x=x-hw;
     		y=y-hh;
@@ -59,26 +62,41 @@ CLAZZ("projects.sprite.tools.Eraser", {
     			by = -y;
     			y = 0;
     		}
-    		if( tx > layer.width ) tx = layer.width;
+    		if( tx > layer.width ) tx = lw;
     		if( ty > layer.height ) ty = layer.height;
     		if( z == undefined ) z = 1;
     		if( z == 0 ) return;
             z = Math.min(1, Math.max(0, z * this.ppmul / 255));
 
 			var wy = y*lw, wby = by*bw, wty = ty*lw;
-			redraw = wy<wty && x<tx;
+			redraw = wy < wty && x < tx;
 
-    		for( ; wy<wty; wy += lw, wby += bw ){
-    			for( var ix=x, ibx=bx; ix<tx; ++ix, ++ibx ){
-    				var bi = (wby+ibx)*4;
-					var fa = bd[bi+3]/255*z, i = (wy+ix)*4;
-					ld[ i+3 ] = ld[ i+3 ] * (1-fa);
-					if( fa==1 ){
-						ld[i] = ld[i+1] = ld[i+2] = 0;
+			if( this.core.mirror ){
+				for( ; wy<wty; wy += lw, wby += bw ){
+					for( var ix=x, ibx=bx; ix<tx; ++ix, ++ibx ){
+						var bi = (wby+ibx)*4;
+						var fa = bd[bi+3]/255*z, i = (wy+ix)*4, mi = (wy+lw-ix-1)*4;
+						ld[ i+3 ] = ld[ i+3 ] * (1-fa);
+						ld[ mi+3 ] = ld[ mi+3 ] * (1-fa);
+						if( fa==1 ){
+							ld[i] = ld[i+1] = ld[i+2] = 0;
+							ld[mi] = ld[mi+1] = ld[mi+2] = 0;
+						}
 					}
-   					// this.core.color.write( layer, ix, y, L );
-    			}
-    		}
+				}
+			}else{
+				for( ; wy<wty; wy += lw, wby += bw ){
+					for( var ix=x, ibx=bx; ix<tx; ++ix, ++ibx ){
+						var bi = (wby+ibx)*4;
+						var fa = bd[bi+3]/255*z, i = (wy+ix)*4;
+						ld[ i+3 ] = ld[ i+3 ] * (1-fa);
+						if( fa==1 ){
+							ld[i] = ld[i+1] = ld[i+2] = 0;
+						}
+						// this.core.color.write( layer, ix, y, L );
+					}
+				}
+			}
     	}
 		return redraw;
     },

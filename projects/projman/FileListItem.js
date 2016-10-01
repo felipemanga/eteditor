@@ -54,26 +54,44 @@ CLAZZ("projects.projman.FileListItem", {
                 return raw;
             };
 
-            this.data.reload = function(cb){
+            this.data.reload = function(cb, force){
                 if( !this.data || !this.data.match(/^https?:\/\/[a-z0-9]+.*$/i) ){
                     raw = this.data;
                     if(cb) cb(this);
                     return;
                 }
 
+                var store = CLAZZ.get("io.WebStore");
+
                 this.cacheURL = true;
-                DOC.getURL(this.data, (s) => {
+                if( force !== false ){
+                    fetch.call(this);
+                }else{
+                    store.read(this.data, (s)=>{
+                        if(!s) fetch.call(this);
+                        else onGetData.call(this, false, s);
+                    });
+                }
+
+                function fetch(){
+                    DOC.getURL(this.data, onGetData.bind(this, true), {binary:true})
+                }
+
+                function onGetData(write, s){
                     raw = s;
+                    if( write ) store.write(this.data, s, function(){
+                        console.log("write", arguments);
+                    });
                     this.cacheURL = arrayToBlobURL( s, this.data );
                     if( cb ) cb(this);
-                }, {binary:true});
+                }
             }
         }
 
         this.data.reload(() => {
             this.DOM.BUTTON.style.display = "initial";
             this.DOM.IMG.style.display = "none";
-        });
+        }, false);
     },
 
     update:function(){

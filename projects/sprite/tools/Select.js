@@ -16,13 +16,14 @@ CLAZZ("projects.sprite.tools.Select", {
 	},
 
     onLoadTools:function(){
-        this.selection = CLAZZ.get("projects.sprite.selectionLayer", {
+        this.selection = CLAZZ.get("projects.sprite.Layer", {
 			core:this.core
 		});
         this.selection.hide();
         this.selection.enabled = false;
         this.selection.canvas.style.opacity = 0.5;
         this.core.selection = this.selection;
+		this.core.overlays.push( this.selection );
     },
 
 	selectAll:function(){
@@ -39,17 +40,18 @@ CLAZZ("projects.sprite.tools.Select", {
 	selectNone:function(){
 		this.selection.context.clearRect( 0, 0, this.core.width, this.core.height );
         this.pool.call("onSelectRect", 0, 0, 0, 0 );
+        this.selection.enabled = false;
 	},
 
     down:function(layer, x, y, z){
     	var selection = this.selection;
-		selection.enabled = true;
 
 		if( !selection.canvas.parent )
 			this.main.DOM.stack.appendChild( selection.canvas );
 
 		if( !this.shortcutHandler.keys[16] ) this.selectNone();
 
+		selection.enabled = true;
 		this.startX = x;
 		this.startY = y;
 
