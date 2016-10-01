@@ -22,8 +22,9 @@ Implemented features:
 - open images from url, provided the target server allows cross-domain requests: eteditor/?p=sprite&u=http://site/image.jpg
 - custom brushes with scaling
 - unlimited raster layers
-- layer blending modes
+- lots of layer blending modes
 - layer alpha
+- reference grid
 - reference image as background for quick and easy Rotoscoping
 - stylus pressure support (only works in IE for now, Chrome & Firefox are still working on the APIs)
 - animation
