@@ -301,8 +301,8 @@ CLAZZ("projects.projman.ProjManProject", {
 
     currentFile:null,
     openFile:function(file){
+        if( this.currentFile == file ) return;
         this.commit();
-
         this.setEditor(this.chooseEditor(file), file);
     },
 
