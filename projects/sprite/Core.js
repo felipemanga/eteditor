@@ -6,6 +6,9 @@ CLAZZ("projects.sprite.Core", {
 		color:"PrimaryColor"
 	},
 
+	overlays:null,
+
+	gridOverlay:null,
 	toolOverlay:null,
 	selection:null,
     tools:null,
@@ -39,6 +42,7 @@ CLAZZ("projects.sprite.Core", {
 		this.frames  = [];
         this.history = [];
         this.layers  = [];
+		this.overlays = [];
 	},
 
 	mask:function( x, y ){
@@ -55,7 +59,15 @@ CLAZZ("projects.sprite.Core", {
 	loadTools:function( toolset ){
         this.tools = {};
 		
-		this.toolOverlay = CLAZZ.get("projects.sprite.toolOverlayLayer", {core:this});
+		this.gridOverlay = CLAZZ.get("projects.sprite.Layer", {core:this});
+		this.gridOverlay.canvas.className += "grid";
+		this.gridOverlay.enabled = false;
+		this.overlays.push(this.gridOverlay);
+
+		this.toolOverlay = CLAZZ.get("projects.sprite.Layer", {core:this});
+		this.toolOverlay.canvas.className += "tool";
+		this.overlays.push(this.toolOverlay);
+
 		Object.keys(toolset).forEach(k => {
 			this.tools[ k ] = CLAZZ.get(toolset[k].fullName, {
 				Pool:this.pool,
@@ -317,15 +329,17 @@ CLAZZ("projects.sprite.Core", {
 	},
 
     setCanvasSize:function(width, height, stretch){
-		if(this.selection){
+		if(this.selection)
 			this.selection.enabled = false;
-			this.selection.canvas.width = width;
-			this.selection.canvas.height = height;
-			this.selection.invalidate();
-		}
 
-		this.toolOverlay.canvas.width = width;
-		this.toolOverlay.canvas.height = height;
+		var gridOverlay = this.gridOverlay;
+		this.overlays.forEach((o)=>{
+			if( o != gridOverlay ){
+				o.canvas.width = width;
+				o.canvas.height = height;
+				o.invalidate();
+			}
+		});
 
         var composite = this.getComposite();
         composite.canvas.width = this.width;
@@ -371,6 +385,37 @@ CLAZZ("projects.sprite.Core", {
 		this.pool.call("onUpdateLayers", this.layers, this.activeLayer);
 		this.pool.call("onResizeCanvas");
     },
+
+	redrawGridOverlay:function(zoom){
+		var gridOverlay = this.gridOverlay, width=this.width, height=this.height;
+		if( zoom <= 4 || gridOverlay.enabled == false ){
+			gridOverlay.canvas.style.display = "none";
+			return;
+		}
+
+		gridOverlay.canvas.style.display = "initial";
+		var gw = Math.floor(width * zoom), gh = Math.floor(height * zoom);
+
+
+		if( gridOverlay.width != gw || gridOverlay.height != gh ){
+			gridOverlay.canvas.width = gw;
+			gridOverlay.canvas.height = gh;
+			gridOverlay.invalidate();
+		}
+
+		var d=gridOverlay.data.data;
+		d.fill(0);
+		for( var y=0; y<height; ++y ){
+			var yw = Math.floor(y*zoom*gw);
+			for( var x=0; x<gw; ++x ){
+				d[(yw+x)*4+3] = 255;
+			}
+		}
+		for( var y=0; y<gh*gw; y+=zoom ){
+			d[Math.floor(y)*4+3] = 255;
+		}
+		gridOverlay.redraw();
+	},
 
     loadImage:function( path, cb, nopush ){
         DOC.create("img", {
