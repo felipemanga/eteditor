@@ -13,29 +13,41 @@ CLAZZ("io.WebStore", {
         this.ready = true;
         for( var k in this.tmp ){
             var d = this.tmp[k];
-            if( d.write ) localforage.setItem(k, d.value, d.cb );
-            else localforage.getItem(k, d.cb);
+            localforage.getItem(k, proc.bind(this, k, d));
         }
         this.tmp = {};
+        return;
+
+        function proc(path, queue, err, data){
+            var write = false;
+            queue.forEach((qi)=>{
+                if( "write" in qi ){
+                    write = true;
+                    data = qi.write;
+                }
+                if( qi.cb ) qi.cb(data);
+            });
+            if(write){
+                localforage.setItem(path, data, function(){
+                    console.log("set", path, arguments);
+                });
+            }
+        }
     },
 
     read:function( name, cb ){
-        if( !ready ){
-            tmp[name] = {
-                write:false,
-                value:null,
-                cb:cb
-            }
+        if( !this.ready ){
+            var queue = this.tmp[name];
+            if( !queue ) this.tmp[name] = queue = [];
+            queue.push({cb:cb});
         }else localforage.getItem( name, cb );
     },
 
     write:function( name, data, cb ){
-        if( !ready ){
-            tmp[name] = {
-                write:true,
-                value:data,
-                cb:cb
-            }
-        }else localforage.setItem( name, value, cb );
+        if( !this.ready ){
+            var queue = this.tmp[name];
+            if( !queue ) this.tmp[name] = queue = [];
+            queue.push({write:data, cb:cb});
+        }else localforage.setItem( name, data, cb );
     }
 });

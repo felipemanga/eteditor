@@ -98,8 +98,9 @@ CLAZZ("projects.sprite.SpriteProject", {
                 var item = items[i++];
                 if( item.kind == "file" && item.type.startsWith("image/") )
                     this.pasteFile( item.getAsFile(), next );
-                if( item.kind == "string" && item.type.startsWith("text/") )
+                else if( item.kind == "string" && item.type.startsWith("text/plain") )
                     item.getAsString( this.pasteLink.bind(this, next) );
+                else next();
             };
             next();
             this.core.push();

@@ -23,6 +23,8 @@ CLAZZ("projects.projman.ProjManProject", {
     proportion:0.5,
     DOM:null,
     project:{
+        name:"New Project",
+        id:null,
         files:[
             {name:"style.css", data:"body {\n\tbackground-image: url(logo.jpg);\n}"},
             {name:"logo.jpg", data:"img/logo.png", cacheURL:true },
