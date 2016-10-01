@@ -1273,7 +1273,8 @@ var DOC = {
 				process( c, c.name, obj );
 				process( c, c.className, obj, "class" );
 				process( c, c.tagName, obj, "tag" );
-				c.className.trim().split(/\s+/).forEach(function(n){
+				var parts = c.className.trim().split(/\s+/);
+				if(parts.length>1) parts.forEach(function(n){
 					process(c, n, obj, "class");
 				});
 				DOC.index( c, obj, attach, autoCfg );

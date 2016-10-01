@@ -241,16 +241,27 @@ CLAZZ("projects.sprite.Core", {
 	getComposite:function(){
 		if( !this.composite )
 			this.composite = this.createLayer(true);
+		
+		var composite = this.composite;
+		if( composite.canvas.width != this.width || composite.canvas.height != this.height ){
+			composite.canvas.width = this.width;
+			composite.canvas.height = this.height;
+			composite.invalidate();
+		}
+
 		return this.composite;
 	},
 
     renderComposite:function( composite, layers ){
 		composite = composite || this.getComposite();
 		layers = layers || this.layers;
+		if( composite.canvas.width != this.width || composite.canvas.height != this.height ){
+			composite.canvas.width = this.width;
+			composite.canvas.height = this.height;
+			composite.invalidate();
+		}
 
 		var opMap = this.opMap;
-        composite.canvas.width = this.width;
-        composite.canvas.height = this.height;
         layers.forEach(function(layer, i){
             if( layer.enabled ){
                 var a = layer.alpha;
