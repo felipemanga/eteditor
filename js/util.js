@@ -35,9 +35,9 @@ function btoURL(str, mime){
 	return URL.createObjectURL(new Blob([arr], obj));
 }
 
-function decbin(a){var d={65533:0},b,bm;for(b=0;128>b;)d[b]=b++;[10,13,39,92].forEach((c,e)=>{b=a.charCodeAt(e);d[b]=c;d[c]=b});a=a.substr(4);for(var f=new Uint8ClampedArray(a.length/8*7),c=0,g=d[a.charCodeAt(7)],h=0,e=0,k=a.length;e<k;++h,++c)bm=d[a.charCodeAt(e++)],f[h]=bm|(g>>c&1)<<7,6==c&&(e++,g=d[a.charCodeAt(e+7)],c=-1);return f};
+function decbin(l,a){var d={65533:0},b,bm;for(b=0;128>b;)d[b]=b++;[10,13,39,92].forEach((c,e)=>{b=a.charCodeAt(e);d[b]=c;d[c]=b});a=a.substr(4);for(var f=new Uint8ClampedArray(l),c=0,g=d[a.charCodeAt(7)],h=0,e=0,k=a.length;e<k;++h,++c)bm=d[a.charCodeAt(e++)],f[h]=bm|(g>>c&1)<<7,6==c&&(e++,g=d[a.charCodeAt(e+7)],c=-1);return f};
 
-function __decbin(str){
+function __decbin(len,str){
 	var start = performance.now();
 	var map={65533:0}, t;
 	for(t=0; t<128;) map[t]=t++;
@@ -49,7 +49,7 @@ function __decbin(str){
 
 	str = str.substr(4);
 
-	var arr = new Uint8ClampedArray(str.length/8*7);
+	var arr = new Uint8ClampedArray(len);
 	var ofbc=0, buf = [], c;
 	var mask = map[str.charCodeAt(7)];
 
@@ -152,7 +152,7 @@ self.encbin = function encbin(b){
 	// timeDelta = performance.now() - start;
 	// console.log("base64:", b64.length, " addslashes:", Math.floor(acc.length / b64.length * 100) + "%", "time:", timeDelta);
 
-	return acc;
+	return l+","+acc;
 }
 })();
 
