@@ -256,8 +256,10 @@ var CLAZZ, SUPER, slice = Array.prototype.slice;
     	};
 
     	for( var k in provides ){
-    		if( !bindctx[k] )
-    			CLAZZ[ provides[k] ]( k, ret );
+    		if( !bindctx[k] ){
+                CLAZZ[ provides[k] ]( k, ret );
+                resolve(k, CLAZZ.get.bind(CLAZZ, k));
+            }
     	}
 
     	if( name ){
