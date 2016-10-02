@@ -32,6 +32,7 @@ CLAZZ("projects.projman.ProjManProject", {
         ]
     },
 
+    libCache:null,
     dirty:false,
     ace:null,
     currentEditor:null,
@@ -485,6 +486,7 @@ CLAZZ("projects.projman.ProjManProject", {
         }
 
         tags = Array.prototype.slice.call( parsed.querySelectorAll("script"), 0 );
+        if( !this.libCache ) this.libCache = {};
         var libs = [];
         var accSrc = ""; // "(function(){\n";
         tags.forEach((tag) => {
@@ -493,7 +495,16 @@ CLAZZ("projects.projman.ProjManProject", {
             var src = tag.getAttribute("src");
 
             if( src in m ) accSrc += m[src] + "\n";
-            else if(src) libs.push(src);
+            else if(src){
+                if( src in this.libCache && embed == "blob" ){
+                    tag.removeAttribute("src");
+                    tag.textContent = this.libCache[src]+"\n";
+                }else{
+                    libs.push(src);
+                    if( embed == "blob" )
+                        DOC.getURL(src, (libsrc)=>this.libCache[src] = libsrc );
+                }
+            }
 
             accSrc += tag.textContent;
             DOC.remove(tag);
@@ -595,16 +606,17 @@ CLAZZ("projects.projman.ProjManProject", {
     htmlToString:function(e){
     	var close = false, a = "";
     	if( e.nodeType != e.DOCUMENT_NODE ){
-            if( e.tagName == "TITLE" ){
+            if( e.nodeName == "TITLE" ){
                 this.buildMeta.title = e.textContent.trim();
             }
-        	a = "<" + e.tagName;
+        	a = "<" + e.nodeName;
 			forEach(e.attributes, (at) => {
                 a += " " + at.name;
                 if( at.value ) a += "=\"" + at.value +"\"";
 			});
 			a += ">";
-            close = ["area", "base", "br", "col", "hr", "img", "input", "link", "meta", "param", "command", "keygen", "source"].indexOf(e.tagName.toLowerCase()) == -1;
+			if(!e.nodeName) debugger;
+            close = ["area", "base", "br", "col", "hr", "img", "input", "link", "meta", "param", "command", "keygen", "source"].indexOf(e.nodeName.toLowerCase()) == -1;
     	}else a = "<!DOCTYPE html>";
 
 
@@ -613,7 +625,7 @@ CLAZZ("projects.projman.ProjManProject", {
             else a += this.htmlToString(c);
         });
 
-        if(close) a += "</" + e.tagName + ">";
+        if(close) a += "</" + e.nodeName + ">";
         return a;
     },
 

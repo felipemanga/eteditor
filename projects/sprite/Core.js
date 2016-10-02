@@ -430,7 +430,7 @@ CLAZZ("projects.sprite.Core", {
 
     loadImage:function( path, cb, nopush ){
         DOC.create("img", {
-            src:path,
+            crossOrigin: "Anonymous",
             onerror: evt => {
             	console.warn(evt);
 				if(cb) cb(false);
@@ -444,7 +444,7 @@ CLAZZ("projects.sprite.Core", {
 				if(!nopush) this.push();
 				if(cb) cb(this.activeLayer);
 			}
-        });
+        }).src = path;
     },
 
     runFilter:function(filter){
