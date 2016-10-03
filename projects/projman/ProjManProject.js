@@ -126,7 +126,7 @@ CLAZZ("projects.projman.ProjManProject", {
 
         Web:function(){
             var name = this.DOM.pageSelector.value.replace(/\.[a-zA-Z]*$/, "");
-            this.createHTML("embed", 2, (src) => {
+            this.createHTML("embed", 1, (src) => {
                 var file = { name:name, data:new Blob([strToBuffer(src)]) };
                 CLAZZ.get("onlineStorage").upload( file, (url)=>{
                     url = location.origin + location.pathname + "?app=" + encodeURIComponent(url);
