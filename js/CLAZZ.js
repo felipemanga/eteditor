@@ -164,6 +164,7 @@ var CLAZZ, SUPER, slice = Array.prototype.slice;
     			else
     			{
 					obj.writable = true;
+					props[k] = v;
     			}
 				obj.value = v;
     			desc[k] = obj;
