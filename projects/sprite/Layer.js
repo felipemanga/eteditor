@@ -50,6 +50,17 @@ CLAZZ("projects.sprite.Layer", {
 		}
     },
 
+	clear:function(){
+		if( composite.canvas.width != this.width || composite.canvas.height != this.height ){
+			composite.canvas.width = this.width;
+			composite.canvas.height = this.height;
+			composite.invalidate();
+		}else{
+			composite.context.clearRect(0,0,this.width,this.height);
+			this.data.data.fill(0);
+		}
+	},
+
 	clone:function(){
 		var clone = CLAZZ.get("projects.sprite.Layer", {core:this.core});
 		clone.name = this.name;

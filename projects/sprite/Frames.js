@@ -48,6 +48,7 @@ var FrameElement = CLAZZ({
 				this.frame.composite.canvas.style.display = "none";
 
 			this.dom.onionSkinIndicator[0].textContent = ( this.frame.composite.canvas.style.display == "none" ? "ʘ" : "֍" );
+			this.frame.composite.clear();
 			this.ctrl.pool.call("renderComposite", this.frame.composite, this.frame );
 			this.ctrl.pool.call("updateOnionSkins", this.ctrl.frames);
 		}
@@ -117,7 +118,11 @@ CLAZZ("projects.sprite.Frames", {
 		if( this.hnd != -1 ) this.stop();
 
 		var core = this.core;
-		this.frames.forEach( frame => core.renderComposite( frame.composite, frame ) );
+		this.frames.forEach( frame =>{
+			frame.composite.clear();
+			core.renderComposite( frame.composite, frame ); 
+		});
+
 		this.DOM.cnvPreview.width = core.width;
 		this.DOM.cnvPreview.height = core.height;
 		this.hnd = setInterval(this.previewNextFrame.bind(this), 1000/(this.core.fps||1) );
@@ -128,6 +133,7 @@ CLAZZ("projects.sprite.Frames", {
 		if( this.hnd != -1 ) this.play();
 		else{
 			this.previewPos = this.frames.indexOf( this.current ) - 1;
+			this.current.composite.clear();
 			this.core.renderComposite( this.current.composite, this.current );
 			this.previewNextFrame();
 		}

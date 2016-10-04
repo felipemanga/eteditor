@@ -353,6 +353,7 @@ CLAZZ("projects.sprite.SpriteProject", {
 		var delay = 1000 / (this.core.fps || 1), THIS=this;
 
 		this.core.frames.forEach(frame => {
+            frame.composite.clear();
 			this.core.renderComposite( frame.composite, frame );
 			gif.addFrame(frame.composite.canvas, {delay:delay});
 		});
@@ -369,6 +370,7 @@ CLAZZ("projects.sprite.SpriteProject", {
 
 	saveJPNG:function(ext){
 		if( this.core.frames.length == 1 ){
+            this.core.getComposite().clear();
 			this.fileSaver.saveFile({
 				name:this.path,
 				data:this.core.renderComposite().canvas.toDataURL("image/" + ext)
@@ -390,6 +392,7 @@ CLAZZ("projects.sprite.SpriteProject", {
 
 		this.core.frames.forEach( (frame, i) => {
 			var x = (i%cols)*width, y = Math.floor(i/cols)*height;
+            frame.composite.clear();
 			this.core.renderComposite( frame.composite, frame );
 			ctx.drawImage( frame.composite.canvas, x, y );
 			arr[(frame.name || 'frame')+i] = {

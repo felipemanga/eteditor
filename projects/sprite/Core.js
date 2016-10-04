@@ -106,8 +106,10 @@ CLAZZ("projects.sprite.Core", {
 			if( pos == -1 ) pos = 0;
 		}
 
-		if( this.layers )
+		if( this.layers ){			
+			this.layers.composite.clear();
 			this.renderComposite(this.layers.composite, this.layers );
+		}
 
 		this.layers = frame;
 		this.setLayer( frame[pos] );
@@ -255,11 +257,8 @@ CLAZZ("projects.sprite.Core", {
     renderComposite:function( composite, layers ){
 		composite = composite || this.getComposite();
 		layers = layers || this.layers;
-		if( composite.canvas.width != this.width || composite.canvas.height != this.height ){
-			composite.canvas.width = this.width;
-			composite.canvas.height = this.height;
-			composite.invalidate();
-		}
+
+		composite.clear();
 
 		var opMap = this.opMap;
         layers.forEach(function(layer, i){
