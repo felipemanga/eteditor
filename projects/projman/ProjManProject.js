@@ -824,9 +824,14 @@ CLAZZ("projects.projman.ProjManProject", {
     $filter:{
         keyup:function(e){
             var value = e.target.value.toLowerCase().trim(), list = this.DOM.docSet[0];
-            list.update({ filter:(e) => e.name.toLowerCase().indexOf( value ) != -1 });
+            var filter = (e) => e.name.toLowerCase().indexOf( value ) != -1;
+            try{
+                var exp = new RegExp(value, "i");
+                filter = (e) => exp.test( e.name );
+            }catch(err){}
+            list.update({ filter:filter });
             if(e.keyCode==13||e.key=="Enter"){
-                list.update({ filter:(e) => e.name.toLowerCase().indexOf( value ) != -1 });
+                list.update({ filter:filter });
                 var value = list.values()[0];
                 if(value) this.openFile(value);
                 list.update({ filter:null });
