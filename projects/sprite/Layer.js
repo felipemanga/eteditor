@@ -51,12 +51,12 @@ CLAZZ("projects.sprite.Layer", {
     },
 
 	clear:function(){
-		if( composite.canvas.width != this.width || composite.canvas.height != this.height ){
-			composite.canvas.width = this.width;
-			composite.canvas.height = this.height;
-			composite.invalidate();
+		if( this.canvas.width != this.width || this.canvas.height != this.height ){
+			this.canvas.width = this.core.width;
+			this.canvas.height = this.core.height;
+			this.invalidate();
 		}else{
-			composite.context.clearRect(0,0,this.width,this.height);
+			this.context.clearRect(0,0,this.core.width,this.core.height);
 			this.data.data.fill(0);
 		}
 	},

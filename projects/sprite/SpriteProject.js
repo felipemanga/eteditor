@@ -153,14 +153,20 @@ CLAZZ("projects.sprite.SpriteProject", {
 	},
 
 	updateOnionSkins:function( frames ){
-		frames.forEach(frame => {
+        var overlays = this.core.overlays;
+
+		frames.forEach( (frame, i) => {
 			if( !frame.composite ){
 				console.warn("Missing frame composite!");
 				return;
 			}
-			DOC.remove( frame.composite );
-			if( frame != this.layers && frame.composite.canvas.style.display != "none" )
-				this.DOM.stack.appendChild( frame.composite.canvas );
+            var pos = overlays.indexOf(frame.composite);
+            if( pos != -1 ) overlays.splice(pos, 1);
+            DOC.remove( frame.composite );
+			if( frame != this.layers && frame.composite.canvas.style.display != "none" ){
+                overlays.splice(i, 0, frame.composite);
+                this.DOM.stack.appendChild( frame.composite.canvas );
+            }
 		});
 
 		this.applyZoom();
