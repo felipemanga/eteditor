@@ -18,15 +18,19 @@ var CLAZZ, SUPER, slice = Array.prototype.slice;
 			}
     	};
     	var injects = {}, provides = {};
-    	var metas = {};
-    	var methods = {};
-    	var props = {};
+    	var metas = {}, methods = {}, props = {}, opFunc = null;
 
         var ret = function(){
-/* INJECTION */
-            if( this == self )
-                return new (ret.bind.apply(ret, [null].concat( slice.call(arguments) )));
+			if( opFunc && typeof this !== "function" ){
+				var fwd = function(){ return opFunc.apply(fwd, slice.call(arguments, 0)); };
+				ret.apply(fwd, slice.call(arguments,0));
+				return fwd;
+			}
 
+            if( this == self )
+                return new (ret.bind.apply(ret, [null].concat( slice.call(arguments, 0) )));
+
+/* INJECTION */
             if( nextInstanceName && nextInstanceClazz === ret ){
                 ret.singletons[nextInstanceName] = this;
                 nextInstanceName = null;
@@ -135,6 +139,10 @@ var CLAZZ, SUPER, slice = Array.prototype.slice;
 							v.SUPER = resolve( v.SUPER );
 						continue;
 				    }
+					if( k == "FUNCTION" ){
+						opFunc = v;
+						continue;
+					}
 				    /* FUNCTION SUPER */
     				if( cclazz["EXTENDS"] )
     				{
