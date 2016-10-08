@@ -153,14 +153,20 @@ CLAZZ("projects.sprite.SpriteProject", {
 	},
 
 	updateOnionSkins:function( frames ){
-		frames.forEach(frame => {
+        var overlays = this.core.overlays;
+
+		frames.forEach( (frame, i) => {
 			if( !frame.composite ){
 				console.warn("Missing frame composite!");
 				return;
 			}
-			DOC.remove( frame.composite );
-			if( frame != this.layers && frame.composite.canvas.style.display != "none" )
-				this.DOM.stack.appendChild( frame.composite.canvas );
+            var pos = overlays.indexOf(frame.composite);
+            if( pos != -1 ) overlays.splice(pos, 1);
+            DOC.remove( frame.composite );
+			if( frame != this.layers && frame.composite.canvas.style.display != "none" ){
+                overlays.splice(i, 0, frame.composite);
+                this.DOM.stack.appendChild( frame.composite.canvas );
+            }
 		});
 
 		this.applyZoom();
@@ -353,6 +359,7 @@ CLAZZ("projects.sprite.SpriteProject", {
 		var delay = 1000 / (this.core.fps || 1), THIS=this;
 
 		this.core.frames.forEach(frame => {
+            frame.composite.clear();
 			this.core.renderComposite( frame.composite, frame );
 			gif.addFrame(frame.composite.canvas, {delay:delay});
 		});
@@ -369,6 +376,7 @@ CLAZZ("projects.sprite.SpriteProject", {
 
 	saveJPNG:function(ext){
 		if( this.core.frames.length == 1 ){
+            this.core.getComposite().clear();
 			this.fileSaver.saveFile({
 				name:this.path,
 				data:this.core.renderComposite().canvas.toDataURL("image/" + ext)
@@ -390,6 +398,7 @@ CLAZZ("projects.sprite.SpriteProject", {
 
 		this.core.frames.forEach( (frame, i) => {
 			var x = (i%cols)*width, y = Math.floor(i/cols)*height;
+            frame.composite.clear();
 			this.core.renderComposite( frame.composite, frame );
 			ctx.drawImage( frame.composite.canvas, x, y );
 			arr[(frame.name || 'frame')+i] = {

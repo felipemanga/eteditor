@@ -118,7 +118,7 @@ CLAZZ("projects.projman.ProjManProject", {
         },
 
         ZIP:function(){
-            this.createHTML("extern", 1, (files) => {
+            this.createHTML("extern", 0, (files) => {
                 files.name = this.DOM.pageSelector.value.replace(/\.[a-zA-Z]*$/, ".zip");
                 this.fileSaver.saveFile(files);
             });
@@ -158,7 +158,7 @@ CLAZZ("projects.projman.ProjManProject", {
             }
 
             function createHTML(){
-                THIS.createHTML("extern", 2, onGotHTML);
+                THIS.createHTML("extern", 1, onGotHTML);
             }
 
             function onGotHTML(files){
@@ -340,6 +340,7 @@ CLAZZ("projects.projman.ProjManProject", {
         DOC.removeChildren( this.DOM.preview );
 
         var src = obj.data;
+        var srcHTML = src;
         var parsed = (new DOMParser()).parseFromString( src, "text/html" );
 
 		var BASE64 = "", FSURL = "";
@@ -458,26 +459,30 @@ CLAZZ("projects.projman.ProjManProject", {
 
         }else{
             var extdep = {};
-            tags = Array.prototype.slice.call( parsed.querySelectorAll("img"), 0 );
-            tags.forEach((img) => {
-                var src = img.getAttribute("src");
-                if( src in m ) extdep[src]=true;
-            });
 
-            tags = Array.prototype.slice.call( parsed.querySelectorAll("a"), 0 );
-            tags.forEach((img) => {
-                var src = img.getAttribute("href");
-                if( src in m ) extdep[src]=true;
-            });
+            if( minimize ){
+                tags = Array.prototype.slice.call( parsed.querySelectorAll("img"), 0 );
+                // tags = tags.concat( Array.prototype.slice.call( parsed.querySelectorAll("script"), 0 ) );
+                tags.forEach((img) => {
+                    var src = img.getAttribute("src");
+                    if( src in m ) extdep[src]=true;
+                });
 
-            tags = Array.prototype.slice.call( parsed.querySelectorAll("link"), 0 );
-            tags.forEach((tag) => {
-                var src = tag.getAttribute("href");
-                if( src in m ) extdep[src]=true;
-            });
+                tags = Array.prototype.slice.call( parsed.querySelectorAll("a"), 0 );
+                tags = tags.concat( Array.prototype.slice.call( parsed.querySelectorAll("link"), 0 ) );
+                tags.forEach((img) => {
+                    var src = img.getAttribute("href");
+                    if( src in m ) extdep[src]=true;
+                });
+
+                tags.forEach((tag) => {
+                    var src = tag.getAttribute("href");
+                    if( src in m ) extdep[src]=true;
+                });
+            }
 
             this.project.files.forEach((file)=>{
-                if( file.name == "index.html" || (!file.storeEXTERN && !extdep[file.name]) ) return;
+                if( file.name == "index.html" || (minimize && !file.storeEXTERN && !extdep[file.name]) ) return;
                 var a;
                 if( file.cacheURL ) a = file.raw();
                 else a = file.data;
@@ -494,15 +499,23 @@ CLAZZ("projects.projman.ProjManProject", {
 
             var src = tag.getAttribute("src");
 
-            if( src in m ) accSrc += m[src] + "\n";
-            else if(src){
-                if( src in this.libCache && embed == "blob" ){
-                    tag.removeAttribute("src");
-                    tag.textContent = this.libCache[src]+"\n";
+             if(src){
+                if( src in m ){
+                    if( embed == "extern" && !minimize ) return; 
+                    accSrc += m[src] + "\n";
                 }else{
-                    libs.push(src);
-                    if( embed == "blob" )
-                        DOC.getURL(src, (libsrc)=>this.libCache[src] = libsrc );
+                    if( src in this.libCache && embed == "blob" ){
+                        tag.removeAttribute("src");
+                        tag.textContent = this.libCache[src]+"\n";
+                    }else{
+                        if( embed == "blob" ){
+                            DOC.getURL(src, (libsrc)=>this.libCache[src] = libsrc );
+                            if( !/^https?:\/\/.*/i.test(src) ){
+                                src = location.origin + location.pathname + src;
+                            }
+                        }
+                        libs.push(src);
+                    }
                 }
             }
 
@@ -547,6 +560,7 @@ CLAZZ("projects.projman.ProjManProject", {
                 src = this.htmlToString(parsed);
                 if( embed == "blob" || embed == "embed" ) cb(src);
                 else{
+                    if( embed == "extern" && !minimize ) files.push({name:"src_" + fileName, data:strToBuffer(srcHTML)});
                     files.push({name:"index.html", data:strToBuffer(src)});
                     cb(files);
                 }
@@ -810,9 +824,14 @@ CLAZZ("projects.projman.ProjManProject", {
     $filter:{
         keyup:function(e){
             var value = e.target.value.toLowerCase().trim(), list = this.DOM.docSet[0];
-            list.update({ filter:(e) => e.name.toLowerCase().indexOf( value ) != -1 });
+            var filter = (e) => e.name.toLowerCase().indexOf( value ) != -1;
+            try{
+                var exp = new RegExp(value, "i");
+                filter = (e) => exp.test( e.name );
+            }catch(err){}
+            list.update({ filter:filter });
             if(e.keyCode==13||e.key=="Enter"){
-                list.update({ filter:(e) => e.name.toLowerCase().indexOf( value ) != -1 });
+                list.update({ filter:filter });
                 var value = list.values()[0];
                 if(value) this.openFile(value);
                 list.update({ filter:null });
