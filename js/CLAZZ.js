@@ -1,6 +1,7 @@
+
 var CLAZZ, SUPER, slice = Array.prototype.slice;
 (function(){
-    var nextUID=1;
+    var nextUID=1, unserializing = false;
     CLAZZ = function( name, clazz ){
     	"use strict";
     	if( typeof name == "object" )
@@ -43,7 +44,8 @@ var CLAZZ, SUPER, slice = Array.prototype.slice;
     		    desc.__uid.value = nextUID++;
     			Object.defineProperties(this, desc);
 /* INJECTION */
-    			doInjections(this, injects, name);
+				if( !unserializing )
+	    			doInjections(this, injects, name);
 /* */
     		}
 
@@ -51,7 +53,8 @@ var CLAZZ, SUPER, slice = Array.prototype.slice;
     		{
     			var superBackup = SUPER;
     			SUPER = (ctor.SUPER && ctor.SUPER.bind(this));
-    			ctor.apply( this, slice.call(arguments, 0) );
+				if( !unserializing ) ctor.apply( this, slice.call(arguments, 0) );
+				else if(SUPER) ctor.SUPER.call(this);
     			SUPER = superBackup;
     		}
 
@@ -164,7 +167,7 @@ var CLAZZ, SUPER, slice = Array.prototype.slice;
     				obj.writable = clazz["DYNAMIC"] == true;
     				methods[k] = v;
     			}
-    			/* META * /else if( k.charAt(0) == "@" )
+    			/* META */else if( k.charAt(0) == "@" )
     			{
     				metas[k.substr(1, k.length)] = v;
     				continue;
@@ -265,7 +268,7 @@ var CLAZZ, SUPER, slice = Array.prototype.slice;
     	};
 
     	for( var k in provides ){
-    		if( !bindctx[k] ){
+    		if( !bindctx[k] || provides[k] == "multi" ){
                 CLAZZ[ provides[k] ]( k, ret );
                 resolve(k, CLAZZ.get.bind(CLAZZ, k));
             }
@@ -347,6 +350,20 @@ var CLAZZ, SUPER, slice = Array.prototype.slice;
     	return CLAZZ.set;
     };
 
+	CLAZZ.multi = function( name, clazz ){
+		var value = dibindings[dibindings.length-1][ name ];
+		if( !value ){
+			value = dibindings[dibindings.length-1][ name ] = ret;
+			value.multi = [];
+		}
+
+		value.multi.push(clazz);
+
+		return CLAZZ.multi;
+
+		function ret(){ return ret.multi; }
+	};
+
     function BindingError(msg){
         Error.call(this, msg);
         this.message = msg;
@@ -386,6 +403,168 @@ var CLAZZ, SUPER, slice = Array.prototype.slice;
     };
 
     /* */
+
+	CLAZZ.serialize = function( value, out ){
+		var final = !out;
+		if( final ) out = [null, {}, {nid:0, nest:0}];
+
+		var keymap = out[2];
+		var valuemap = out[1];
+		
+		keymap.nest++;
+		out[0] = S(value);
+		
+		if( final ){
+			out.pop();
+			return valuemap;
+		}
+
+		return out[0];
+
+		function S( v ){
+			var id = v;
+			var typeofv = typeof v;
+			if( v === null ) typeofv = "null";
+			if( typeofv == "object" ){
+				if( v.constructor.CLAZZ ){
+					if( CLAZZ.serialize.encoder[v.constructor.fullName] )
+						typeofv = v.constructor.fullName;
+					else
+						typeofv = "ci";
+				}else{
+					typeofv = v.constructor.name;
+					if( !v.__uid )
+						Object.defineProperty(v, "__uid", {value:CLAZZ.getUID()} );
+				}
+				id = v.__uid;
+			}
+
+			if( !(id in keymap) )
+				keymap[id] = [];
+			
+			var keyset = keymap[id];
+			for( var i=0; i<keyset.length; ++i ){
+				if( keyset[i].value == v )
+					return keyset[i].id;
+			}
+
+			var desc = {
+				id:++keymap.nid,
+				value:v,
+				encoder:typeofv
+			};
+
+			keyset[keyset.length] = desc;
+
+			var encoder = CLAZZ.serialize.encoder[ typeofv ];
+			if( !encoder ) throw new Error("Can't encode " + typeofv + " " + v);
+
+			var call = valuemap[ desc.id ] = [ typeofv, 0 ];
+			call[ 1 ] = encoder(v, call, out);
+
+			return desc.id;
+		}
+	};
+
+	CLAZZ.serialize.encoder = {
+		number:function(value, desc, out){ return value; },
+		Float32Array:function(value, desc, out){ return value; },
+		SharedArrayBuffer:function(value, desc, out){ return value; },
+		boolean:function(value, desc, out){ return value; },
+		string:function(value, desc, out){ return value; },
+		"null":function(value, desc, out){ return value; },
+		"undefined":function(value, desc, out){ return value; },
+
+		"function":function(value, desc, out){ return value.toString() },
+
+		Object:function(value, desc, out){
+			var flat = {};
+			var pn = Object.getOwnPropertyNames(value);
+			for( var i=0, l=pn.length; i<l; ++i ){
+				flat[pn[i]] = CLAZZ.serialize( value[pn[i]], out );
+			}
+			return flat;
+		},
+
+		ci:function(value, desc, out){
+			desc.push(value.constructor.fullName);
+			var flat = {};
+			var meta = value.constructor.meta;
+			for( var k in value.constructor.properties ){
+				if( meta[k] && !meta[k].serialize ) continue;
+				flat[k] = CLAZZ.serialize( value[k], out );
+			}
+			return flat;
+		},
+
+		Array:function(value, desc, out){
+			var flat = [];
+			for( var i=0, l=value.length; i<l; ++i ){
+				flat[i] = CLAZZ.serialize( value[i], out );
+			}
+			return flat;
+		}
+	};
+
+	CLAZZ.unserialize = function( inp, key ){
+		var end = key == undefined;
+		if( end ){
+			inp = [1, inp];
+			key = 1;
+			unserializing = true;
+		}
+
+		var ret;
+		try{
+			ret = D( inp[1][key], inp );
+		}catch(ex){
+			throw ex;
+		}finally{
+			if( end )
+				unserializing = false;
+		}
+
+		return ret;
+
+		function D( src, inp ){
+			var k = src[0];
+			src[0] = inp;
+			var dec = CLAZZ.unserialize.decoder[ k ];
+			if( !dec ) throw ("No decoder for " + k);
+			var ret = dec.apply( src[1], src );
+			src[0] = k;
+			return ret;
+		}
+	};
+
+	CLAZZ.unserialize.decoder = {
+		number:function(inp, value){ return value; },
+		Float32Array:function(inp, value){ 
+			if( value instanceof Float32Array ) return value; 
+			return Float32Array.from(value); 
+		},
+		SharedArrayBuffer:function(inp, value){ return value; },
+		boolean:function(inp, value){ return value; },
+		string:function(inp, value){ return value; },
+		"null":function(inp){ return null; },
+		"undefined":function(){ return undefined; },
+		"function":function(inp, value){ return eval("(" + value + ")"); },
+		ci:function( inp, value, clazz ){
+			value = CLAZZ.get(clazz);
+			for( var k in this ) value[k] = CLAZZ.unserialize( inp, this[k] );
+			return value;
+		},
+		Array:function( inp ){
+			var out = [];
+			for( var i=0, l=this.length; i<l; ++i ) out[i] = CLAZZ.unserialize( inp, this[i] );
+			return out;
+		},
+		Object:function( inp ){
+			var value = {};
+			for( var k in this ) value[k] = CLAZZ.unserialize( inp, this[k] );
+			return value;
+		}
+	};
 
     CLAZZ.getUID = function(){ return nextUID++; };
 
